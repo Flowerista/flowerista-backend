@@ -29,8 +29,10 @@ public class PaypalService {
     private final PayPalHttpClient payPalHttpClient;
     private final OrderService orderService;
 
-    public PaymentOrder createPayment(BigDecimal fee, String currencyCode, Integer orderId) {
-        //TODO: add validation for sum and currency and order total sum
+    public PaymentOrder createPayment(Integer orderId) {
+        ua.flowerista.shop.models.Order order = orderService.getOrder(orderId).get(); //check for null made in controller
+        BigDecimal fee = order.getSum();
+        String currencyCode = order.getCurrency();
         OrderRequest orderRequest = new OrderRequest();
         orderRequest.checkoutPaymentIntent("CAPTURE");
         AmountWithBreakdown amountBreakdown = new AmountWithBreakdown().currencyCode(currencyCode).value(fee.toString());
@@ -44,16 +46,16 @@ public class PaypalService {
 
         try {
             HttpResponse<Order> orderHttpResponse = payPalHttpClient.execute(ordersCreateRequest);
-            Order order = orderHttpResponse.result();
+            Order paymentOrder = orderHttpResponse.result();
 
-            String redirectUrl = order.links().stream()
+            String redirectUrl = paymentOrder.links().stream()
                     .filter(link -> "approve".equals(link.rel()))
                     .findFirst()
                     .orElseThrow(NoSuchElementException::new)
                     .href();
-            orderService.updatePayId(orderId, order.id());
+            orderService.updatePayId(orderId, paymentOrder.id());
             orderService.updateStatus(orderId, "PENDING");
-            return new PaymentOrder("success", order.id(), redirectUrl);
+            return new PaymentOrder("success", paymentOrder.id(), redirectUrl);
         } catch (IOException e) {
             log.error(e.getMessage());
             return new PaymentOrder("Error");

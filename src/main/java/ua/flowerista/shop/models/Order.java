@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 @Entity
 @Table(name = "orders")
@@ -20,4 +22,9 @@ public class Order {
     private String payId;
     @Column(name = "user_id")
     private Integer userId;
+    @Column(name = "sum")
+    BigDecimal sum;
+    @Column(name = "currency")
+    String currency;
+
 }
