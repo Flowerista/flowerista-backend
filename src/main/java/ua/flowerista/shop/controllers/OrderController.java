@@ -26,13 +26,13 @@ public class OrderController {
     private final UserService userService;
     private final JwtService jwtService;
 
-    @Operation(summary = "Create new order", description = "Returns bad request order already exist, and accepted if everything fine")
-    @ApiResponses(value = {@ApiResponse(responseCode = "400", description = "If order already exist"),
+    @Operation(summary = "Create new order", description = "Returns bad request if order already exist, and accepted if everything fine")
+    @ApiResponses(value = {@ApiResponse(responseCode = "409", description = "If order already exist"),
             @ApiResponse(responseCode = "202", description = "Data was accepted")})
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody Order order, HttpServletRequest request) {
         if (orderService.isOrderExists(order)) {
-            return ResponseEntity.badRequest().body("Order already exists");
+            return ResponseEntity.status(409).body("Order already exists");
         }
         order.setUserId(extractedUserIdFromAuthHeader(request));
         order = orderService.createOrder(order);
@@ -41,7 +41,7 @@ public class OrderController {
 
     @Operation(summary = "Get order by id", description = "Returns order by id")
     @ApiResponses(value = {@ApiResponse(responseCode = "400", description = "If order not found"),
-            @ApiResponse(responseCode = "400", description = "If user is not allowed to see this order"),
+            @ApiResponse(responseCode = "403", description = "If user is not allowed to see this order"),
             @ApiResponse(responseCode = "200", description = "Return order by id")})
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrder(@PathVariable Integer id, HttpServletRequest request) {
@@ -51,7 +51,7 @@ public class OrderController {
         }
         Integer requestUserId = extractedUserIdFromAuthHeader(request);
         if (!order.get().getUserId().equals(requestUserId)) {
-            return ResponseEntity.badRequest().body("You are not allowed to see this order");
+            return ResponseEntity.status(403).body("You are not allowed to see this order");
         }
         return ResponseEntity.ok(order.get());
     }
