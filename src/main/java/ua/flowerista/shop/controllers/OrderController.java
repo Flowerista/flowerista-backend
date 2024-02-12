@@ -34,6 +34,7 @@ public class OrderController {
         if (orderService.isOrderExists(order)) {
             return ResponseEntity.status(409).body("Order already exists");
         }
+        //TODO: add validation for order
         order.setUserId(extractedUserIdFromAuthHeader(request));
         order = orderService.createOrder(order);
         return ResponseEntity.accepted().body(order);

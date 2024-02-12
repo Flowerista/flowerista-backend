@@ -17,6 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("update Order o set o.payId = :id where o.id = :orderId")
     void updatePayId(@Param("payId") Integer orderId, @Param("id") String id);
 
-    @Query("select o.id from Order o where o.payId = :token")
-    Integer getOrderIdByPayId(String token);
+    @Modifying
+    @Query("update Order o set o.status = :status where o.payId = :payId")
+    void updateStatusByPayId(@Param("payId") String payId, @Param("status") String status);
 }

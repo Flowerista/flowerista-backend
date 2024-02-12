@@ -30,6 +30,7 @@ public class PaypalService {
     private final OrderService orderService;
 
     public PaymentOrder createPayment(BigDecimal fee, String currencyCode, Integer orderId) {
+        //TODO: add validation for sum and currency and order total sum
         OrderRequest orderRequest = new OrderRequest();
         orderRequest.checkoutPaymentIntent("CAPTURE");
         AmountWithBreakdown amountBreakdown = new AmountWithBreakdown().currencyCode(currencyCode).value(fee.toString());
@@ -65,7 +66,7 @@ public class PaypalService {
         try {
             HttpResponse<Order> httpResponse = payPalHttpClient.execute(ordersCaptureRequest);
             if (httpResponse.result().status() != null) {
-                orderService.updateStatus(orderService.getOrderIdByPayId(token), "IN_PROCESS");
+                orderService.updateStatusByPayId(token, "IN_PROCESS");
                 return new CompletedOrder("success", token);
             }
         } catch (IOException e) {
