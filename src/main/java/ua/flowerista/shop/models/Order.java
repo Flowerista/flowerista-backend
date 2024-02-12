@@ -1,5 +1,23 @@
 package ua.flowerista.shop.models;
 
-public class Order {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
+@Entity
+@Table(name = "orders")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class Order {
+    @Column(name = "id")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private OrderStatus status;
+    @Column(name = "pay_id")
+    private String payId;
+    @Column(name = "user_id")
+    private Integer userId;
 }
