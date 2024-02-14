@@ -26,5 +26,4 @@ public class Order {
     BigDecimal sum;
     @Column(name = "currency")
     String currency;
-
 }

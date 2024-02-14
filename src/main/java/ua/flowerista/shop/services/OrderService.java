@@ -13,7 +13,7 @@ import java.util.Optional;
 public class OrderService {
     private final OrderRepository orderRepository;
 
-    public void updateStatus(Integer orderId, String status) {
+    public void updateStatus(Integer orderId, OrderStatus status) {
         orderRepository.updateStatus(orderId, status);
     }
 
@@ -36,7 +36,7 @@ public class OrderService {
         return orderRepository.existsById(order.getId());
     }
 
-    public void updateStatusByPayId(String payId, String status) {
+    public void updateStatusByPayId(String payId, OrderStatus status) {
         orderRepository.updateStatusByPayId(payId, status);
     }
 

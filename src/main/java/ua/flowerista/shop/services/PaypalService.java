@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ua.flowerista.shop.models.CompletedOrder;
+import ua.flowerista.shop.models.OrderStatus;
 import ua.flowerista.shop.models.PaymentOrder;
 
 import java.io.IOException;
@@ -20,12 +21,10 @@ import java.util.NoSuchElementException;
 @Service
 @RequiredArgsConstructor
 public class PaypalService {
-    public static final String SUCCESS_URL = "/api/payment/capture";
-    public static final String CANCEL_URL = "/checkout";
-    @Value("${server.url}")
-    private String serverUrl;
-    @Value("${front.url}")
-    private String frontUrl;
+    public static final String SUCCESS_URL = "/capture";
+    public static final String CANCEL_URL = "/cancel";
+    @Value("${frontend.server.url}")
+    private String frontendUrl;
     private final PayPalHttpClient payPalHttpClient;
     private final OrderService orderService;
 
@@ -39,8 +38,8 @@ public class PaypalService {
         PurchaseUnitRequest purchaseUnitRequest = new PurchaseUnitRequest().amountWithBreakdown(amountBreakdown);
         orderRequest.purchaseUnits(List.of(purchaseUnitRequest));
         ApplicationContext applicationContext = new ApplicationContext()
-                .returnUrl(serverUrl + SUCCESS_URL)
-                .cancelUrl(frontUrl + CANCEL_URL);
+                .returnUrl(frontendUrl + SUCCESS_URL)
+                .cancelUrl(frontendUrl + CANCEL_URL);
         orderRequest.applicationContext(applicationContext);
         OrdersCreateRequest ordersCreateRequest = new OrdersCreateRequest().requestBody(orderRequest);
 
@@ -54,7 +53,7 @@ public class PaypalService {
                     .orElseThrow(NoSuchElementException::new)
                     .href();
             orderService.updatePayId(orderId, paymentOrder.id());
-            orderService.updateStatus(orderId, "PENDING");
+            orderService.updateStatus(orderId, OrderStatus.PENDING);
             return new PaymentOrder("success", paymentOrder.id(), redirectUrl);
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -68,7 +67,7 @@ public class PaypalService {
         try {
             HttpResponse<Order> httpResponse = payPalHttpClient.execute(ordersCaptureRequest);
             if (httpResponse.result().status() != null) {
-                orderService.updateStatusByPayId(token, "IN_PROCESS");
+                orderService.updateStatusByPayId(token, OrderStatus.IN_PROCESS);
                 return new CompletedOrder("success", token);
             }
         } catch (IOException e) {
