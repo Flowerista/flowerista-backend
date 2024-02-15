@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import ua.flowerista.shop.dto.AddressDto;
+import ua.flowerista.shop.dto.IdDto;
 import ua.flowerista.shop.dto.user.UserChangePasswordRequestDto;
 import ua.flowerista.shop.dto.user.UserChangePersonalInfoDto;
 import ua.flowerista.shop.services.UserService;
@@ -92,8 +93,8 @@ public class UserController {
 	@Operation(summary = "Add bouquete to wishlist", description = "Accepting bouquete id in body and auth in header")
 	@ApiResponses(value = { @ApiResponse(responseCode = "403", description = "If user not auth`d"),
 			@ApiResponse(responseCode = "202", description = "If user is authenticated") })
-	public ResponseEntity<?> addBouqueteToWishList(@RequestBody int bouqueteId, Principal connectedUser) {
-		service.addBouqueteToWishList(bouqueteId, connectedUser);
+	public ResponseEntity<?> addBouqueteToWishList(@RequestBody IdDto idDto, Principal connectedUser) {
+		service.addBouqueteToWishList(idDto.getId(), connectedUser);
 		return ResponseEntity.accepted().build();
 	}
 
@@ -101,8 +102,8 @@ public class UserController {
 	@Operation(summary = "Remove bouquete from wishlist", description = "Accepting bouquete id in body and auth in header")
 	@ApiResponses(value = { @ApiResponse(responseCode = "403", description = "If user not auth`d"),
 			@ApiResponse(responseCode = "202", description = "If user is authenticated") })
-	public ResponseEntity<?> deleteBouqueteFromWishList(@RequestBody int bouqueteId, Principal connectedUser) {
-		service.deleteBouqueteFromWishList(bouqueteId, connectedUser);
+	public ResponseEntity<?> deleteBouqueteFromWishList(@RequestBody IdDto idDto, Principal connectedUser) {
+		service.deleteBouqueteFromWishList(idDto.getId(), connectedUser);
 		return ResponseEntity.accepted().build();
 	}
 
