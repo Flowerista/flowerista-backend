@@ -100,7 +100,7 @@
 
 		<dependency>
 			<groupId>com.paypal.sdk</groupId>
-			<artifactId>rest-api-sdk</artifactId>
+			<artifactId>checkout-sdk</artifactId>
 			<version>LATEST</version>
 		</dependency>
 
