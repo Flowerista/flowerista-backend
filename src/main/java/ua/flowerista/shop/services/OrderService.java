@@ -6,6 +6,7 @@ import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderStatus;
 import ua.flowerista.shop.repo.OrderRepository;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -22,6 +23,7 @@ public class OrderService {
     }
 
     public Order createOrder(Order order) {
+        order.setCurrency(Objects.requireNonNullElse(order.getCurrency(),"UAH"));
         return orderRepository.save(order);
     }
 
