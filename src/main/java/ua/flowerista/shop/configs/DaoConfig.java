@@ -1,5 +1,7 @@
 package ua.flowerista.shop.configs;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -20,12 +22,6 @@ public class DaoConfig {
 
 	@Value("${spring.datasource.url}")
 	private String url;
-
-	@Value("${spring.datasource.username}")
-	private String username;
-
-	@Value("${spring.datasource.password}")
-	private String password;
 
 	@Value("${spring.datasource.driver-class-name}")
 	private String driverClassName;
@@ -58,11 +54,19 @@ public class DaoConfig {
 	public DataSource dataSource() {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName(driverClassName);
-		dataSource.setUrl(url);
+		URI dbUri = null;
+		try {
+			dbUri = new URI(url);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+		String username = dbUri.getUserInfo().split(":")[0];
+		String password = dbUri.getUserInfo().split(":")[1];
+		String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath() + "?sslmode=require";
+		dataSource.setUrl(dbUrl);
 		dataSource.setUsername(username);
 		dataSource.setPassword(password);
 		return dataSource;
-
 	}
 
 	private Properties hibernateProperties() {
