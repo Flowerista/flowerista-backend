@@ -3,16 +3,21 @@ package ua.flowerista.shop.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ua.flowerista.shop.models.Order;
+import ua.flowerista.shop.models.OrderItem;
 import ua.flowerista.shop.models.OrderStatus;
+import ua.flowerista.shop.repo.OrderItemRepository;
 import ua.flowerista.shop.repo.OrderRepository;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
 
     public void updateStatus(Integer orderId, OrderStatus status) {
         orderRepository.updateStatus(orderId, status);
@@ -24,6 +29,10 @@ public class OrderService {
 
     public Order createOrder(Order order) {
         order.setCurrency(Objects.requireNonNullElse(order.getCurrency(),"UAH"));
+        Set<OrderItem> orderItems = order.getOrderItems().stream()
+                .map(orderItem -> orderItemRepository.save(orderItem))
+                .collect(Collectors.toSet());
+        order.setOrderItems(orderItems);
         return orderRepository.save(order);
     }
 
@@ -31,11 +40,11 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
-    public boolean isOrderExists(Order order) {
-        if (order.getId() == null) {
+    public boolean isOrderExists(Integer orderId) {
+        if (orderId == null) {
             return false;
         }
-        return orderRepository.existsById(order.getId());
+        return orderRepository.existsById(orderId);
     }
 
     public void updateStatusByPayId(String payId, OrderStatus status) {
