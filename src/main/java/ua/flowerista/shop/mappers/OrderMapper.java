@@ -20,7 +20,7 @@ public class OrderMapper implements EntityMapper<Order, OrderDto>{
         entity.setUserId(dto.getUserId());
         entity.setSum(dto.getSum());
         entity.setOrderItems(dto.getOrderItems().stream()
-                .map(orderItemDto -> orderItemMapper.toEntity(orderItemDto))
+                .map(orderItemMapper::toEntity)
                 .collect(Collectors.toSet()));
         return entity;
     }
@@ -34,7 +34,7 @@ public class OrderMapper implements EntityMapper<Order, OrderDto>{
         dto.setUserId(entity.getUserId());
         dto.setSum(entity.getSum());
         dto.setOrderItems(entity.getOrderItems().stream()
-                .map(orderItem -> orderItemMapper.toDto(orderItem))
+                .map(orderItemMapper::toDto)
                 .collect(Collectors.toSet()));
         return dto;
     }

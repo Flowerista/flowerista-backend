@@ -39,7 +39,6 @@ public class BouqueteSize {
 	private BigDecimal defaultPrice;
 
 	@Column(name = "is_sale")
-	@NotNull
 	private Boolean isSale;
 
 	@Column(name = "discount")

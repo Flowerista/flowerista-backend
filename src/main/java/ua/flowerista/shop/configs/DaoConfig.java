@@ -56,9 +56,7 @@ public class DaoConfig {
 		dataSource.setDriverClassName(driverClassName);
 		URI dbUri = null;
 		try {
-			System.out.println("URL " + url);
 			dbUri = new URI(url);
-			System.out.println("DB URI " + dbUri);
 
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);

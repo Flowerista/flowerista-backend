@@ -23,5 +23,4 @@ public class OrderItemDto implements Serializable {
     int colorId;
     @PositiveOrZero(message = "Price must be not less than 0")
     BigDecimal price;
-    Boolean isSale;
 }
