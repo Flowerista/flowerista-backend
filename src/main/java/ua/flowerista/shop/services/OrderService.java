@@ -8,6 +8,7 @@ import ua.flowerista.shop.models.OrderStatus;
 import ua.flowerista.shop.repo.OrderItemRepository;
 import ua.flowerista.shop.repo.OrderRepository;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -30,9 +31,12 @@ public class OrderService {
     public Order createOrder(Order order) {
         order.setCurrency(Objects.requireNonNullElse(order.getCurrency(),"UAH"));
         Set<OrderItem> orderItems = order.getOrderItems().stream()
-                .map(orderItem -> orderItemRepository.save(orderItem))
+                .map(orderItemRepository::save)
                 .collect(Collectors.toSet());
         order.setOrderItems(orderItems);
+        order.setSum(orderItems.stream()
+                .map(orderItem -> orderItem.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
         return orderRepository.save(order);
     }
 
@@ -54,6 +58,7 @@ public class OrderService {
     public boolean isOrderPayed(Integer orderId) {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
+            //TODO: trow exception for not found order
             return true;
         }
         return order.get().getStatus().compareTo(OrderStatus.PENDING) > 0;

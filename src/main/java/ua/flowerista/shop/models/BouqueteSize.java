@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Getter
@@ -35,13 +36,17 @@ public class BouqueteSize {
 
 	@Column(name = "defaultprice")
 	@NotNull
-	private int defaultPrice;
+	private BigDecimal defaultPrice;
+
+	@Column(name = "is_sale")
+	@NotNull
+	private Boolean isSale;
 
 	@Column(name = "discount")
-	private Integer discount;
+	private BigDecimal discount;
 
 	@Column(name = "discountprice")
-	private Integer discountPrice;
+	private BigDecimal discountPrice;
 
 	@Override
 	public final boolean equals(Object o) {

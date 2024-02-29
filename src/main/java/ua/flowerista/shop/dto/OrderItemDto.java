@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * DTO for {@link ua.flowerista.shop.models.OrderItem}
@@ -21,5 +22,6 @@ public class OrderItemDto implements Serializable {
     int sizeId;
     int colorId;
     @PositiveOrZero(message = "Price must be not less than 0")
-    int price;
+    BigDecimal price;
+    Boolean isSale;
 }

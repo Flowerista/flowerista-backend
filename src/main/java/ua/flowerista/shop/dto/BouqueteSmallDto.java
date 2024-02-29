@@ -1,5 +1,6 @@
 package ua.flowerista.shop.dto;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,9 +18,9 @@ public class BouqueteSmallDto {
 	private int id;
 	private String name;
     private Map<Integer, String> imageUrls;
-	private int defaultPrice;
-	private Integer discount;
-	private Integer discountPrice;
+	private BigDecimal defaultPrice;
+	private BigDecimal discount;
+	private BigDecimal discountPrice;
 	private Set<BouqueteSize> sizes;
 	private int stockQuantity;
 }

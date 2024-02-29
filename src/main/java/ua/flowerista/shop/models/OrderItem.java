@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Getter
@@ -36,7 +37,7 @@ public class OrderItem {
 	@JoinColumn(name = "color_id")
 	private Color color;
 	@Column(name = "price")
-	private int price;
+	private BigDecimal price;
 
 	@Override
 	public final boolean equals(Object o) {
