@@ -29,7 +29,7 @@ public class OrderService {
     }
 
     public Order createOrder(Order order) {
-        order.setCurrency(Objects.requireNonNullElse(order.getCurrency(),"UAH"));
+        order.setCurrency(Objects.requireNonNullElse(order.getCurrency(),"USD"));
         Set<OrderItem> orderItems = order.getOrderItems().stream()
                 .map(orderItemRepository::save)
                 .collect(Collectors.toSet());
