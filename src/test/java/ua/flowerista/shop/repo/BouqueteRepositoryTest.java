@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -23,13 +24,15 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import ua.flowerista.shop.config.PostgresTestProfileJPAConfig;
 import ua.flowerista.shop.models.Bouquete;
 
-@SpringBootTest
+@SpringBootTest(classes = PostgresTestProfileJPAConfig.class)
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:application.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ActiveProfiles("test")
 class BouqueteRepositoryTest extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Autowired
@@ -129,19 +132,19 @@ class BouqueteRepositoryTest extends AbstractTransactionalJUnit4SpringContextTes
 		Page<Bouquete> content = repository.findByFilters(null, colorIds, null, null, false, true, false, pageable);
 		List<Bouquete> bouquetes = content.getContent();
 		assertEquals(bouquetes.size(), 2);
-		assertEquals(bouquetes.get(0).getId(), 3);
+		assertEquals(bouquetes.get(0).getId(), 1);
 	}
-	
+
 	@Test
 	void findMinPrice() {
 		Integer min = repository.findMinPrice();
-		assertEquals(40, min);
+		assertEquals(45, min);
 	}
-	
+
 	@Test
 	void findMaxPrice() {
 		Integer max = repository.findMaxPrice();
-		assertEquals(51, max);
+		assertEquals(50, max);
 	}
 
 }

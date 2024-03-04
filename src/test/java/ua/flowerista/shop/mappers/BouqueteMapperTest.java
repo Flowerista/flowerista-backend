@@ -1,31 +1,27 @@
 package ua.flowerista.shop.mappers;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import ua.flowerista.shop.dto.BouqueteDto;
 import ua.flowerista.shop.dto.ColorDto;
 import ua.flowerista.shop.dto.FlowerDto;
-import ua.flowerista.shop.models.Bouquete;
-import ua.flowerista.shop.models.BouqueteSize;
-import ua.flowerista.shop.models.Color;
-import ua.flowerista.shop.models.Flower;
-import ua.flowerista.shop.models.Size;
+import ua.flowerista.shop.models.*;
+
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class BouqueteMapperTest {
-	
+
 	@Mock
 	private ColorMapper cMapper;
 	@Mock
@@ -54,14 +50,14 @@ class BouqueteMapperTest {
 		flowers.add(fDto2);
 		colors.add(cDto1);
 		colors.add(cDto2);
-		
+
 		Set<BouqueteSize> sizes = new HashSet<>();
 		BouqueteSize size1 = new BouqueteSize();
 		size1.setId(1);
 		size1.setSize(Size.MEDIUM);
-		size1.setDefaultPrice(123);
-		
-		
+		size1.setDefaultPrice(BigInteger.valueOf(123));
+
+
 		dto.setSizes(sizes);
         dto.setId(1);
         dto.setFlowers(flowers);
@@ -70,9 +66,9 @@ class BouqueteMapperTest {
         dto.setName("Sample Bouquet");
         dto.setQuantity(50);
         dto.setSoldQuantity(20);
-        
+
         Bouquete entity = mapper.toEntity(dto);
-        
+
         assertEquals(dto.getId(), entity.getId());
         assertEquals(dto.getSizes(), entity.getSizes());
         assertEquals(dto.getItemCode(), entity.getItemCode());
@@ -104,13 +100,13 @@ class BouqueteMapperTest {
 		flowers.add(flower2);
 		colors.add(color1);
 		colors.add(color2);
-		
+
 		Set<BouqueteSize> sizes = new HashSet<>();
 		BouqueteSize size1 = new BouqueteSize();
 		size1.setId(1);
 		size1.setSize(Size.MEDIUM);
-		size1.setDefaultPrice(123);
-		
+		size1.setDefaultPrice(BigInteger.valueOf(123));
+
         entity.setId(1);
         entity.setSizes(sizes);
         entity.setFlowers(flowers);
@@ -119,9 +115,9 @@ class BouqueteMapperTest {
         entity.setName("Sample Bouquet");
         entity.setQuantity(50);
         entity.setSoldQuantity(20);
-        
+
         BouqueteDto dto = mapper.toDto(entity);
-        
+
         assertEquals(entity.getId(), dto.getId());
         assertEquals(entity.getSizes(), dto.getSizes());
         assertEquals(entity.getItemCode(), dto.getItemCode());
@@ -130,7 +126,7 @@ class BouqueteMapperTest {
         assertEquals(entity.getSoldQuantity(), dto.getSoldQuantity());
         verify(cMapper, times(2)).toDto(any(Color.class));
         verify(fMapper, times(2)).toDto(any(Flower.class));
-		
+
 	}
 
 }

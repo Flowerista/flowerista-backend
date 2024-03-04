@@ -8,12 +8,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import ua.flowerista.shop.dto.OrderDto;
+import ua.flowerista.shop.mappers.OrderMapper;
 import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderStatus;
 import ua.flowerista.shop.models.User;
 import ua.flowerista.shop.services.OrderService;
+import ua.flowerista.shop.services.validators.OrderValidator;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -23,19 +27,24 @@ import java.util.Optional;
 @Tag(name = "Order controller")
 public class OrderController {
     private final OrderService orderService;
+    private final OrderValidator orderValidator;
+    private final OrderMapper orderMapper;
 
     @Operation(summary = "Create new order", description = "Returns bad request if order already exist, and accepted if everything fine")
     @ApiResponses(value = {@ApiResponse(responseCode = "409", description = "If order already exist"),
             @ApiResponse(responseCode = "202", description = "Data was accepted")})
     @PostMapping
-    public ResponseEntity<?> createOrder(@RequestBody Order order, Principal connectedUser) {
-        if (orderService.isOrderExists(order)) {
+    public ResponseEntity<?> createOrder(@RequestBody OrderDto order, Principal connectedUser) {
+        List<String> errors = orderValidator.validateOrder(order);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(errors.toString());
+        }
+        if (orderService.isOrderExists(order.getId())) {
             return ResponseEntity.status(409).body("Order already exists");
         }
-        //TODO: add validation for order
         order.setUserId(getPrincipalUser(connectedUser).getId());
         order.setStatus(OrderStatus.PLACED);
-        order = orderService.createOrder(order);
+        order = orderMapper.toDto(orderService.createOrder(orderMapper.toEntity(order)));
         return ResponseEntity.accepted().body(order);
     }
 
@@ -53,7 +62,35 @@ public class OrderController {
         if (!order.get().getUserId().equals(requestUserId)) {
             return ResponseEntity.status(403).body("You are not allowed to see this order");
         }
-        return ResponseEntity.ok(order.get());
+        return ResponseEntity.ok(orderMapper.toDto(order.get()));
+    }
+
+    @Operation(summary = "Update order by id", description = "Update order by id")
+    @ApiResponses(value = {@ApiResponse(responseCode = "403", description = "If user is not allowed to update this order"),
+            @ApiResponse(responseCode = "200", description = "Updated"),
+            @ApiResponse(responseCode = "400", description = "If order is not valid"),
+            @ApiResponse(responseCode = "202", description = "Data was accepted and order was created")})
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateOrder(@PathVariable Integer id, @RequestBody OrderDto order, Principal connectedUser) {
+        List<String> errors = orderValidator.validateOrder(order);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(errors.toString());
+        }
+        if (!orderService.isOrderExists(id)) {
+            order.setUserId(getPrincipalUser(connectedUser).getId());
+            order.setStatus(OrderStatus.PLACED);
+            return ResponseEntity.accepted().body(orderService.createOrder(orderMapper.toEntity(order)));
+        }
+        Integer requestUserId = getPrincipalUser(connectedUser).getId();
+        Optional<Order> savedOrder = orderService.getOrder(id);
+        if (!savedOrder.get().getUserId().equals(requestUserId)) {
+            return ResponseEntity.status(403).body("You are not allowed to update this order");
+        }
+        order.setUserId(getPrincipalUser(connectedUser).getId());
+        order.setId(id);
+        order.setStatus(OrderStatus.PLACED);
+        order = orderMapper.toDto(orderService.createOrder(orderMapper.toEntity(order)));
+        return ResponseEntity.accepted().body(order);
     }
 
     private static User getPrincipalUser(Principal connectedUser) {

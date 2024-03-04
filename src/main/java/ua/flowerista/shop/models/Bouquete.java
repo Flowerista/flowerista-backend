@@ -60,5 +60,4 @@ public class Bouquete {
 	private int quantity;
 	@Column(name = "soldquantity")
 	private int soldQuantity;
-
 }

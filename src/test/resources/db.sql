@@ -4,7 +4,7 @@ CREATE SEQUENCE IF NOT EXISTS public.bouquete_id_seq
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
-    
+
 CREATE SEQUENCE IF NOT EXISTS public.color_id_seq
     INCREMENT 1
     START 1
@@ -37,9 +37,10 @@ CREATE TABLE IF NOT EXISTS public.bouquete_size
     id SERIAL PRIMARY KEY,
     bouquete_id INTEGER REFERENCES public.bouquete(id) ON DELETE CASCADE,
     size VARCHAR(255) NOT NULL CHECK (size IN ('SMALL', 'MEDIUM', 'LARGE')),
-    defaultprice INTEGER NOT NULL,
-    discount INTEGER,
-    discountprice INTEGER,
+    defaultprice NUMERIC NOT NULL,
+    discount NUMERIC,
+    discountprice NUMERIC,
+    is_sale BOOLEAN DEFAULT FALSE,
     CONSTRAINT uk_bouquete_size_bouquete_id_size UNIQUE (bouquete_id, size)
 );
 
@@ -100,10 +101,17 @@ INSERT INTO flower(name) VALUES ('DaoTest2');
 INSERT INTO flower(name) VALUES ('DaoTest3');
 INSERT INTO flower(name) VALUES ('DaoTest4');
 
-INSERT INTO public.bouquete (defaultprice, discount, discountprice, itemcode, name, quantity, size, soldquantity) VALUES
-(50, 10, 45, 'BQ001', 'Spring Bouquet', 20, NULL, 5),
-(40, NULL, NULL, 'BQ002', 'Summer Bouquet', 15, 'SMALL', 2),
-(60, 15, 51, 'BQ003', 'Autumn Bouquet', 25, 'MEDIUM', 8);
+INSERT INTO public.bouquete (itemcode, name, quantity, soldquantity) VALUES
+('BQ001', 'Spring Bouquet', 20, 5),
+('BQ002', 'Summer Bouquet', 15, 2),
+('BQ003', 'Autumn Bouquet', 25, 8);
+
+
+INSERT INTO public.bouquete_size (bouquete_id, defaultprice, discount, discountprice, size) VALUES
+(1, 50, 10, 40, 'SMALL'),
+(1, 60, 10, 50, 'MEDIUM'),
+(2, 40, NULL, NULL, 'SMALL'),
+(3, 60, 15, 45, 'MEDIUM');
 
 INSERT INTO public.bouquete_color (bouquete_id, color_id) VALUES
 (1, 1),
