@@ -1,23 +1,12 @@
 package ua.flowerista.shop.services;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import jakarta.transaction.Transactional;
 import ua.flowerista.shop.dto.BouqueteCardDto;
 import ua.flowerista.shop.dto.BouqueteDto;
 import ua.flowerista.shop.dto.BouqueteSmallDto;
@@ -27,6 +16,11 @@ import ua.flowerista.shop.models.Bouquete;
 import ua.flowerista.shop.models.BouqueteSize;
 import ua.flowerista.shop.models.Size;
 import ua.flowerista.shop.repo.BouqueteRepository;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -117,13 +111,13 @@ public class BouqueteService {
     	Bouquete bouquete = new Bouquete();
     	BouqueteSize sizeS = new BouqueteSize();
     	sizeS.setSize(Size.SMALL);
-    	sizeS.setDefaultPrice(BigDecimal.valueOf(123));
+    	sizeS.setDefaultPrice(BigInteger.valueOf(123));
     	BouqueteSize sizeM = new BouqueteSize();
     	sizeM.setSize(Size.MEDIUM);
-    	sizeM.setDefaultPrice(BigDecimal.valueOf(140));
+    	sizeM.setDefaultPrice(BigInteger.valueOf(140));
     	BouqueteSize sizeL = new BouqueteSize();
     	sizeL.setSize(Size.LARGE);
-    	sizeL.setDefaultPrice(BigDecimal.valueOf(180));
+    	sizeL.setDefaultPrice(BigInteger.valueOf(180));
 
     	Set<BouqueteSize> sizes = new HashSet<>();
     	sizes.add(sizeS);

@@ -10,6 +10,7 @@ import java.util.List;
 public class OrderValidator {
     public List<String> validateOrder(OrderDto order) {
         List<String> errors = new ArrayList<>();
+        //TODO: implement validation
         return errors;
     }
 }

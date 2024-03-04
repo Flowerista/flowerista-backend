@@ -2,10 +2,13 @@ package ua.flowerista.shop.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Set;
 
@@ -29,7 +32,7 @@ public class Order {
     @Column(name = "user_id")
     private Integer userId;
     @Column(name = "sum")
-    BigDecimal sum;
+    BigInteger sum;
     @Column(name = "currency")
     String currency;
     @OneToMany

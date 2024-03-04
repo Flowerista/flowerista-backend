@@ -1,28 +1,23 @@
 package ua.flowerista.shop.mappers;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import ua.flowerista.shop.dto.BouqueteDto;
 import ua.flowerista.shop.dto.ColorDto;
 import ua.flowerista.shop.dto.FlowerDto;
-import ua.flowerista.shop.models.Bouquete;
-import ua.flowerista.shop.models.BouqueteSize;
-import ua.flowerista.shop.models.Color;
-import ua.flowerista.shop.models.Flower;
-import ua.flowerista.shop.models.Size;
+import ua.flowerista.shop.models.*;
+
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class BouqueteMapperTest {
@@ -60,7 +55,7 @@ class BouqueteMapperTest {
 		BouqueteSize size1 = new BouqueteSize();
 		size1.setId(1);
 		size1.setSize(Size.MEDIUM);
-		size1.setDefaultPrice(BigDecimal.valueOf(123));
+		size1.setDefaultPrice(BigInteger.valueOf(123));
 
 
 		dto.setSizes(sizes);
@@ -110,7 +105,7 @@ class BouqueteMapperTest {
 		BouqueteSize size1 = new BouqueteSize();
 		size1.setId(1);
 		size1.setSize(Size.MEDIUM);
-		size1.setDefaultPrice(BigDecimal.valueOf(123));
+		size1.setDefaultPrice(BigInteger.valueOf(123));
 
         entity.setId(1);
         entity.setSizes(sizes);

@@ -8,7 +8,7 @@ import ua.flowerista.shop.models.OrderStatus;
 import ua.flowerista.shop.repo.OrderItemRepository;
 import ua.flowerista.shop.repo.OrderRepository;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -35,8 +35,8 @@ public class OrderService {
                 .collect(Collectors.toSet());
         order.setOrderItems(orderItems);
         order.setSum(orderItems.stream()
-                .map(orderItem -> orderItem.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
+                .map(orderItem -> orderItem.getPrice().multiply(BigInteger.valueOf(orderItem.getQuantity())))
+                .reduce(BigInteger.ZERO, BigInteger::add));
         return orderRepository.save(order);
     }
 

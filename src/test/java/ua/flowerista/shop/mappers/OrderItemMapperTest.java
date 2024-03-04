@@ -14,7 +14,7 @@ import ua.flowerista.shop.repo.BouqueteRepository;
 import ua.flowerista.shop.repo.BouqueteSizeRepository;
 import ua.flowerista.shop.repo.ColorRepository;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +49,7 @@ public class OrderItemMapperTest {
         dto.setQuantity(1);
         dto.setColorId(1);
         dto.setSizeId(1);
-        dto.setPrice(BigDecimal.valueOf(100));
+        dto.setPrice(BigInteger.valueOf(100));
         //when
         OrderItem orderItem = orderItemMapper.toEntity(dto);
         //then
@@ -69,9 +69,9 @@ public class OrderItemMapperTest {
 
         BouqueteSize size = new BouqueteSize();
         size.setId(1);
-        size.setDefaultPrice(BigDecimal.valueOf(100));
-        size.setDiscountPrice(BigDecimal.valueOf(90));
-        size.setDiscount(BigDecimal.valueOf(10));
+        size.setDefaultPrice(BigInteger.valueOf(100));
+        size.setDiscountPrice(BigInteger.valueOf(90));
+        size.setDiscount(BigInteger.valueOf(10));
         size.setIsSale(true);
         Mockito.when(bouqueteSizeRepository.findById(1)).thenReturn(java.util.Optional.of(size));
 
@@ -82,7 +82,7 @@ public class OrderItemMapperTest {
         dto.setQuantity(1);
         dto.setColorId(1);
         dto.setSizeId(1);
-        dto.setPrice(BigDecimal.valueOf(90));
+        dto.setPrice(BigInteger.valueOf(90));
         //when
         OrderItem orderItem = orderItemMapper.toEntity(dto);
         //then
@@ -105,7 +105,7 @@ public class OrderItemMapperTest {
         BouqueteSize size = new BouqueteSize();
         size.setId(1);
         orderItem.setSize(size);
-        orderItem.setPrice(BigDecimal.valueOf(100));
+        orderItem.setPrice(BigInteger.valueOf(100));
         //when
         OrderItemDto dto = orderItemMapper.toDto(orderItem);
         //then
@@ -126,9 +126,9 @@ public class OrderItemMapperTest {
 
         BouqueteSize size = new BouqueteSize();
         size.setId(1);
-        size.setDefaultPrice(BigDecimal.valueOf(100));
-        size.setDiscountPrice(BigDecimal.valueOf(90));
-        size.setDiscount(BigDecimal.valueOf(10));
+        size.setDefaultPrice(BigInteger.valueOf(100));
+        size.setDiscountPrice(BigInteger.valueOf(90));
+        size.setDiscount(BigInteger.valueOf(10));
         size.setIsSale(false);
         Mockito.when(bouqueteSizeRepository.findById(1)).thenReturn(java.util.Optional.of(size));
 

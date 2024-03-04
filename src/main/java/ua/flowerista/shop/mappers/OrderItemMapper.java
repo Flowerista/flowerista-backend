@@ -8,14 +8,13 @@ import ua.flowerista.shop.repo.BouqueteRepository;
 import ua.flowerista.shop.repo.BouqueteSizeRepository;
 import ua.flowerista.shop.repo.ColorRepository;
 
-import java.math.BigDecimal;
-
 @Component
 @RequiredArgsConstructor
-public class OrderItemMapper implements EntityMapper<OrderItem, OrderItemDto>{
+public class OrderItemMapper implements EntityMapper<OrderItem, OrderItemDto> {
     private final ColorRepository colorRepository;
     private final BouqueteSizeRepository bouqueteSizeRepository;
     private final BouqueteRepository bouqueteRepository;
+
     @Override
     public OrderItem toEntity(OrderItemDto dto) {
         OrderItem entity = new OrderItem();
@@ -27,9 +26,9 @@ public class OrderItemMapper implements EntityMapper<OrderItem, OrderItemDto>{
         entity.setColor(colorRepository.findById(dto.getColorId()).get());
         entity.setSize(bouqueteSizeRepository.findById(dto.getSizeId()).get());
         if (entity.getSize().getIsSale()) {
-            entity.setPrice(entity.getSize().getDiscountPrice().multiply(BigDecimal.valueOf(entity.getQuantity())));
+            entity.setPrice(entity.getSize().getDiscountPrice());
         } else {
-            entity.setPrice(entity.getSize().getDefaultPrice().multiply(BigDecimal.valueOf(entity.getQuantity())));
+            entity.setPrice(entity.getSize().getDefaultPrice());
         }
         return entity;
     }

@@ -7,7 +7,7 @@ import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderStatus;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Set;
 
 /**
@@ -21,6 +21,6 @@ public class OrderDto implements Serializable {
     private OrderStatus status;
     private String payId;
     private Integer userId;
-    private BigDecimal sum;
+    private BigInteger sum;
     private Set<OrderItemDto> orderItems;
 }

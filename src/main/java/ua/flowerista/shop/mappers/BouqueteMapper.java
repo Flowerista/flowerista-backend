@@ -69,10 +69,10 @@ public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto> {
 		dto.setName(entity.getName());
 		dto.setImageUrls(entity.getImageUrls());
 		dto.setSizes(entity.getSizes());
-		dto.setStockQuantity(entity.getQuantity());		
+		dto.setStockQuantity(entity.getQuantity());
 		return dto;
 	}
-	
+
 	public BouqueteCardDto toCardDto(Bouquete entity) {
 		BouqueteCardDto dto = new BouqueteCardDto();
 		dto.setId(entity.getId());
@@ -94,6 +94,6 @@ public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto> {
 		}
 		throw new RuntimeException("Size not found for Bouquete: " + bouquete.getId());
 	}
-	
+
 
 }

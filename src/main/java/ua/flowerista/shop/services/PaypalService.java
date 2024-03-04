@@ -30,7 +30,7 @@ public class PaypalService {
 
     public PaymentOrder createPayment(Integer orderId) {
         ua.flowerista.shop.models.Order order = orderService.getOrder(orderId).get(); //check for null made in controller
-        BigDecimal fee = order.getSum();
+        BigDecimal fee = BigDecimal.valueOf(order.getSum().longValue());
         String currencyCode = order.getCurrency();
         OrderRequest orderRequest = new OrderRequest();
         orderRequest.checkoutPaymentIntent("CAPTURE");
