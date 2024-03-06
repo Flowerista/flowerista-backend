@@ -46,4 +46,6 @@ public interface BouqueteRepository extends JpaRepository<Bouquete, Integer> {
 	@Query("SELECT b FROM Bouquete b WHERE lower(b.name) LIKE lower(concat('%', :name, '%'))")
 	List<Bouquete> searchByName(@Param("name") String name);
 
+	@Query("SELECT COUNT(b) > 0 FROM Bouquete b WHERE b.id = :productId and b.quantity > 0")
+	Boolean isBouqueteAvailableForSale(Integer productId);
 }

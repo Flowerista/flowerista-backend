@@ -14,13 +14,12 @@ import java.math.BigInteger;
 @Data
 @NoArgsConstructor
 public class OrderItemDto implements Serializable {
-    Integer id;
-    private int productId;
+    Integer productId;
     @NotBlank
     String name;
-    int quantity;
-    int sizeId;
-    int colorId;
+    Integer quantity;
+    Integer sizeId;
+    Integer colorId;
     @PositiveOrZero(message = "Price must be not less than 0")
     BigInteger price;
 }

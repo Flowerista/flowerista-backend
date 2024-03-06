@@ -23,4 +23,5 @@ public class OrderDto implements Serializable {
     private Integer userId;
     private BigInteger sum;
     private Set<OrderItemDto> orderItems;
+    private AddressDto address;
 }
