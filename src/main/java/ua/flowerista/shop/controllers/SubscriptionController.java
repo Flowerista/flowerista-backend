@@ -39,8 +39,9 @@ public class SubscriptionController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "400", description = "If email already exists"),
 			@ApiResponse(responseCode = "202", description = "If email was accepted") })
 	public ResponseEntity<?> addBouqueteToWishList(@RequestBody @Valid SubscriptionRequest request ) {
-		if(service.sub(request).equals("Email added")) {
-			return ResponseEntity.accepted().body("Email added");
+		String result = service.sub(request);
+		if(result.equals("Email added")) {
+			return ResponseEntity.accepted().body(result);
 		}
 		return ResponseEntity.badRequest().body(service.sub(request));
 	}
