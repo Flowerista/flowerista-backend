@@ -24,13 +24,11 @@ public class OrderValidator {
 
         isOrderItemsEmpty(order, errors);
         isProductIdEmpty(order, errors);
-        isColorEmpty(order, errors);
         isSizeEmpty(order, errors);
 
         isQuantityPositive(order, errors);
 
         isProductIdExist(order, errors);
-        isColorIdExist(order, errors);
         isSizeIdExist(order, errors);
 
         isProductIdAvailableForSale(order, errors);
@@ -76,14 +74,6 @@ public class OrderValidator {
         });
     }
 
-    private void isColorIdExist(OrderDto order, List<String> errors) {
-        order.getOrderItems().forEach(orderItem -> {
-            if (!colorService.isColorExist(orderItem.getColorId())) {
-                errors.add("Color with id " + orderItem.getColorId() + " does not exist");
-            }
-        });
-    }
-
     private void isProductIdExist(OrderDto order, List<String> errors) {
         order.getOrderItems().forEach(orderItem -> {
             if (!bouqueteService.isBouqueteExist(orderItem.getProductId())) {
@@ -96,14 +86,6 @@ public class OrderValidator {
         order.getOrderItems().forEach(orderItem -> {
             if (orderItem.getSizeId() == null) {
                 errors.add("Size is empty");
-            }
-        });
-    }
-
-    private void isColorEmpty(OrderDto order, List<String> errors) {
-        order.getOrderItems().forEach(orderItem -> {
-            if (orderItem.getColorId() == null) {
-                errors.add("Color is empty");
             }
         });
     }

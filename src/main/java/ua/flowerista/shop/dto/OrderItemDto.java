@@ -19,7 +19,6 @@ public class OrderItemDto implements Serializable {
     String name;
     Integer quantity;
     Integer sizeId;
-    Integer colorId;
     @PositiveOrZero(message = "Price must be not less than 0")
     BigInteger price;
 }
