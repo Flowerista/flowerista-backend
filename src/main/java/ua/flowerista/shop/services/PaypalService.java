@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 public class PaypalService {
     public static final String SUCCESS_URL = "/capture";
     public static final String CANCEL_URL = "/cancel";
+    public static final String PAYPAL_URL = "https://www.sandbox.paypal.com/checkoutnow?token=";
     @Value("${frontend.server.url}")
     private String frontendUrl;
     private final PayPalHttpClient payPalHttpClient;
@@ -76,4 +77,15 @@ public class PaypalService {
         return new CompletedOrder("error");
     }
 
+    public PaymentOrder getPaymentForOrder(Integer orderId) {
+        ua.flowerista.shop.models.Order order = orderService.getOrder(orderId).get();
+        if (order.getPayId() == null) {
+            return createPayment(orderId);
+        }
+        return new PaymentOrder("success", order.getPayId(), getPayPalPaymentLink(order.getPayId()));
+    }
+
+    private String getPayPalPaymentLink(String payId) {
+        return PAYPAL_URL + payId;
+    }
 }
