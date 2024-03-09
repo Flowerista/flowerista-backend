@@ -57,10 +57,10 @@ public class DaoConfig {
 	public DataSource dataSource() {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName(driverClassName);
-		System.out.println("spring.datasource.url : " + url);
+		System.out.println("spring.datasource.url = ${DATABASE_URL} : " + url);
 		System.out.println("System.getenv(\"JDBC_DATABASE_URL\"): " + System.getenv("JDBC_DATABASE_URL"));
 		System.out.println("System.getenv(\"DATABASE_URL\"): " + System.getenv("DATABASE_URL"));
-		System.out.println("myUrl: " + myUrl);
+		System.out.println("myUrl = ${DATABASE_URL}: " + myUrl);
 		URI dbUri = null;
 		try {
 			dbUri = new URI(url);
