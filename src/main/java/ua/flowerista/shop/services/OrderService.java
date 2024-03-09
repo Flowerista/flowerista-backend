@@ -9,7 +9,6 @@ import ua.flowerista.shop.repo.AddressRepository;
 import ua.flowerista.shop.repo.OrderItemRepository;
 import ua.flowerista.shop.repo.OrderRepository;
 
-import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -63,5 +62,13 @@ public class OrderService {
             return true;
         }
         return order.get().getStatus().compareTo(OrderStatus.PENDING) > 0;
+    }
+
+    public boolean isOrderWaitingForPayment(Integer orderId) {
+        Optional<Order> order = orderRepository.findById(orderId);
+        if (order.isEmpty()) {
+            return false;
+        }
+        return order.get().getStatus().equals(OrderStatus.PENDING);
     }
 }

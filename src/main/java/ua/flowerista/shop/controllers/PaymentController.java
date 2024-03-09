@@ -30,6 +30,9 @@ public class PaymentController {
         if (orderService.isOrderPayed(orderId)) {
             return ResponseEntity.badRequest().body("Order already payed or not found");
         }
+        if (orderService.isOrderWaitingForPayment(orderId)) {
+            return  ResponseEntity.ok(paypalService.getPaymentForOrder(orderId));
+        }
         return ResponseEntity.accepted().body(paypalService.createPayment(orderId));
     }
 
