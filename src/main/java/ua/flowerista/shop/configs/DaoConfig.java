@@ -56,8 +56,8 @@ public class DaoConfig {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName(driverClassName);
 		System.out.println("URL: " + url);
-		System.out.println("URL: " + url);
-		System.out.println("URL: " + url);
+		System.out.println("JDBC_DATABASE_URL: " + System.getenv("JDBC_DATABASE_URL"));
+		System.out.println("DATABASE_URL: " + System.getenv("DATABASE_URL"));
 		System.out.println("URL: " + url);
 		URI dbUri = null;
 		try {
