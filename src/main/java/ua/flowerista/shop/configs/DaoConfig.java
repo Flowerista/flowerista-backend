@@ -20,8 +20,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DaoConfig {
 
-	
-	private String url = "postgres://oizwagngtwvqya:f9b933512ab9c916b47411735fcc612ec1998758f15cd0ce95426cfa8e3394a0@ec2-79-125-89-233.eu-west-1.compute.amazonaws.com:5432/db3bq11hd0q54h";
+	@Value("${spring.datasource.url}")
+	private String url;
+	private String durl = "postgres://oizwagngtwvqya:f9b933512ab9c916b47411735fcc612ec1998758f15cd0ce95426cfa8e3394a0@ec2-79-125-89-233.eu-west-1.compute.amazonaws.com:5432/db3bq11hd0q54h";
 
 	@Value("${spring.datasource.driver-class-name}")
 	private String driverClassName;
@@ -54,6 +55,10 @@ public class DaoConfig {
 	public DataSource dataSource() {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName(driverClassName);
+		System.out.println("URL: " + url);
+		System.out.println("URL: " + url);
+		System.out.println("URL: " + url);
+		System.out.println("URL: " + url);
 		URI dbUri = null;
 		try {
 			dbUri = new URI(url);
