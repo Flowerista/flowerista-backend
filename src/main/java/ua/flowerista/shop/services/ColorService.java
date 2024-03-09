@@ -42,4 +42,7 @@ public class ColorService {
 		repo.save(mapper.toEntity(color));
 	}
 
+    public Boolean isColorExist(Integer colorId) {
+		return repo.existsById(colorId);
+    }
 }

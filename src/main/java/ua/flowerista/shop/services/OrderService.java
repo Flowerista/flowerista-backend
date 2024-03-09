@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderItem;
 import ua.flowerista.shop.models.OrderStatus;
+import ua.flowerista.shop.repo.AddressRepository;
 import ua.flowerista.shop.repo.OrderItemRepository;
 import ua.flowerista.shop.repo.OrderRepository;
 
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final AddressRepository addressRepository;
 
     public void updateStatus(Integer orderId, OrderStatus status) {
         orderRepository.updateStatus(orderId, status);
@@ -29,14 +31,13 @@ public class OrderService {
     }
 
     public Order createOrder(Order order) {
-        order.setCurrency(Objects.requireNonNullElse(order.getCurrency(),"UAH"));
+        order.setCurrency(Objects.requireNonNullElse(order.getCurrency(),"USD"));
         Set<OrderItem> orderItems = order.getOrderItems().stream()
                 .map(orderItemRepository::save)
                 .collect(Collectors.toSet());
         order.setOrderItems(orderItems);
-        order.setSum(orderItems.stream()
-                .map(orderItem -> orderItem.getPrice().multiply(BigInteger.valueOf(orderItem.getQuantity())))
-                .reduce(BigInteger.ZERO, BigInteger::add));
+        order.setAddress(addressRepository.save(order.getAddress()));
+        order = orderRepository.save(order);
         return orderRepository.save(order);
     }
 

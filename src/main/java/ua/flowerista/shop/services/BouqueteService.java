@@ -107,6 +107,10 @@ public class BouqueteService {
         return repo.searchByName(name).stream().map(boquete -> mapper.toSmallDto(boquete)).collect(Collectors.toList());
     }
 
+	public Boolean isBouqueteExist(Integer id) {
+		return repo.existsById(id);
+	}
+
     public void test () {
     	Bouquete bouquete = new Bouquete();
     	BouqueteSize sizeS = new BouqueteSize();
@@ -131,4 +135,7 @@ public class BouqueteService {
     	repo.save(bouquete);
     }
 
+	public boolean isBouqueteAvailableForSale(Integer productId) {
+		return repo.isBouqueteAvailableForSale(productId);
+	}
 }

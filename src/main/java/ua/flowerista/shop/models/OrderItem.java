@@ -36,9 +36,6 @@ public class OrderItem {
     @ManyToOne
     @JoinColumn(name = "size_id")
     private BouqueteSize size;
-    @ManyToOne
-    @JoinColumn(name = "color_id")
-    private Color color;
     @Column(name = "price")
     private BigInteger price;
 

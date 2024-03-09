@@ -39,6 +39,8 @@ public class Order {
     @JoinColumn(name = "order_id")
     @ToString.Exclude
     private Set<OrderItem> orderItems;
+    @OneToOne
+    private Address address;
 
     @Override
     public final boolean equals(Object o) {

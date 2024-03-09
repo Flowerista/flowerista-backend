@@ -2,6 +2,7 @@ package ua.flowerista.shop.configs;
 
 import java.util.List;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -40,6 +41,7 @@ public class SecurityConfig {
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 		.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(req -> req.requestMatchers(WHITE_LIST_URL).permitAll()
+						.dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
 						.requestMatchers("/api/admin/**").hasAuthority(Role.ADMIN.name())
 						.requestMatchers("/api/user/**").hasAnyAuthority(Role.USER.name(), Role.ADMIN.name())
 						.anyRequest().authenticated())
@@ -52,7 +54,7 @@ public class SecurityConfig {
 
 		return http.build();
 	}
-	
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
