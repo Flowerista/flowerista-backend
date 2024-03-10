@@ -2,6 +2,7 @@ package ua.flowerista.shop.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ua.flowerista.shop.dto.OrderDto;
 import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderItem;
 import ua.flowerista.shop.models.OrderStatus;
@@ -9,6 +10,7 @@ import ua.flowerista.shop.repo.AddressRepository;
 import ua.flowerista.shop.repo.OrderItemRepository;
 import ua.flowerista.shop.repo.OrderRepository;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -70,5 +72,18 @@ public class OrderService {
             return false;
         }
         return order.get().getStatus().equals(OrderStatus.PENDING);
+    }
+
+    public List<Order> getAllOrders() {
+        //TODO: need to increase performance
+        return orderRepository.findAll().stream()
+                .collect(Collectors.toList());
+    }
+
+    public void updateOrder(Integer id, Order entity) {
+        if (entity.getId() == null) {
+            entity.setId(id);
+        }
+        orderRepository.save(entity);
     }
 }
