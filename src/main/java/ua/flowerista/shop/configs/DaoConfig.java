@@ -20,12 +20,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DaoConfig {
 
-	@Value("${spring.datasource.url}")
-	private String url;
-	@Value("${myUrl}")
-	private String myUrl;
-	private String durl = "postgres://oizwagngtwvqya:f9b933512ab9c916b47411735fcc612ec1998758f15cd0ce95426cfa8e3394a0@ec2-79-125-89-233.eu-west-1.compute.amazonaws.com:5432/db3bq11hd0q54h";
-
 	@Value("${spring.datasource.driver-class-name}")
 	private String driverClassName;
 
@@ -57,14 +51,9 @@ public class DaoConfig {
 	public DataSource dataSource() {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName(driverClassName);
-		System.out.println("spring.datasource.url = ${DATABASE_URL} : " + url);
-		System.out.println("System.getenv(\"JDBC_DATABASE_URL\"): " + System.getenv("JDBC_DATABASE_URL"));
-		System.out.println("System.getenv(\"DATABASE_URL\"): " + System.getenv("DATABASE_URL"));
-		System.out.println("myUrl = ${DATABASE_URL}: " + myUrl);
 		URI dbUri = null;
 		try {
-			dbUri = new URI(url);
-
+			dbUri = new URI(System.getenv("DATABASE_URL"));
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
