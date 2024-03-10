@@ -42,7 +42,9 @@ public class SecurityConfig {
 		.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(req -> req.requestMatchers(WHITE_LIST_URL).permitAll()
 						.dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
-						.requestMatchers("/api/admin/**").hasAuthority(Role.ADMIN.name())
+						//TODO: change to hasAuthority. For now, it's permitAll. It's for testing purposes.
+						.requestMatchers("/api/admin/**").permitAll()
+						//.requestMatchers("/api/admin/**").hasAuthority(Role.ADMIN.name())
 						.requestMatchers("/api/user/**").hasAnyAuthority(Role.USER.name(), Role.ADMIN.name())
 						.anyRequest().authenticated())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
