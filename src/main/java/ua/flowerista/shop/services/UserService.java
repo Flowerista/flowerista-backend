@@ -44,7 +44,7 @@ public class UserService {
 
 	@Autowired
 	private UserRepository repository;
-	
+
 	@Autowired
 	private BouqueteRepository bouqueteRepository;
 
@@ -53,7 +53,7 @@ public class UserService {
 
 	@Autowired
 	private AddressMapper addressMapper;
-	
+
 	@Autowired
 	private BouqueteMapper bouqueteMapper;
 
@@ -83,7 +83,7 @@ public class UserService {
 		}
 		User user = mapper.toEntity(regDto);
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setRole(Role.USER);
+		user.setRole(Role.ROLE_USER);
 		user.setAddress(new Address());
 		return repository.save(user);
 	}
@@ -217,25 +217,25 @@ public class UserService {
 		user.setLastName(dto.getLastName());
 		repository.save(user);
 	}
-	
+
 	public Set<BouqueteSmallDto> getWishList (Principal connectedUser) {
 		var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 		return user.getWishlist().stream().map(bouquete -> bouqueteMapper.toSmallDto(bouquete)).collect(Collectors.toSet());
 	}
-	
+
 	public void addBouqueteToWishList (int id, Principal connectedUser) {
 		var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 		Bouquete bouquete = bouqueteRepository.getReferenceById(id);
 		user.getWishlist().add(bouquete);
 		repository.save(user);
 	}
-	
+
 	public void deleteBouqueteFromWishList (int id, Principal connectedUser) {
 		var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 		Bouquete bouquete = bouqueteRepository.getReferenceById(id);
 		user.getWishlist().remove(bouquete);
 		repository.save(user);
-	}	
+	}
 
 	private String validatePasswordResetToken(String token) {
 		final PasswordResetToken passToken = passwordTokenRepository.findByToken(token);
