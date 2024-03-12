@@ -83,7 +83,7 @@ public class UserService {
 		}
 		User user = mapper.toEntity(regDto);
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setRole(Role.ROLE_USER);
+		user.setRole(Role.USER);
 		user.setAddress(new Address());
 		return repository.save(user);
 	}
