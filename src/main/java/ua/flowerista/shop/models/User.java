@@ -66,11 +66,11 @@ public class User implements UserDetails {
 
 	@Column(name = "enabled")
 	private boolean enabled;
-	
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
-    
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "wishlist",
@@ -80,7 +80,7 @@ public class User implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of(new SimpleGrantedAuthority(role.name()));
+		return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
 	}
 
 	@Override
