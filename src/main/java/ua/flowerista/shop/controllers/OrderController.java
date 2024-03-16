@@ -19,6 +19,7 @@ import ua.flowerista.shop.services.validators.OrderValidator;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -91,6 +92,19 @@ public class OrderController {
         order.setStatus(OrderStatus.PLACED);
         order = orderMapper.toDto(orderService.createOrder(orderMapper.toEntity(order)));
         return ResponseEntity.accepted().body(order);
+    }
+
+    @Operation(summary = "Get orders history", description = "The history of all the user's orders is returned.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "400", description = "If no order is found"),
+            @ApiResponse(responseCode = "200", description = "Return orders history")})
+    @GetMapping("/history")
+    public ResponseEntity<?> getAllOrdersByUser(Principal connectedUser) {
+        Integer requestUserId = getPrincipalUser(connectedUser).getId();
+        List<Order> orderList = orderService.getOrdersByUserId(requestUserId);
+        if (orderList.isEmpty()) {
+            return ResponseEntity.badRequest().body("No orders were found");
+        }
+        return ResponseEntity.ok(orderList.stream().map(orderMapper::toDto).collect(Collectors.toList()));
     }
 
     private static User getPrincipalUser(Principal connectedUser) {
