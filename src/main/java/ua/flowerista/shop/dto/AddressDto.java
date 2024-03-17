@@ -25,4 +25,13 @@ public class AddressDto {
 	private String entrance;
 	@Pattern(regexp = "^[0-9]*$", message = "Only numbers are allowed in the flat")
 	private String flat;
+
+	@Override
+	public String toString() {
+		return "city='" + city + '\'' +
+				", street='" + street + '\'' +
+				", house='" + house + '\'' +
+				", entrance='" + entrance + '\'' +
+				", flat='" + flat;
+	}
 }

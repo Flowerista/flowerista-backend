@@ -13,12 +13,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ua.flowerista.shop.auditing.ApplicationAuditAware;
 import ua.flowerista.shop.repo.UserRepository;
 
 @Configuration
 @RequiredArgsConstructor
-public class ApplicationConfig {
+public class ApplicationConfig implements WebMvcConfigurer {
 
 
 	  private final UserRepository repository;
@@ -51,5 +53,10 @@ public class ApplicationConfig {
 	  public PasswordEncoder passwordEncoder() {
 	    return new BCryptPasswordEncoder();
 	  }
+
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/js/**")
+				.addResourceLocations("classpath:/static/js/");
+	}
 
 }

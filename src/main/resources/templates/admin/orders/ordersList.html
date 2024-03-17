@@ -6,10 +6,86 @@
 <head>
     <meta charset="UTF-8">
     <title>Orders</title>
+    <script type="text/javascript" th:src="@{/js/filter.js}"></script>
 </head>
 <body>
 <main layout:fragment="main">
-<!--    TODO: Orders list-->
+    <!--    TODO: Orders list-->
+    <div th:if="${#lists.isEmpty(orders)}">
+        <h3> Orders list is empty </h3>
+    </div>
+    <h3>
+        Total orders - <span th:text="${orders.totalElements}"></span> pcs.
+    </h3>
+    <table id="emp-table" class="table table-striped">
+        <thead>
+        <tr>
+            <th col-index=1>Id</th>
+            <th col-index=2>Status
+                <select class="table-filter" onchange="filter_rows()">
+                    <option value="all"></option>
+                </select></th>
+            <th col-index=3>Address</th>
+            <th col-index=4>Items</th>
+            <th col-index=5>Total price</th>
+            <th>Edit</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders.content}">
+            <td th:text="${order.id}" style="width: 5%"></td>
+            <td th:text="${order.status}" style="width: 10%"></td>
+            <td th:text="${order.address}" style="width: 35%"></td>
+            <td style="width: 40%">
+                <ul>
+                    <li th:each="item : ${order.items}">
+                        <span th:text="${item.name}"></span>
+                        <span> - </span>
+                        <span th:text="${item.quantity}"></span>
+                    </li>
+                </ul>
+            </td>
+            <td th:text="${order.sum}" style="width: 5%"></td>
+            <td style="width: 5%">
+                <a th:href="@{/api/admin/orders/{id}(id=${order.id})}">Edit</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination justify-content-center">
+            <li th:each="i: ${#numbers.sequence(0, orders.totalPages - 1)}" class="page-item"><a class="page-link"
+                                                                                                 th:href="@{/api/admin/orders?page={page}(page=${i})}"
+                                                                                                 th:text="${i}"></a>
+            </li>
+        </ul>
+    </nav>
 </main>
+<script layout:fragment="script">
+    getUniqueValuesFromColumn()
+    document.getElementById('filter').addEventListener('keyup', debound(filter_table, 500))
+
+    function filter_table(e) {
+        const rows = document.querySelectorAll('tbody tr')
+        rows.forEach(row => {
+            row.style.display = (row.innerText.includes(e.target.value)) ? '' : 'none'
+        })
+    }
+
+    function debound(func, timeout) {
+        let timer
+        return (...args) => {
+            if (!timer) {
+                func.apply(this, args);
+            }
+            clearTimeout(timer)
+            timer = setTimeout(() => {
+                func.apply(this, args)
+                timer = undefined
+            }, timeout)
+        }
+    }
+</script>
 </body>
 </html>

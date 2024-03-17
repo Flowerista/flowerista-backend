@@ -1,18 +1,20 @@
 package ua.flowerista.shop.controllers;
 
+import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import ua.flowerista.shop.dto.OrderDto;
 import ua.flowerista.shop.mappers.OrderMapper;
+import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderStatus;
 import ua.flowerista.shop.services.OrderService;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/api/admin")
@@ -22,15 +24,21 @@ public class AdminPanelController {
     private final OrderMapper orderMapper;
 
     @GetMapping("/orders")
-    public ModelAndView getOrders() {
-        List<OrderDto> orders = orderService.getAllOrders().stream()
-                .map(orderMapper::toDto)
-                .toList();
+    public ModelAndView getOrders(@QuerydslPredicate(root = Order.class)
+                                  Predicate predicate,
+                                  @RequestParam(name = "page", defaultValue = "0", required = false)
+                                  Integer page,
+                                  @RequestParam(name = "size", defaultValue = "10", required = false)
+                                  Integer size,
+                                  Pageable pageable) {
+        Page<OrderDto> orders = orderService.getAllOrders(predicate,
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))).map(orderMapper::toDto);
+        //return ResponseEntity.ok(orders);
         return new ModelAndView("admin/orders/ordersList").addObject("orders", orders);
     }
 
     @GetMapping("/orders/{id}")
-    public ModelAndView getOrder(@PathVariable Integer id) {
+    public ModelAndView getById(@PathVariable Integer id) {
         OrderDto order = orderMapper.toDto(orderService.getOrder(id).orElseThrow());
         return new ModelAndView("admin/orders/orderView").addObject("order", order);
     }
@@ -46,4 +54,5 @@ public class AdminPanelController {
         orderService.updateOrder(id, orderMapper.toEntity(order));
         return new ModelAndView("redirect:/api/admin/orders/" + id);
     }
+
 }
