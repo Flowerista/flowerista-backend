@@ -15,12 +15,16 @@ import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderStatus;
 import ua.flowerista.shop.models.QOrder;
 
+import java.util.List;
+
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer>, QuerydslPredicateExecutor<Order>, QuerydslBinderCustomizer<QOrder> {
     @Override
     default void customize(QuerydslBindings bindings, QOrder root){
         bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) (path, s) -> path.equalsIgnoreCase(s));
     }
+
+    List<Order> findByUserId(Integer userId);
 
     @Modifying
     @Transactional

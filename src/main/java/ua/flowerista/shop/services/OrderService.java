@@ -12,6 +12,7 @@ import ua.flowerista.shop.repo.AddressRepository;
 import ua.flowerista.shop.repo.OrderItemRepository;
 import ua.flowerista.shop.repo.OrderRepository;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -82,7 +83,7 @@ public class OrderService {
     }
 
     public List<Order> getOrdersByUserId(Integer userId) {
-        return getAllOrders().stream().filter(order -> order.getUserId() == userId).collect(Collectors.toList());
+        return orderRepository.findByUserId(userId);
     }
 
     public void updateOrder(Integer id, Order entity) {
