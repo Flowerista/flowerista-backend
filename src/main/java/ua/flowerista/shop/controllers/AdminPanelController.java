@@ -33,7 +33,6 @@ public class AdminPanelController {
                                   Pageable pageable) {
         Page<OrderDto> orders = orderService.getAllOrders(predicate,
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))).map(orderMapper::toDto);
-        //return ResponseEntity.ok(orders);
         return new ModelAndView("admin/orders/ordersList").addObject("orders", orders);
     }
 
