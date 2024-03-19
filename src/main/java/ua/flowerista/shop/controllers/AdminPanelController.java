@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import ua.flowerista.shop.dto.OrderDto;
+import ua.flowerista.shop.dto.user.UserDto;
 import ua.flowerista.shop.mappers.OrderMapper;
 import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderStatus;
@@ -39,6 +40,7 @@ public class AdminPanelController {
     @GetMapping("/orders/{id}")
     public ModelAndView getById(@PathVariable Integer id) {
         OrderDto order = orderMapper.toDto(orderService.getOrder(id).orElseThrow());
+        UserDto user = order.getUser();
         return new ModelAndView("admin/orders/orderView").addObject("order", order);
     }
 

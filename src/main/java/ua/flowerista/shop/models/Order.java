@@ -29,8 +29,8 @@ public class Order {
     private OrderStatus status;
     @Column(name = "pay_id")
     private String payId;
-    @Column(name = "user_id")
-    private Integer userId;
+    @ManyToOne
+    private User user;
     @Column(name = "sum")
     BigInteger sum;
     @Column(name = "currency")

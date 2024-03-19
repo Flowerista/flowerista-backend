@@ -3,6 +3,7 @@ package ua.flowerista.shop.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ua.flowerista.shop.dto.user.UserDto;
 import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderStatus;
 
@@ -24,4 +25,5 @@ public class OrderDto implements Serializable {
     private BigInteger sum;
     private Set<OrderItemDto> items;
     private AddressDto address;
+    private UserDto user;
 }
