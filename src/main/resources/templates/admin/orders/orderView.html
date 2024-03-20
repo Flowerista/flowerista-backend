@@ -37,6 +37,7 @@
                                 <thead>
                                 <tr>
                                     <th>Product</th>
+                                    <th>Size</th>
                                     <th>Quantity</th>
                                     <th>Price</th>
                                     <th>Total</th>
@@ -44,20 +45,25 @@
                                 </thead>
                                 <tbody>
                                 <tr th:each="item : ${order.orderItems}">
-                                    <td th:text="${item.product.name}"></td>
+                                    <td th:text="${item.name}"></td>
+                                    <td th:text="${item.size}"></td>
                                     <td th:text="${item.quantity}"></td>
-                                    <td th:text="${item.product.price}"></td>
+                                    <td th:text="${item.price}"></td>
                                     <td th:text="${item.product.price * item.quantity}"></td>
                                 </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h3>Order Actions</h3>
-                            <form th:action="@{/admin/orders/updateStatus}" method="post">
-                                <
+                </div>
+            </div>
+        </div>
+    </div>
+<!--                    <div class="row">-->
+<!--                        <div class="col-md-12">-->
+<!--                            <h3>Order Actions</h3>-->
+<!--                            <form th:action="@{/admin/orders/updateStatus}" method="post">-->
+<!--                                -->
 </main>
 </body>
 </html>

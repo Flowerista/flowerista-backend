@@ -29,8 +29,7 @@ public class Order {
     private OrderStatus status;
     @Column(name = "pay_id")
     private String payId;
-    @ManyToOne
-    private User user;
+
     @Column(name = "sum")
     BigInteger sum;
     @Column(name = "currency")
@@ -41,6 +40,10 @@ public class Order {
     private Set<OrderItem> orderItems;
     @OneToOne
     private Address address;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Override
     public final boolean equals(Object o) {

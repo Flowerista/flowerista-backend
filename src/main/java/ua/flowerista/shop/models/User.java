@@ -1,5 +1,6 @@
 package ua.flowerista.shop.models;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +31,7 @@ public class User implements UserDetails {
 	@Column(name = "id")
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private Integer id;
 
 	@Column(name = "first_name", nullable = false)
 	private String firstName;
@@ -65,8 +66,8 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "bouquete_id"))
     private Set<Bouquete> wishlist;
 
-	@OneToMany(mappedBy = "orders", fetch = FetchType.LAZY)
-	private List<Order> orders;
+	@OneToMany(mappedBy = "user", orphanRemoval = true)
+	private List<Order> orders = new ArrayList<>();
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
