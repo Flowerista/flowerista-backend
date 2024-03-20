@@ -23,7 +23,7 @@ public class OrderDto implements Serializable {
     private String payId;
     private Integer userId;
     private BigInteger sum;
-    private Set<OrderItemDto> items;
+    private Set<OrderItemDto> orderItems;
     private AddressDto address;
     private UserDto user;
 }
