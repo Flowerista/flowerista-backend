@@ -1,6 +1,9 @@
 package ua.flowerista.shop.services;
 
+import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderItem;
@@ -31,7 +34,7 @@ public class OrderService {
     }
 
     public Order createOrder(Order order) {
-        order.setCurrency(Objects.requireNonNullElse(order.getCurrency(),"USD"));
+        order.setCurrency(Objects.requireNonNullElse(order.getCurrency(), "USD"));
         Set<OrderItem> orderItems = order.getOrderItems().stream()
                 .map(orderItemRepository::save)
                 .collect(Collectors.toSet());
@@ -73,14 +76,14 @@ public class OrderService {
         return order.get().getStatus().equals(OrderStatus.PENDING);
     }
 
-    public List<Order> getAllOrders() {
+    public Page<Order> getAllOrders(Predicate predicate,
+                                    Pageable pageable) {
         //TODO: need to increase performance
-        return orderRepository.findAll().stream()
-                .collect(Collectors.toList());
+        return orderRepository.findAll(predicate, pageable);
     }
 
     public List<Order> getOrdersByUserId(Integer userId) {
-        return getAllOrders().stream().filter(order -> order.getUserId() == userId).collect(Collectors.toList());
+        return orderRepository.findByUserId(userId);
     }
 
     public void updateOrder(Integer id, Order entity) {

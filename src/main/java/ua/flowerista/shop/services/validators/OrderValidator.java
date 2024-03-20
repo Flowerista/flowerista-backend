@@ -38,7 +38,7 @@ public class OrderValidator {
     }
 
     private void isQuantityPositive(OrderDto order, List<String> errors) {
-        order.getOrderItems().forEach(orderItem -> {
+        order.getItems().forEach(orderItem -> {
             if (orderItem.getQuantity() <= 0) {
                 errors.add("Quantity should be positive");
             }
@@ -46,7 +46,7 @@ public class OrderValidator {
     }
 
     private void isProductIdAvailableForSale(OrderDto order, List<String> errors) {
-        order.getOrderItems().forEach(orderItem -> {
+        order.getItems().forEach(orderItem -> {
             if (!bouqueteService.isBouqueteAvailableForSale(orderItem.getProductId())) {
                 errors.add("Product with id " + orderItem.getProductId() + " is not available for sale - " +
                         "out of stock or not active");
@@ -56,7 +56,7 @@ public class OrderValidator {
 
     private void isSumCalculatedOnFrontEqualToCalculatedOnServer(OrderDto order, List<String> errors) {
         BigInteger sum = BigInteger.ZERO;
-        for (OrderItemDto orderItem : order.getOrderItems()) {
+        for (OrderItemDto orderItem : order.getItems()) {
             BigInteger price = bouqueteSizeService.getPrice(orderItem.getSizeId());
             sum = sum.add(price.multiply(BigInteger.valueOf(orderItem.getQuantity())));
         }
@@ -67,7 +67,7 @@ public class OrderValidator {
     }
 
     private void isSizeIdExist(OrderDto order, List<String> errors) {
-        order.getOrderItems().forEach(orderItem -> {
+        order.getItems().forEach(orderItem -> {
             if (!bouqueteSizeService.isSizeExist(orderItem.getSizeId())) {
                 errors.add("Size with id " + orderItem.getSizeId() + " does not exist");
             }
@@ -75,7 +75,7 @@ public class OrderValidator {
     }
 
     private void isProductIdExist(OrderDto order, List<String> errors) {
-        order.getOrderItems().forEach(orderItem -> {
+        order.getItems().forEach(orderItem -> {
             if (!bouqueteService.isBouqueteExist(orderItem.getProductId())) {
                 errors.add("Product with id " + orderItem.getProductId() + " does not exist");
             }
@@ -83,7 +83,7 @@ public class OrderValidator {
     }
 
     private void isSizeEmpty(OrderDto order, List<String> errors) {
-        order.getOrderItems().forEach(orderItem -> {
+        order.getItems().forEach(orderItem -> {
             if (orderItem.getSizeId() == null) {
                 errors.add("Size is empty");
             }
@@ -91,7 +91,7 @@ public class OrderValidator {
     }
 
     private void isProductIdEmpty(OrderDto order, List<String> errors) {
-        order.getOrderItems().forEach(orderItem -> {
+        order.getItems().forEach(orderItem -> {
             if (orderItem.getProductId() == null) {
                 errors.add("Product id is empty");
             }
@@ -99,7 +99,7 @@ public class OrderValidator {
     }
 
     private void isOrderItemsEmpty(OrderDto order, List<String> errors) {
-        if (order.getOrderItems().isEmpty()) {
+        if (order.getItems().isEmpty()) {
             errors.add("Order items are empty");
         }
     }
