@@ -38,7 +38,7 @@
             <td th:text="${order.address}" style="width: 35%"></td>
             <td style="width: 40%">
                 <ul>
-                    <li th:each="item : ${order.items}">
+                    <li th:each="item : ${order.orderItems}">
                         <span th:text="${item.name}"></span>
                         <span> - </span>
                         <span th:text="${item.quantity}"></span>
