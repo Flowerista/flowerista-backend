@@ -1,5 +1,6 @@
 package ua.flowerista.shop.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import ua.flowerista.shop.models.OrderStatus;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.Set;
 
 /**
@@ -26,4 +28,9 @@ public class OrderDto implements Serializable {
     private Set<OrderItemDto> orderItems;
     private AddressDto address;
     private UserDto user;
+    @JsonProperty("date")
+    private String dateCreated;
+    @JsonProperty("time")
+    private String timeCreated;
+    private Instant updated;
 }

@@ -12,6 +12,7 @@ import ua.flowerista.shop.repo.AddressRepository;
 import ua.flowerista.shop.repo.OrderItemRepository;
 import ua.flowerista.shop.repo.OrderRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,6 +28,7 @@ public class OrderService {
 
     public void updateStatus(Integer orderId, OrderStatus status) {
         orderRepository.updateStatus(orderId, status);
+        orderRepository.updateUpdatedDateTime(orderId, Instant.now());
     }
 
     public void updatePayId(Integer orderId, String payId) {
@@ -91,5 +93,9 @@ public class OrderService {
             entity.setId(id);
         }
         orderRepository.save(entity);
+    }
+
+    private void updateDateTimesWhenOrderUpdated(Order order) {
+        order.setUpdated(Instant.now());
     }
 }

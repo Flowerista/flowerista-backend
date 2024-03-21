@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class OrderMapper implements EntityMapper<Order, OrderDto>{
     private final OrderItemMapper orderItemMapper;
     private final AddressMapper addressMapper;
+    private final UserMapper userMapper;
     private final UserService userService;
     @Override
     public Order toEntity(OrderDto dto) {
@@ -26,6 +27,11 @@ public class OrderMapper implements EntityMapper<Order, OrderDto>{
                 .map(orderItemMapper::toEntity)
                 .collect(Collectors.toSet()));
         entity.setAddress(addressMapper.toEntity(dto.getAddress()));
+        entity.setTimeCreated(dto.getTimeCreated());
+        entity.setDateCreated(dto.getDateCreated());
+        if (dto.getUpdated() != null) {
+            entity.setUpdated(dto.getUpdated());
+        }
         return entity;
     }
 
@@ -35,12 +41,16 @@ public class OrderMapper implements EntityMapper<Order, OrderDto>{
         dto.setId(entity.getId());
         dto.setStatus(entity.getStatus());
         dto.setPayId(entity.getPayId());
+        dto.setUser(userMapper.toDto(entity.getUser()));
         dto.setUserId(entity.getUser().getId());
         dto.setSum(entity.getSum());
         dto.setOrderItems(entity.getOrderItems().stream()
                 .map(orderItemMapper::toDto)
                 .collect(Collectors.toSet()));
         dto.setAddress(addressMapper.toDto(entity.getAddress()));
+        dto.setTimeCreated(entity.getTimeCreated());
+        dto.setDateCreated(entity.getDateCreated());
+        dto.setUpdated(entity.getUpdated());
         return dto;
     }
 }
