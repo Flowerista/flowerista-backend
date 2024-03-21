@@ -27,8 +27,9 @@
                 </select></th>
             <th col-index=3>Address</th>
             <th col-index=4>Items</th>
-            <th col-index=5>Total price</th>
-            <th>Edit</th>
+            <th col-index=5>Date</th>
+            <th col-index=6>Total price</th>
+            <th>Details</th>
         </tr>
         </thead>
         <tbody>
@@ -36,18 +37,19 @@
             <td th:text="${order.id}" style="width: 5%"></td>
             <td th:text="${order.status}" style="width: 10%"></td>
             <td th:text="${order.address}" style="width: 35%"></td>
-            <td style="width: 40%">
+            <td style="width: 35%">
                 <ul>
-                    <li th:each="item : ${order.items}">
+                    <li th:each="item : ${order.orderItems}">
                         <span th:text="${item.name}"></span>
                         <span> - </span>
                         <span th:text="${item.quantity}"></span>
                     </li>
                 </ul>
             </td>
+            <td th:text="${order.dateCreated}" style="width: 5%"></td>
             <td th:text="${order.sum}" style="width: 5%"></td>
             <td style="width: 5%">
-                <a th:href="@{/api/admin/orders/{id}(id=${order.id})}">Edit</a>
+                <a th:href="@{/api/admin/orders/{id}(id=${order.id})}">Details</a>
             </td>
         </tr>
         </tbody>
