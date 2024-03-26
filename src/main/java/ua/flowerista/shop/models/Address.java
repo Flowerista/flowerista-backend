@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 public class Address {
-	
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -24,5 +24,7 @@ public class Address {
 	private String house;
 	private String entrance;
 	private String flat;
+	private String dateDelivery;
+	private String timeDelivery;
 
 }

@@ -19,7 +19,7 @@
                             <h3>Order Details</h3>
                             <p><strong>Order ID:</strong> <span th:text="${order.id}"></span></p>
                             <p><strong>Order Created:</strong> <span
-                                    th:text="${order.dateCreated} + ' ' + ${order.timeCreated}"></span></p>
+                                    th:text="${order.created} + ' ' + ${order.created}"></span></p>
                             <p><strong>Order Updated:</strong> <span th:text="${order.updated}"></span></p>
                             <p><strong>Order Status:</strong> <span th:text="${order.status}"></span></p>
                             <p><strong>Order Total:</strong> <span th:text="${order.sum}"></span></p>
@@ -30,6 +30,20 @@
                                     th:text="${order.user.firstName + ' ' + order.user.lastName}"></span></p>
                             <p><strong>Customer Email:</strong> <span th:text="${order.user.email}"></span></p>
                             <p><strong>Customer Phone:</strong> <span th:text="${order.user.phoneNumber}"></span></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h3>Shipping Address</h3>
+                        <div class="col-md-6">
+                            <p><strong>City:</strong> <span th:text="${order.address.city}"></span></p>
+                            <p><strong>Street:</strong> <span th:text="${order.address.street}"></span></p>
+                            <p><strong>House:</strong> <span th:text="${order.address.house}"></span></p>
+                            <p><strong>Entrance:</strong> <span th:text="${order.address.entrance}"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Flat:</strong> <span th:text="${order.address.flat}"></span></p>
+                            <p><strong>Date delivery:</strong> <span th:text="${order.address.dateDelivery}"></span></p>
+                            <p><strong>Time delivery:</strong> <span th:text="${order.address.timeDelivery}"></span></p>
                         </div>
                     </div>
                     <div class="row">

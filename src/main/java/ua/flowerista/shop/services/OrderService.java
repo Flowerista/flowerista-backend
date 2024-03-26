@@ -42,6 +42,7 @@ public class OrderService {
                 .collect(Collectors.toSet());
         order.setOrderItems(orderItems);
         order.setAddress(addressRepository.save(order.getAddress()));
+        order.setCreated(Instant.now());
         order = orderRepository.save(order);
         return orderRepository.save(order);
     }

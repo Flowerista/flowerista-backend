@@ -43,10 +43,8 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @Column(name = "date_created")
-    private String dateCreated;
-    @Column(name = "time_created")
-    private String timeCreated;
+    @Column(name = "created")
+    private Instant created;
     @Column(name = "updated")
     private Instant updated;
 

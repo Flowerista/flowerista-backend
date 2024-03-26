@@ -27,8 +27,7 @@ public class OrderMapper implements EntityMapper<Order, OrderDto>{
                 .map(orderItemMapper::toEntity)
                 .collect(Collectors.toSet()));
         entity.setAddress(addressMapper.toEntity(dto.getAddress()));
-        entity.setTimeCreated(dto.getTimeCreated());
-        entity.setDateCreated(dto.getDateCreated());
+        entity.setCreated(dto.getCreated());
         if (dto.getUpdated() != null) {
             entity.setUpdated(dto.getUpdated());
         }
@@ -48,8 +47,7 @@ public class OrderMapper implements EntityMapper<Order, OrderDto>{
                 .map(orderItemMapper::toDto)
                 .collect(Collectors.toSet()));
         dto.setAddress(addressMapper.toDto(entity.getAddress()));
-        dto.setTimeCreated(entity.getTimeCreated());
-        dto.setDateCreated(entity.getDateCreated());
+        dto.setCreated(entity.getCreated());
         dto.setUpdated(entity.getUpdated());
         return dto;
     }

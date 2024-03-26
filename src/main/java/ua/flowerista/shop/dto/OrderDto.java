@@ -28,9 +28,6 @@ public class OrderDto implements Serializable {
     private Set<OrderItemDto> orderItems;
     private AddressDto address;
     private UserDto user;
-    @JsonProperty("date")
-    private String dateCreated;
-    @JsonProperty("time")
-    private String timeCreated;
+    private Instant created;
     private Instant updated;
 }

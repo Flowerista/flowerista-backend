@@ -16,6 +16,8 @@ public class AddressMapper implements EntityMapper<Address, AddressDto> {
 		entity.setHouse(dto.getHouse());
 		entity.setEntrance(dto.getEntrance());
 		entity.setFlat(dto.getFlat());
+		entity.setDateDelivery(dto.getDateDelivery());
+		entity.setTimeDelivery(dto.getTimeDelivery());
 		return entity;
 	}
 
@@ -27,6 +29,8 @@ public class AddressMapper implements EntityMapper<Address, AddressDto> {
 		dto.setHouse(entity.getHouse());
 		dto.setEntrance(entity.getEntrance());
 		dto.setFlat(entity.getFlat());
+		dto.setDateDelivery(entity.getDateDelivery());
+		dto.setTimeDelivery(entity.getTimeDelivery());
 		return dto;
 	}
 

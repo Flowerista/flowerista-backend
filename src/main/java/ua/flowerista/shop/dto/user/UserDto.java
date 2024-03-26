@@ -1,5 +1,7 @@
 package ua.flowerista.shop.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -41,7 +43,7 @@ public class UserDto {
 
 	@Size(min = 9, max = 9, message = "Phone number should be exact 9 characters.")
 	private int phoneNumber;
-
+	@JsonIgnore
 	private String role;
 
 }
