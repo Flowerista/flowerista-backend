@@ -13,7 +13,6 @@ import ua.flowerista.shop.models.QFlower;
 
 @Repository
 public interface FlowerRepository extends JpaRepository<Flower, Integer>, QuerydslPredicateExecutor<Flower>, QuerydslBinderCustomizer<QFlower>{
-
     @Override
     default void customize(QuerydslBindings bindings, QFlower root) {
         bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) (path, s) -> path.equalsIgnoreCase(s));

@@ -51,7 +51,6 @@ public class FlowerService {
 									  Pageable pageable) {
 		return repo.findAll(predicate, pageable);
 	}
-
 	public Optional<Flower> getFlower(Integer id) {
 		return repo.findById(id);
 	}
