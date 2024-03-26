@@ -11,7 +11,7 @@ import ua.flowerista.shop.models.User;
 
 @Component
 public class UserMapper implements EntityMapper<User, UserDto> {
-	
+
 	@Autowired
 	private AddressMapper addressMapper;
 
@@ -36,9 +36,9 @@ public class UserMapper implements EntityMapper<User, UserDto> {
 		dto.setEmail(entity.getEmail());
 		dto.setPhoneNumber(Integer.valueOf(entity.getPhoneNumber()));
 		dto.setRole(entity.getRole().toString());
-		return null;
+		return dto;
 	}
-	
+
 	public User toEntity (UserRegistrationBodyDto dto) {
 		User user = new User();
 		user.setFirstName(dto.getFirstName());
@@ -48,7 +48,7 @@ public class UserMapper implements EntityMapper<User, UserDto> {
 		user.setPhoneNumber(String.valueOf(dto.getPhoneNumber()));
 		return user;
 	}
-	
+
 	public UserProfileDto toProfileDto(User entity) {
 		UserProfileDto dto = new UserProfileDto();
 		dto.setEmail(entity.getEmail());

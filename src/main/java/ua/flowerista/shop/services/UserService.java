@@ -252,4 +252,7 @@ public class UserService {
 		return passToken.getExpiryDate().before(cal.getTime());
 	}
 
+    public User getUserById(Integer userId) {
+		return repository.findById(userId).orElse(null);
+    }
 }

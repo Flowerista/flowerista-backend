@@ -10,6 +10,91 @@
 <body>
 <main layout:fragment="main">
     <!--    TODO: Order view page with ability to modify status-->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div th:if="${order}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Order Details</h3>
+                            <p><strong>Order ID:</strong> <span th:text="${order.id}"></span></p>
+                            <p><strong>Order Created:</strong> <span
+                                    th:text="${order.created} + ' ' + ${order.created}"></span></p>
+                            <p><strong>Order Updated:</strong> <span th:text="${order.updated}"></span></p>
+                            <p><strong>Order Status:</strong> <span th:text="${order.status}"></span></p>
+                            <p><strong>Order Total:</strong> <span th:text="${order.sum}"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h3>Customer Details</h3>
+                            <p><strong>Customer Name:</strong> <span
+                                    th:text="${order.user.firstName + ' ' + order.user.lastName}"></span></p>
+                            <p><strong>Customer Email:</strong> <span th:text="${order.user.email}"></span></p>
+                            <p><strong>Customer Phone:</strong> <span th:text="${order.user.phoneNumber}"></span></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h3>Shipping Address</h3>
+                        <div class="col-md-6">
+                            <p><strong>City:</strong> <span th:text="${order.address.city}"></span></p>
+                            <p><strong>Street:</strong> <span th:text="${order.address.street}"></span></p>
+                            <p><strong>House:</strong> <span th:text="${order.address.house}"></span></p>
+                            <p><strong>Entrance:</strong> <span th:text="${order.address.entrance}"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Flat:</strong> <span th:text="${order.address.flat}"></span></p>
+                            <p><strong>Date delivery:</strong> <span th:text="${order.address.dateDelivery}"></span></p>
+                            <p><strong>Time delivery:</strong> <span th:text="${order.address.timeDelivery}"></span></p>
+                            <p><strong>Type delivery:</strong> <span th:text="${order.address.typeDelivery}"></span></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Order Items</h3>
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Size</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="item : ${order.orderItems}">
+                                    <td th:text="${item.name}"></td>
+                                    <td th:text="${item.size}"></td>
+                                    <td th:text="${item.quantity}"></td>
+                                    <td th:text="${item.price}"></td>
+                                    <td th:text="${item.price * item.quantity}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container d-print-none">
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Order Actions</h3>
+                <form th:action="@{/api/admin/orders/{id}/status(id=${order.id})}" method="post">
+                    <div class="form-group">
+                        <label for="status">Order Status</label>
+                        <select class="form-control" id="status" name="status">
+                            <option th:each="statuse : ${statuses}"
+                                    th:value="${statuse}"
+                                    th:text="${statuse}">
+                            </option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </main>
 </body>
 </html>

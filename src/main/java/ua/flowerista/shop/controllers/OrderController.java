@@ -60,7 +60,7 @@ public class OrderController {
             return ResponseEntity.badRequest().body("Order not found");
         }
         Integer requestUserId = getPrincipalUser(connectedUser).getId();
-        if (!order.get().getUserId().equals(requestUserId)) {
+        if (!order.get().getUser().getId().equals(requestUserId)) {
             return ResponseEntity.status(403).body("You are not allowed to see this order");
         }
         return ResponseEntity.ok(orderMapper.toDto(order.get()));
@@ -84,7 +84,7 @@ public class OrderController {
         }
         Integer requestUserId = getPrincipalUser(connectedUser).getId();
         Optional<Order> savedOrder = orderService.getOrder(id);
-        if (!savedOrder.get().getUserId().equals(requestUserId)) {
+        if (!savedOrder.get().getUser().getId().equals(requestUserId)) {
             return ResponseEntity.status(403).body("You are not allowed to update this order");
         }
         order.setUserId(getPrincipalUser(connectedUser).getId());

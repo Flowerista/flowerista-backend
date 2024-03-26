@@ -15,6 +15,7 @@ import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderStatus;
 import ua.flowerista.shop.models.QOrder;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -40,4 +41,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer>, Querydsl
     @Transactional
     @Query("update Order o set o.status = :status where o.payId = :payId")
     void updateStatusByPayId(@Param("payId") String payId, @Param("status") OrderStatus status);
+    @Modifying
+    @Transactional
+    @Query("update Order o set o.updated = :now where o.id = :orderId")
+    void updateUpdatedDateTime(Integer orderId, Instant now);
 }

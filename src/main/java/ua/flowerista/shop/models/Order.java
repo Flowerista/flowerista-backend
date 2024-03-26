@@ -9,6 +9,7 @@ import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
 
@@ -29,8 +30,6 @@ public class Order {
     private OrderStatus status;
     @Column(name = "pay_id")
     private String payId;
-    @Column(name = "user_id")
-    private Integer userId;
     @Column(name = "sum")
     BigInteger sum;
     @Column(name = "currency")
@@ -41,6 +40,13 @@ public class Order {
     private Set<OrderItem> orderItems;
     @OneToOne
     private Address address;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+    @Column(name = "created")
+    private Instant created;
+    @Column(name = "updated")
+    private Instant updated;
 
     @Override
     public final boolean equals(Object o) {
