@@ -26,5 +26,6 @@ public class Address {
 	private String flat;
 	private String dateDelivery;
 	private String timeDelivery;
+	private String typeDelivery;
 
 }

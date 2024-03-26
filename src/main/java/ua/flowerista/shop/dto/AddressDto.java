@@ -30,6 +30,8 @@ public class AddressDto {
 	private String dateDelivery;
 	@JsonProperty("time")
 	private String timeDelivery;
+	@JsonProperty("type")
+	private String typeDelivery;
 
 	@Override
 	public String toString() {
