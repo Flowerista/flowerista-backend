@@ -1,4 +1,4 @@
-package ua.flowerista.shop.controllers;
+package ua.flowerista.shop.controllers.adminPanel;
 
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import ua.flowerista.shop.services.OrderService;
 @Controller
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-public class AdminPanelController {
+public class OrderAPController {
     private final OrderService orderService;
     private final OrderMapper orderMapper;
 
