@@ -65,48 +65,6 @@
             }
         });
     });
-
-    function handleDoubleClick(event) {
-        var target = event.target;
-        if (target.classList.contains('flower-name')) {
-            var flowerId = target.parentElement.querySelector('td:first-child').textContent.trim();
-            var oldName = target.textContent.trim();
-
-            var inputField = document.createElement('input');
-            inputField.setAttribute('type', 'text');
-            inputField.setAttribute('value', oldName);
-
-            target.textContent = '';
-            target.appendChild(inputField);
-
-            inputField.focus();
-
-            inputField.addEventListener('keyup', function(event) {
-                if (event.key === 'Enter') {
-                    var newName = inputField.value.trim();
-
-                    updateFlowerName(flowerId, newName);
-
-                    target.textContent = newName;
-                }
-            });
-        }
-    }
-    function updateFlowerName(flowerId, newName) {
-        $.ajax({
-            url: '/api/admin/flowers',
-            type: 'PATCH',
-            contentType: 'application/json',
-            data: JSON.stringify({ id: flowerId, name: newName }),
-            success: function(response) {
-                console.log('Flower name updated successfully:', response);
-            },
-            error: function(xhr, status, error) {
-                console.error('Failed to update flower name:', error);
-            }
-        });
-    }
-    document.getElementById('emp-table').addEventListener('dblclick', handleDoubleClick);
 </script>
 </body>
 </html>
