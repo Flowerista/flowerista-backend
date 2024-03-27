@@ -36,11 +36,17 @@ public class FlowerAPController {
     }
 
     @GetMapping("/{id}")
-    public ModelAndView getFlowerById(@PathVariable Integer id) {
+    public ModelAndView getFlowerById(@PathVariable int id) {
         ModelAndView result = new ModelAndView("admin/flowers/flowerView");
         FlowerDto flower = flowerMapper.toDto(flowerService.getFlower(id).orElseThrow());
         result.addObject("flower", flower);
         return result;
+    }
+
+    @PostMapping("/{id}")
+    public ModelAndView changeFlowerName(@PathVariable int id, @RequestParam("inputName") String flowerName) {
+        flowerService.update(new FlowerDto(id, flowerName));
+        return new ModelAndView("redirect:/api/admin/flowers/" + id);
     }
 
 }
