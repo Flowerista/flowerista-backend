@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bouquets</title>
+    <script type="text/javascript" th:src="@{/js/filter.js}"></script>
+</head>
+<body>
+<main layout:fragment="main">
+    <div th:if="${#lists.isEmpty(bouquets)}">
+        <h3> Bouquets list is empty </h3>
+    </div>
+    <div style="display: flex; justify-content: space-between">
+        <h3>
+            Total bouquets - <span th:text="${bouquets.totalElements}"></span> pcs.
+        </h3>
+        <input type="text" name="bouquetName" id="searchInput" class="form-control" placeholder="Search by bouquet name"
+               style="width: 20%">
+    </div>
+    <table id="emp-table" class="table table-striped">
+        <thead>
+        <tr>
+            <th col-index=1>Id</th>
+            <th col-index=2>Name</th>
+            <th col-index=3>Quantity</th>
+            <th col-index=4>Flowers
+                <select class="table-filter" id="flowerFilter" onchange="filterRows()">
+                    <option value="all"></option>
+                </select></th>
+            <th col-index=4>Colors
+                <select class="table-filter" id="colorFilter" onchange="filterRows()">
+                    <option value="all"></option>
+                </select></th>
+            <th>Details</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="bouquet : ${bouquets.content}">
+            <td th:text="${bouquet.id}" style="width: 5%"></td>
+            <td th:text="${bouquet.name}" style="width: 10%"></td>
+            <td th:text="${bouquet.quantity}" style="width: 10%"></td>
+            <td style="width: 25%">
+                <ul>
+                    <li th:each="item : ${bouquet.flowers}">
+                        <span th:text="${item.name}"></span>
+                    </li>
+                </ul>
+            </td>
+            <td style="width: 25%">
+                <ul>
+                    <li th:each="item : ${bouquet.colors}">
+                        <span th:text="${item.name}"></span>
+                    </li>
+                </ul>
+            </td>
+            <td style="width: 5%">
+                <a th:href="@{/api/admin/bouqets/{id}(id=${bouquet.id})}">Details</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination justify-content-center">
+            <li th:each="i: ${#numbers.sequence(0, bouquets.totalPages - 1)}" class="page-item"><a class="page-link"
+                                                                                                   th:href="@{/api/admin/bouquets?page={page}(page=${i})}"
+                                                                                                   th:text="${i}"></a>
+            </li>
+        </ul>
+    </nav>
+</main>
+<script layout:fragment="script">
+    var searchInput = document.getElementById('searchInput');
+
+    searchInput.addEventListener('keyup', function () {
+        var query = searchInput.value.trim().toLowerCase();
+
+        fetch('/api/admin/bouquets?search=' + query)
+            .then(response => response.text())
+            .then(html => {
+                var parser = new DOMParser();
+                var newDocument = parser.parseFromString(html, 'text/html');
+                var newTable = newDocument.querySelector('#emp-table');
+
+                document.querySelector('#emp-table tbody').innerHTML = newTable.querySelector('tbody').innerHTML;
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    function filterRows() {
+        var selectedFlower = document.querySelector('#flowerFilter').value.trim().toLowerCase();
+        var selectedColor = document.querySelector('#colorFilter').value.trim().toLowerCase();
+        var rows = document.querySelectorAll('#emp-table tbody tr');
+
+        rows.forEach(function (row) {
+            var bouquetFlowers = Array.from(row.querySelectorAll('td:nth-child(4) span')).map(function (flower) {
+                return flower.textContent.trim().toLowerCase();
+            });
+            var bouquetColors = Array.from(row.querySelectorAll('td:nth-child(5) span')).map(function (color) {
+                return color.textContent.trim().toLowerCase();
+            });
+
+            if ((selectedFlower === 'all' || bouquetFlowers.includes(selectedFlower)) &&
+                (selectedColor === 'all' || bouquetColors.includes(selectedColor))) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function extractUniqueFlowersAndColors() {
+        var flowerSet = new Set();
+        var colorSet = new Set();
+        var rows = document.querySelectorAll('#emp-table tbody tr');
+
+        rows.forEach(function (row) {
+            var flowers = row.querySelectorAll('td:nth-child(4) span');
+            flowers.forEach(function (flower) {
+                flowerSet.add(flower.textContent.trim());
+            });
+
+            var colors = row.querySelectorAll('td:nth-child(5) span');
+            colors.forEach(function (color) {
+                colorSet.add(color.textContent.trim());
+            });
+        });
+
+        return {
+            flowers: Array.from(flowerSet),
+            colors: Array.from(colorSet)
+        };
+    }
+
+    function populateSelect() {
+        var uniqueFlowersAndColors = extractUniqueFlowersAndColors();
+
+        // Populate flowers select
+        var flowerSelect = document.querySelector('#flowerFilter');
+        uniqueFlowersAndColors.flowers.forEach(function (flower) {
+            var option = document.createElement('option');
+            option.value = flower;
+            option.textContent = flower;
+            flowerSelect.appendChild(option);
+        });
+
+        // Populate colors select
+        var colorSelect = document.querySelector('#colorFilter');
+        uniqueFlowersAndColors.colors.forEach(function (color) {
+            var option = document.createElement('option');
+            option.value = color;
+            option.textContent = color;
+            colorSelect.appendChild(option);
+        });
+    }
+
+    // Call populateSelect when the document is loaded
+    document.addEventListener('DOMContentLoaded', function () {
+        populateSelect();
+    });
+</script>
+
+</body>
+</html>
