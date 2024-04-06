@@ -6,7 +6,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Bouquets</title>
-    <script type="text/javascript" th:src="@{/js/filter.js}"></script>
 </head>
 <body>
 <main layout:fragment="main">
@@ -17,8 +16,11 @@
         <h3>
             Total bouquets - <span th:text="${bouquets.totalElements}"></span> pcs.
         </h3>
-        <input type="text" name="bouquetName" id="searchInput" class="form-control" placeholder="Search by bouquet name"
-               style="width: 20%">
+        <form th:action="@{/api/admin/bouquets}" method="get" style="display: flex; width: 35%">
+            <input type="text" name="bouquetName" id="searchInput" class="form-control"
+                   placeholder="Search by bouquet name">
+            <button type="submit" class="btn btn-primary" style="margin: 0 2%">Search</button>
+        </form>
     </div>
     <table id="emp-table" class="table table-striped">
         <thead>
@@ -73,23 +75,6 @@
     </nav>
 </main>
 <script layout:fragment="script">
-    var searchInput = document.getElementById('searchInput');
-
-    searchInput.addEventListener('keyup', function () {
-        var query = searchInput.value.trim().toLowerCase();
-
-        fetch('/api/admin/bouquets?search=' + query)
-            .then(response => response.text())
-            .then(html => {
-                var parser = new DOMParser();
-                var newDocument = parser.parseFromString(html, 'text/html');
-                var newTable = newDocument.querySelector('#emp-table');
-
-                document.querySelector('#emp-table tbody').innerHTML = newTable.querySelector('tbody').innerHTML;
-            })
-            .catch(error => console.error('Error:', error));
-    });
-
     function filterRows() {
         var selectedFlower = document.querySelector('#flowerFilter').value.trim().toLowerCase();
         var selectedColor = document.querySelector('#colorFilter').value.trim().toLowerCase();

@@ -27,10 +27,11 @@ public class BouqueteAPController {
     public ModelAndView getBouqets(@QuerydslPredicate(root = Bouquete.class) Predicate predicate,
                                    @RequestParam(name = "page", defaultValue = "0", required = false) Integer page,
                                    @RequestParam(name = "size", defaultValue = "10", required = false) Integer size,
-                                   @RequestParam(name = "search", required = false) String searchQuery) {
+                                   @RequestParam(name = "bouquetName",  defaultValue = "", required = false) String name) {
+        System.out.println(name);
         Page<BouqueteDto> bouquets;
-        if (searchQuery != null && !searchQuery.isEmpty()) {
-            bouquets = bouqueteService.searchBouquetsByName(searchQuery, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")))
+        if (!name.equals("")) {
+            bouquets = bouqueteService.searchBouquetsByName(name, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")))
                     .map(bouqueteMapper::toDto);
         } else {
             bouquets = bouqueteService.getAllBouquetes(predicate, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")))
