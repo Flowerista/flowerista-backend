@@ -1,5 +1,6 @@
 package ua.flowerista.shop.services;
 
+import com.querydsl.core.types.Predicate;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -137,5 +138,14 @@ public class BouqueteService {
 
 	public boolean isBouqueteAvailableForSale(Integer productId) {
 		return repo.isBouqueteAvailableForSale(productId);
+	}
+
+	public Page<Bouquete> getAllBouquetes(Predicate predicate,
+										  Pageable pageable) {
+		return repo.findAll(predicate, pageable);
+	}
+
+	public Page<Bouquete> searchBouquetsByName(String name, Pageable pageable) {
+		return repo.findByNameContainingIgnoreCase(name, pageable);
 	}
 }

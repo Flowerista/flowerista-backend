@@ -2,17 +2,28 @@ package ua.flowerista.shop.repo;
 
 import java.util.List;
 
+import com.querydsl.core.types.dsl.StringPath;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
+import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.querydsl.binding.SingleValueBinding;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import ua.flowerista.shop.models.Bouquete;
+import ua.flowerista.shop.models.QBouquete;
 
 @Repository
-public interface BouqueteRepository extends JpaRepository<Bouquete, Integer> {
+public interface BouqueteRepository extends JpaRepository<Bouquete, Integer>, QuerydslPredicateExecutor<Bouquete>, QuerydslBinderCustomizer<QBouquete> {
+
+	@Override
+	default void customize(QuerydslBindings bindings, QBouquete root) {
+		bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) (path, s) -> path.containsIgnoreCase(s));
+	}
 
 	List<Bouquete> findTop5ByOrderBySoldQuantityDesc();
 
@@ -48,4 +59,6 @@ public interface BouqueteRepository extends JpaRepository<Bouquete, Integer> {
 
 	@Query("SELECT COUNT(b) > 0 FROM Bouquete b WHERE b.id = :productId and b.quantity > 0")
 	Boolean isBouqueteAvailableForSale(Integer productId);
+
+	Page<Bouquete> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }
