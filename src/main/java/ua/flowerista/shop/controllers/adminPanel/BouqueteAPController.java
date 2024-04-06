@@ -28,7 +28,6 @@ public class BouqueteAPController {
                                    @RequestParam(name = "page", defaultValue = "0", required = false) Integer page,
                                    @RequestParam(name = "size", defaultValue = "10", required = false) Integer size,
                                    @RequestParam(name = "bouquetName",  defaultValue = "", required = false) String name) {
-        System.out.println(name);
         Page<BouqueteDto> bouquets;
         if (!name.equals("")) {
             bouquets = bouqueteService.searchBouquetsByName(name, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")))
