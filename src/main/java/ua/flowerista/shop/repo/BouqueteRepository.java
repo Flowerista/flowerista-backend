@@ -22,7 +22,7 @@ public interface BouqueteRepository extends JpaRepository<Bouquete, Integer>, Qu
 
 	@Override
 	default void customize(QuerydslBindings bindings, QBouquete root) {
-		bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) (path, s) -> path.equalsIgnoreCase(s));
+		bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) (path, s) -> path.containsIgnoreCase(s));
 	}
 
 	List<Bouquete> findTop5ByOrderBySoldQuantityDesc();
