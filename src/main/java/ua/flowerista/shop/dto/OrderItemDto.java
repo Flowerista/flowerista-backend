@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * DTO for {@link ua.flowerista.shop.models.OrderItem}
@@ -24,4 +25,6 @@ public class OrderItemDto implements Serializable {
     String size;
     @PositiveOrZero(message = "Price must be not less than 0")
     BigInteger price;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Map<Integer, String> imageUrls;
 }

@@ -38,6 +38,7 @@ public class OrderItemMapper implements EntityMapper<OrderItem, OrderItemDto> {
         dto.setSizeId(entity.getSize().getId());
         dto.setSize(entity.getSize().getSize().name());
         dto.setPrice(entity.getPrice());
+        dto.setImageUrls(entity.getBouquete().getImageUrls());
         return dto;
     }
 }
