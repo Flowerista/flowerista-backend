@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bouquet</title>
+    <style>
+        .table-image {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-head {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .row {
+            margin: 3% 0;
+        }
+    </style>
+</head>
+<body>
+<main layout:fragment="main">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3>Bouquet Images</h3>
+                        <table class="table table-striped table-image">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="table-head" th:each="image : ${bouquet.imageUrls}">
+                                <td th:text="${image.getKey()}"></td>
+                                <td class="text-center"><img th:src="${image.getValue()}" style="max-width: 40%"></td>
+                                <td>
+                                    <button class="delete-btn btn btn-primary" th:data-bouquet-id="${bouquet.id}"
+                                            th:data-image-id="${image.getKey()}">Delete
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <form th:action="@{/api/admin/bouquets/image/{id}(id=${bouquet.id})}" method="post"
+                              id="uploadForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="imageInput" class="form-label">Choose Image(s)</label>
+                                <input type="file" id="imageInput" name="images" multiple class="form-control">
+                            </div>
+                            <button class="btn btn-primary" type="submit">Upload</button>
+                        </form>
+                    </div>
+                </div>
+
+                <form id="bouquetForm">
+                    <div th:if="${bouquet}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h3>Bouquet Details</h3>
+                                <p><strong>Bouquet ID: </strong><input id="id" class="form-control" th:type="number"
+                                                                       th:name="id"
+                                                                       th:value="${bouquet.id}" disabled/></p>
+                                <p><strong>Bouquet Item Code: </strong><input id="itemCode" class="form-control" th:type="text"
+                                                                              th:name="itemCode"
+                                                                              th:value="${bouquet.itemCode}"/></p>
+                                <p><strong>Bouquet Name: </strong><input id="name" class="form-control" th:type="text"
+                                                                         th:name="name" th:value="${bouquet.name}"/></p>
+                                <p><strong>Bouquet Quantity: </strong><input id="quantity" class="form-control" th:type="text"
+                                                                             th:name="quantity"
+                                                                             th:value="${bouquet.quantity}"/></p>
+                                <p><strong>Bouquet Sold Quantity: </strong><input id="soldQuantity" class="form-control" th:type="text"
+                                                                                  th:name="soldQuantity"
+                                                                                  th:value="${bouquet.soldQuantity}"
+                                                                                  disabled/>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h3>Bouquet flowers</h3>
+                                <table id="flowerTable" class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="item : ${bouquet.flowers}">
+                                        <td class="flowerId" th:text="${item.id}"></td>
+                                        <td><select class="form-control" name="flower_name">
+                                            <option th:each="flower : ${item}"
+                                                    th:value="${flower.getId()}"
+                                                    th:text="${flower.getName()}" selected>
+                                            </option>
+                                            <option th:each="flower : ${flowers}"
+                                                    th:unless="${flower.getName() == item.getName()}"
+                                                    th:value="${flower.getId()}"
+                                                    th:text="${flower.getName()}">
+                                            </option>
+                                        </select></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h3>Bouquet colors</h3>
+                                <table id="colorTable" class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="item : ${bouquet.colors}">
+                                        <td class="flowerId" th:text="${item.id}"></td>
+                                        <td><select class="form-control" name="color_name">
+                                            <option th:each="color : ${item}"
+                                                    th:value="${color.getId()}"
+                                                    th:text="${color.getName()}" selected>
+                                            </option>
+                                            <option th:each="color : ${colors}"
+                                                    th:unless="${color.getName() == item.getName()}"
+                                                    th:value="${color.getId()}"
+                                                    th:text="${color.getName()}">
+                                            </option>
+                                        </select></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h3>Bouquet sizes</h3>
+                                <table id="sizesTable" class="table table-stripped">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Sizes</th>
+                                        <th>Default Price</th>
+                                        <th>Is Sale</th>
+                                        <th>Discount</th>
+                                        <th>Discount Price</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="item : ${bouquet.sizes}">
+                                        <td class="sizeId" th:text="${item.id}"></td>
+                                        <td class="sizeName" th:text="${item.size.name()}"></td>
+                                        <td><input class="form-control defaultPrice" th:type="number"
+                                                   th:name="defaultPrice"
+                                                   th:value="${item.defaultPrice}"/></td>
+                                        <td>
+                                            <select class="form-control isSale" name="isSale">
+                                                <option value="true" th:if="${item.isSale}" selected>true</option>
+                                                <option value="false" th:if="${!item.isSale}" selected>false</option>
+                                                <option value="true" th:if="${!item.isSale}">true</option>
+                                                <option value="false" th:if="${item.isSale}">false</option>
+                                            </select>
+                                        </td>
+                                        <td><input class="form-control discountPercentage" th:type="number"
+                                                   th:name="discount"
+                                                   th:value="${item.discount}"/></td>
+                                        <td><input class="form-control discountPrice" th:type="number"
+                                                   th:name="discountPrice"
+                                                   th:value="${item.discountPrice}"/>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <button class="btn btn-primary" id="submitFormBtn">Update all data</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<script layout:fragment="script">
+    // Add event listeners to discount percentage fields to detect changes
+    document.querySelectorAll('#sizesTable tbody .discountPercentage').forEach(function(discountInput) {
+        discountInput.addEventListener('change', function() {
+            // Retrieve the parent row (tr element) of the discount percentage field
+            var row = this.closest('tr');
+            // Get the default price and discount price elements within the same row
+            var defaultPriceInput = row.querySelector('.defaultPrice');
+            var discountPriceInput = row.querySelector('.discountPrice');
+
+            // Calculate new discount price based on the changed discount percentage
+            var discount = parseFloat(this.value);
+            var defaultPrice = parseFloat(defaultPriceInput.value);
+            var discountedPrice = defaultPrice * (1 - (discount / 100));
+
+            // Update the discount price field value
+            discountPriceInput.value = Math.round(discountedPrice);
+
+            // Calculate and update the discount percentage field value
+            var discountPercentage = Math.round(((defaultPrice - discountedPrice) / defaultPrice) * 100);
+            row.querySelector('.discountPercentage').value = discountPercentage;
+
+            // Log the line number of the changed field
+            var lineNumber = Array.from(row.parentNode.children).indexOf(row) + 1;
+            console.log('Discount percentage changed in row ' + lineNumber);
+        });
+    });
+
+    // Add event listeners to discount price fields to detect changes
+    document.querySelectorAll('#sizesTable tbody .discountPrice').forEach(function(discountPriceInput) {
+        discountPriceInput.addEventListener('change', function() {
+            // Retrieve the parent row (tr element) of the discount price field
+            var row = this.closest('tr');
+            // Get the default price and discount percentage elements within the same row
+            var defaultPriceInput = row.querySelector('.defaultPrice');
+            var discountInput = row.querySelector('.discountPercentage');
+
+            // Calculate new discount percentage based on the changed discount price
+            var defaultPrice = parseFloat(defaultPriceInput.value);
+            var discountedPrice = parseFloat(this.value);
+            var discountPercentage = Math.round(((defaultPrice - discountedPrice) / defaultPrice) * 100);
+
+            // Update the discount percentage field value
+            discountInput.value = discountPercentage;
+
+            // Log the line number of the changed field
+            var lineNumber = Array.from(row.parentNode.children).indexOf(row) + 1;
+            console.log('Discount price changed in row ' + lineNumber);
+        });
+    });
+
+
+    // Add event listeners to default price fields to detect changes
+    document.querySelectorAll('#sizesTable tbody .defaultPrice').forEach(function(defaultPriceInput) {
+        defaultPriceInput.addEventListener('change', function() {
+            // Retrieve the parent row (tr element) of the default price field
+            var row = this.closest('tr');
+            // Get the discount percentage and discount price elements within the same row
+            var discountInput = row.querySelector('.discountPercentage');
+            var discountPriceInput = row.querySelector('.discountPrice');
+
+            // Calculate new discount price based on the changed default price
+            var defaultPrice = parseFloat(this.value);
+            var discount = parseFloat(discountInput.value);
+            var discountedPrice = defaultPrice * (1 - (discount / 100));
+
+            // Update the discount price field value
+            discountPriceInput.value = Math.round(discountedPrice);
+
+            // Log the line number of the changed field
+            var lineNumber = Array.from(row.parentNode.children).indexOf(row) + 1;
+            console.log('Default price changed in row ' + lineNumber);
+        });
+    });
+
+
+    // Add event listeners to isSale fields to detect changes
+    document.querySelectorAll('#sizesTable tbody .isSale').forEach(function(isSaleSelect) {
+        isSaleSelect.addEventListener('change', function() {
+            // Retrieve the parent row (tr element) of the isSale field
+            var row = this.closest('tr');
+            // Get the default price, discount percentage, and discount price elements within the same row
+            var defaultPriceInput = row.querySelector('.defaultPrice');
+            var discountInput = row.querySelector('.discountPercentage');
+            var discountPriceInput = row.querySelector('.discountPrice');
+
+            // Check if isSale is true or false
+            var isSaleValue = this.value === 'true';
+
+            // Update discount fields based on isSale value
+            if (isSaleValue) {
+                // Set discount percentage to 0
+                discountInput.value = '0';
+                // Set discount price to default price
+                discountPriceInput.value = defaultPriceInput.value;
+            } else {
+                // Clear discount percentage
+                discountInput.value = '';
+                // Clear discount price
+                discountPriceInput.value = '';
+            }
+
+            // Log the line number of the changed field
+            var lineNumber = Array.from(row.parentNode.children).indexOf(row) + 1;
+            console.log('isSale field changed in row ' + lineNumber);
+        });
+    });
+
+    // Changing the ID of a flower after changing its name
+    document.querySelectorAll('#flowerTable select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            // Get the selected flower's ID from the selected option
+            var selectedFlowerId = this.value;
+
+            // Find the corresponding <td> element with class "flowerId" in the same row
+            var flowerIdCell = this.closest('tr').querySelector('.flowerId');
+
+            // Update the content of the <td> element with the selected flower's ID
+            flowerIdCell.textContent = selectedFlowerId;
+        });
+    });
+
+    // Changing the ID color after changing its name
+    document.querySelectorAll('#colorTable select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            // Get the selected color's ID from the value of the selected option
+            var selectedColorId = this.value;
+
+            // Find the corresponding <td> element with class "flowerId" in the same row
+            var colorIdCell = this.closest('tr').querySelector('.flowerId');
+
+            // Update the content of the <td> element with the selected color's ID
+            colorIdCell.textContent = selectedColorId;
+        });
+    });
+
+    // Handling the entire form submit event
+    document.getElementById("submitFormBtn").addEventListener("click", function (event) {
+        event.preventDefault();
+
+        var bouquetDto = {
+            id: parseInt(document.getElementById("id").value),
+            itemCode: document.getElementById("itemCode").value,
+            name: document.getElementById("name").value,
+            quantity: parseInt(document.getElementById("quantity").value),
+            soldQuantity: parseInt(document.getElementById("soldQuantity").value),
+            flowers: [],
+            colors: [],
+            sizes: []
+        };
+
+        // Extract flower data from table
+        var flowerRows = document.querySelectorAll("#flowerTable tbody tr");
+        flowerRows.forEach(function (row) {
+            var id = parseInt(row.querySelector(".flowerId").textContent);
+            var name = row.querySelector("select[name='flower_name'] option:checked").textContent;
+            bouquetDto.flowers.push({ id: id, name: name });
+        });
+
+        var colorRows = document.querySelectorAll("#colorTable tbody tr");
+        colorRows.forEach(function (row) {
+            var id = parseInt(row.querySelector(".flowerId").textContent);
+            var name = row.querySelector("select[name='color_name'] option:checked").textContent;
+            bouquetDto.colors.push({ id: id, name: name });
+        });
+
+        var sizeRows = document.querySelectorAll("#sizesTable tbody tr");
+        sizeRows.forEach(function (row) {
+            var id = parseInt(row.querySelector(".sizeId").textContent);
+            var size = row.querySelector(".sizeName").textContent;
+            var defaultPrice = parseFloat(row.querySelector("input[name='defaultPrice']").value);
+            var isSale = row.querySelector("select[name='isSale']").value === 'true';
+            var discount = parseFloat(row.querySelector("input[name='discount']").value);
+            var discountPrice = parseFloat(row.querySelector("input[name='discountPrice']").value);
+
+            bouquetDto.sizes.push({ id: id, size: size.toUpperCase(), defaultPrice: defaultPrice, isSale: isSale, discount: discount, discountPrice: discountPrice });
+        });
+
+        sendDataToController(bouquetDto);
+    });
+
+    function sendDataToController(bouquetDto) {
+        // AJAX request to send bouquetDto to the controller
+        var xhr = new XMLHttpRequest();
+        var url = "/api/admin/bouquets/" + bouquetDto.id;
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    console.log("Data sent successfully");
+                    window.location.reload();
+                } else {
+                    console.error("Error:", xhr.status);
+                }
+            }
+        };
+
+        xhr.send(JSON.stringify(bouquetDto));
+    }
+
+    // Submitting a request to remove a photo
+    document.addEventListener("DOMContentLoaded", function () {
+        const deleteButtons = document.querySelectorAll(".delete-btn");
+
+        deleteButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                const bouquetId = this.getAttribute("data-bouquet-id");
+                const imageId = this.getAttribute("data-image-id");
+
+                // Confirm before sending the delete request
+                if (confirm("Are you sure you want to delete this image?")) {
+                    fetch(`/api/admin/bouquets/` + bouquetId + '/' + imageId, {
+                        method: "DELETE"
+                    }).then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            console.error("Failed to delete image");
+                        }
+                    }).catch(error => {
+                        console.error("Error:", error);
+                    });
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
