@@ -7,14 +7,8 @@
     <meta charset="UTF-8">
     <title>Bouquet</title>
     <style>
-        .table-image {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .table-head {
-            display: flex;
-            justify-content: space-between;
+        .elem {
+            width: 20%;
         }
 
         .row {
@@ -30,20 +24,20 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h3>Bouquet Images</h3>
-                        <table class="table table-striped table-image">
+                        <table class="table table-striped">
                             <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Image</th>
-                                <th>Delete</th>
+                            <tr class="table-head">
+                                <th class="text-start">ID</th>
+                                <th class="text-center">Image</th>
+                                <th class="text-end">Delete</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr class="table-head" th:each="image : ${bouquet.imageUrls}">
+                            <tr th:each="image : ${bouquet.imageUrls}">
                                 <td th:text="${image.getKey()}"></td>
                                 <td class="text-center"><img th:src="${image.getValue()}" style="max-width: 40%"></td>
                                 <td>
-                                    <button class="delete-btn btn btn-primary" th:data-bouquet-id="${bouquet.id}"
+                                    <button class="delete-img-btn btn btn-primary" th:data-bouquet-id="${bouquet.id}"
                                             th:data-image-id="${image.getKey()}">Delete
                                     </button>
                                 </td>
@@ -91,14 +85,15 @@
                                 <table id="flowerTable" class="table table-striped">
                                     <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
+                                        <th class="text-start">ID</th>
+                                        <th class="text-center">Name</th>
+                                        <th class="text-end">Delete</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     <tr th:each="item : ${bouquet.flowers}">
-                                        <td class="flowerId" th:text="${item.id}"></td>
-                                        <td><select class="form-control" name="flower_name">
+                                        <td class="flowerId text-start" th:text="${item.id}"></td>
+                                        <td class="text-center elem"><select class="form-control" name="flower_name">
                                             <option th:each="flower : ${item}"
                                                     th:value="${flower.getId()}"
                                                     th:text="${flower.getName()}" selected>
@@ -109,9 +104,15 @@
                                                     th:text="${flower.getName()}">
                                             </option>
                                         </select></td>
+                                        <td class="text-end">
+                                            <button class="delete-btn btn btn-primary" th:data-bouquet-id="${bouquet.id}"
+                                                    th:data-flower-id="${item.id}">Delete
+                                            </button>
+                                        </td>
                                     </tr>
                                     </tbody>
                                 </table>
+                                <button class="btn btn-primary" type="button" id="addFlowerButton">Add Flower</button>
                             </div>
                         </div>
 
@@ -120,15 +121,16 @@
                                 <h3>Bouquet colors</h3>
                                 <table id="colorTable" class="table table-striped">
                                     <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
+                                    <tr class="table-head">
+                                        <th class="text-start">ID</th>
+                                        <th class="text-center">Name</th>
+                                        <th class="text-end">Delete</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     <tr th:each="item : ${bouquet.colors}">
-                                        <td class="flowerId" th:text="${item.id}"></td>
-                                        <td><select class="form-control" name="color_name">
+                                        <td class="colorId text-start" th:text="${item.id}"></td>
+                                        <td class="text-center elem"><select class="form-control" name="color_name">
                                             <option th:each="color : ${item}"
                                                     th:value="${color.getId()}"
                                                     th:text="${color.getName()}" selected>
@@ -139,9 +141,15 @@
                                                     th:text="${color.getName()}">
                                             </option>
                                         </select></td>
+                                        <td class="text-end">
+                                            <button class="delete-btn btn btn-primary" th:data-bouquet-id="${bouquet.id}"
+                                                    th:data-color-id="${item.id}">Delete
+                                            </button>
+                                        </td>
                                     </tr>
                                     </tbody>
                                 </table>
+                                <button class="btn btn-primary" type="button" id="addColorButton">Add Flower</button>
                             </div>
                         </div>
 
@@ -184,7 +192,9 @@
                                     </tr>
                                     </tbody>
                                 </table>
-                                <button class="btn btn-primary" id="submitFormBtn">Update all data</button>
+                                <div class="text-center">
+                                    <button class="btn btn-primary" id="submitFormBtn" style="font-size: large">Update all data</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -194,6 +204,95 @@
     </div>
 </main>
 <script layout:fragment="script">
+    document.addEventListener('click', function(event) {
+        // Check if the clicked element is the addFlowerButton
+        if (event.target.id === 'addFlowerButton') {
+            // Clone the last row of the table
+            var newRow = document.querySelector('#flowerTable tbody tr:last-child').cloneNode(true);
+
+            // Clear the selected value of the dropdown in the new row
+            newRow.querySelector('select').selectedIndex = 0;
+
+            // Remove selected options that are already selected in other rows
+            var selectedOptions = [];
+            document.querySelectorAll('#flowerTable tbody select').forEach(function(select) {
+                selectedOptions.push(select.value);
+            });
+
+            newRow.querySelectorAll('option').forEach(function(option) {
+                if (selectedOptions.includes(option.value)) {
+                    option.remove();
+                }
+            });
+
+            // Set the ID of the new row to the selected value
+            var selectedValue = newRow.querySelector('select').value;
+            newRow.querySelector('.flowerId').textContent = selectedValue;
+
+            // Append the new row to the table
+            document.querySelector('#flowerTable tbody').appendChild(newRow);
+        } else if (event.target.id === 'addColorButton') {
+            // Clone the last row of the table
+            var newRow = document.querySelector('#colorTable tbody tr:last-child').cloneNode(true);
+
+            // Clear the selected value of the dropdown in the new row
+            newRow.querySelector('select').selectedIndex = 0;
+
+            // Remove selected options that are already selected in other rows
+            var selectedOptions = [];
+            document.querySelectorAll('#colorTable tbody select').forEach(function(select) {
+                selectedOptions.push(select.value);
+            });
+
+            newRow.querySelectorAll('option').forEach(function(option) {
+                if (selectedOptions.includes(option.value)) {
+                    option.remove();
+                }
+            });
+
+            // Set the ID of the new row to the selected value
+            var selectedValue = newRow.querySelector('select').value;
+            newRow.querySelector('.colorId').textContent = selectedValue;
+
+            // Append the new row to the table
+            document.querySelector('#colorTable tbody').appendChild(newRow);
+        } else if (event.target.classList.contains('delete-btn')) {
+            // Find the closest row (tr) containing the delete button
+            var row = event.target.closest('tr');
+
+            // Remove the row from the table
+            row.remove();
+        }
+    });
+
+
+    document.addEventListener('change', function(event) {
+        // Check if the changed element is a select element inside the flower table
+        if (event.target.matches('#flowerTable select')) {
+            // Get the selected flower's ID from the selected option
+            var selectedFlowerId = event.target.value;
+
+            // Find the corresponding <td> element with class "flowerId" in the same row
+            var flowerIdCell = event.target.closest('tr').querySelector('.flowerId');
+
+            // Update the content of the <td> element with the selected flower's ID
+            flowerIdCell.textContent = selectedFlowerId;
+        } else if (event.target.matches('#colorTable select')) {
+            // Check if the changed element is a select element inside the color table
+            if (event.target.matches('#colorTable select')) {
+                // Get the selected color's ID from the selected option
+                var selectedColorId = event.target.value;
+
+                // Find the corresponding <td> element with class "colorId" in the same row
+                var colorIdCell = event.target.closest('tr').querySelector('.colorId');
+
+                // Update the content of the <td> element with the selected color's ID
+                colorIdCell.textContent = selectedColorId;
+            }
+        }
+    });
+
+
     // Add event listeners to discount percentage fields to detect changes
     document.querySelectorAll('#sizesTable tbody .discountPercentage').forEach(function(discountInput) {
         discountInput.addEventListener('change', function() {
@@ -244,7 +343,6 @@
         });
     });
 
-
     // Add event listeners to default price fields to detect changes
     document.querySelectorAll('#sizesTable tbody .defaultPrice').forEach(function(defaultPriceInput) {
         defaultPriceInput.addEventListener('change', function() {
@@ -267,7 +365,6 @@
             console.log('Default price changed in row ' + lineNumber);
         });
     });
-
 
     // Add event listeners to isSale fields to detect changes
     document.querySelectorAll('#sizesTable tbody .isSale').forEach(function(isSaleSelect) {
@@ -301,34 +398,6 @@
         });
     });
 
-    // Changing the ID of a flower after changing its name
-    document.querySelectorAll('#flowerTable select').forEach(function(select) {
-        select.addEventListener('change', function() {
-            // Get the selected flower's ID from the selected option
-            var selectedFlowerId = this.value;
-
-            // Find the corresponding <td> element with class "flowerId" in the same row
-            var flowerIdCell = this.closest('tr').querySelector('.flowerId');
-
-            // Update the content of the <td> element with the selected flower's ID
-            flowerIdCell.textContent = selectedFlowerId;
-        });
-    });
-
-    // Changing the ID color after changing its name
-    document.querySelectorAll('#colorTable select').forEach(function(select) {
-        select.addEventListener('change', function() {
-            // Get the selected color's ID from the value of the selected option
-            var selectedColorId = this.value;
-
-            // Find the corresponding <td> element with class "flowerId" in the same row
-            var colorIdCell = this.closest('tr').querySelector('.flowerId');
-
-            // Update the content of the <td> element with the selected color's ID
-            colorIdCell.textContent = selectedColorId;
-        });
-    });
-
     // Handling the entire form submit event
     document.getElementById("submitFormBtn").addEventListener("click", function (event) {
         event.preventDefault();
@@ -354,7 +423,7 @@
 
         var colorRows = document.querySelectorAll("#colorTable tbody tr");
         colorRows.forEach(function (row) {
-            var id = parseInt(row.querySelector(".flowerId").textContent);
+            var id = parseInt(row.querySelector(".colorId").textContent);
             var name = row.querySelector("select[name='color_name'] option:checked").textContent;
             bouquetDto.colors.push({ id: id, name: name });
         });
@@ -397,7 +466,7 @@
 
     // Submitting a request to remove a photo
     document.addEventListener("DOMContentLoaded", function () {
-        const deleteButtons = document.querySelectorAll(".delete-btn");
+        const deleteButtons = document.querySelectorAll(".delete-img-btn");
 
         deleteButtons.forEach(function (button) {
             button.addEventListener("click", function () {
