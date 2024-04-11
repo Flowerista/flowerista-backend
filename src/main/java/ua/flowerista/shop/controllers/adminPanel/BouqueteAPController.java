@@ -33,9 +33,9 @@ public class BouqueteAPController {
 
     @GetMapping
     public ModelAndView getAllBouquets(@QuerydslPredicate(root = Bouquete.class) Predicate predicate,
-                                   @RequestParam(name = "page", defaultValue = "0", required = false) Integer page,
-                                   @RequestParam(name = "size", defaultValue = "10", required = false) Integer size,
-                                   @RequestParam(name = "bouquetName",  defaultValue = "", required = false) String name) {
+                                       @RequestParam(name = "page", defaultValue = "0", required = false) Integer page,
+                                       @RequestParam(name = "size", defaultValue = "10", required = false) Integer size,
+                                       @RequestParam(name = "bouquetName", defaultValue = "", required = false) String name) {
         Page<BouqueteDto> bouquets;
         if (!name.equals("")) {
             bouquets = bouqueteService.searchBouquetsByName(name, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")))
@@ -74,10 +74,11 @@ public class BouqueteAPController {
 
     @PostMapping("/image/{id}")
     public ModelAndView uploadImages(@PathVariable Integer id, @RequestParam("images") List<MultipartFile> images) {
-        System.out.println(images.get(0));
-        BouqueteDto bouquetDto = bouqueteService.getBouqueteById(id);
-        bouqueteService.insert(bouquetDto, images);
-        return new ModelAndView("redirect:/api/admin/bouquets/" + id);
+        if (!images.isEmpty() && !images.stream().allMatch(MultipartFile::isEmpty)) {
+            BouqueteDto bouquetDto = bouqueteService.getBouqueteById(id);
+            bouqueteService.insert(bouquetDto, images);
+        }
+        return new ModelAndView(new RedirectView("redirect:/api/admin/bouquets/" + id, true, false));
     }
 
     @DeleteMapping("/{bouquetId}/{imageId}")
