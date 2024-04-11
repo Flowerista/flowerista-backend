@@ -31,7 +31,7 @@ public class UserMapper implements EntityMapper<User, UserDto> {
 	public UserDto toDto(User entity) {
 		UserDto dto = new UserDto();
 		dto.setId(entity.getId());
-		dto.setFirstName(entity.getLastName());
+		dto.setFirstName(entity.getFirstName());
 		dto.setLastName(entity.getLastName());
 		dto.setEmail(entity.getEmail());
 		dto.setPhoneNumber(Integer.valueOf(entity.getPhoneNumber()));
