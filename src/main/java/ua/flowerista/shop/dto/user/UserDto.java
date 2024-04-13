@@ -1,7 +1,7 @@
 package ua.flowerista.shop.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -9,11 +9,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ua.flowerista.shop.serializers.UserDtoSerializer;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
+@JsonSerialize(using = UserDtoSerializer.class)
 public class UserDto {
 
 	private int id;
