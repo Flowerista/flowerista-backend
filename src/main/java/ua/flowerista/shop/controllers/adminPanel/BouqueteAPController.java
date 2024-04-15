@@ -14,10 +14,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import ua.flowerista.shop.dto.*;
 import ua.flowerista.shop.mappers.BouqueteMapper;
 import ua.flowerista.shop.models.Bouquete;
-import ua.flowerista.shop.services.BouqueteService;
-import ua.flowerista.shop.services.BouqueteSizeService;
-import ua.flowerista.shop.services.ColorService;
-import ua.flowerista.shop.services.FlowerService;
+import ua.flowerista.shop.services.*;
 
 import java.util.List;
 
@@ -68,7 +65,7 @@ public class BouqueteAPController {
         bouqueteDto.setImageUrls(bouquete.getImageUrls());
 
         bouqueteSizeService.saveAll(bouqueteDto.getSizes());
-        bouqueteService.insert(bouqueteDto);
+        bouqueteService.update(bouqueteDto);
         return new ModelAndView("redirect:/api/admin/bouquets/" + id);
     }
 
@@ -78,7 +75,7 @@ public class BouqueteAPController {
             BouqueteDto bouquetDto = bouqueteService.getBouqueteById(id);
             bouqueteService.insert(bouquetDto, images);
         }
-        return new ModelAndView(new RedirectView("redirect:/api/admin/bouquets/" + id, true, false));
+        return new ModelAndView("redirect:/api/admin/bouquets/" + id);
     }
 
     @DeleteMapping("/{bouquetId}/{imageId}")
