@@ -2,6 +2,8 @@ package ua.flowerista.shop.services;
 
 import com.querydsl.core.types.Predicate;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +32,7 @@ public class BouqueteService {
     private BouqueteRepository repo;
     private BouqueteMapper mapper;
     private CloudinaryService cloudinary;
+    private static final Logger logger = LoggerFactory.getLogger(BouqueteService.class);
 
     @Autowired
     public BouqueteService(BouqueteRepository repo, BouqueteMapper mapper, CloudinaryService cloudinary) {
@@ -150,9 +153,14 @@ public class BouqueteService {
         return repo.findAll(predicate, pageable);
     }
 
-    public void deleteImageFromBouquet(Integer bouquetId, Integer imageId) {
+    public void deleteImageFromBouquet(Integer bouquetId, Integer imageId){
         Bouquete bouquete = repo.findById(bouquetId).orElseThrow();
         Map<Integer, String> imageUrls = bouquete.getImageUrls();
+        try {
+            cloudinary.deleteImage(cloudinary.extractPublicId(imageUrls.get(imageId)));
+        } catch (Exception e) {
+            logger.error("Error deleting the image", e);
+        }
         imageUrls.remove(imageId);
         bouquete.setImageUrls(imageUrls);
         repo.save(bouquete);
