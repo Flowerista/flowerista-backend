@@ -45,4 +45,15 @@ public class CloudinaryService {
         cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
     }
 
+    public String extractPublicId(String imageUrl) {
+        String withoutProtocol = imageUrl.replaceFirst("^(https?://)?[^/]+/", "");
+
+        int index = withoutProtocol.indexOf('/');
+        if (index != -1) {
+            return withoutProtocol.substring(0, index);
+        } else {
+            return withoutProtocol;
+        }
+    }
+
 }
