@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import ua.flowerista.shop.models.CompletedOrder;
 import ua.flowerista.shop.models.OrderStatus;
 import ua.flowerista.shop.models.PaymentOrder;
+import ua.flowerista.shop.repo.PaymentOrderRepository;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -23,11 +24,11 @@ import java.util.NoSuchElementException;
 public class PaypalService {
     public static final String SUCCESS_URL = "/capture";
     public static final String CANCEL_URL = "/cancel";
-    public static final String PAYPAL_URL = "https://www.sandbox.paypal.com/checkoutnow?token=";
     @Value("${frontend.server.url}")
     private String frontendUrl;
     private final PayPalHttpClient payPalHttpClient;
     private final OrderService orderService;
+    private final PaymentOrderRepository paymentOrderRepository;
 
     public PaymentOrder createPayment(Integer orderId) {
         ua.flowerista.shop.models.Order order = orderService.getOrder(orderId).get(); //check for null made in controller
@@ -55,7 +56,9 @@ public class PaypalService {
                     .href();
             orderService.updatePayId(orderId, paymentOrder.id());
             orderService.updateStatus(orderId, OrderStatus.PENDING);
-            return new PaymentOrder("success", paymentOrder.id(), redirectUrl);
+            PaymentOrder paymentOrderEntity = new PaymentOrder("success", paymentOrder.id(), redirectUrl);
+            paymentOrderRepository.save(paymentOrderEntity);
+            return paymentOrderEntity;
         } catch (IOException e) {
             log.error(e.getMessage());
             return new PaymentOrder("Error");
@@ -69,6 +72,7 @@ public class PaypalService {
             HttpResponse<Order> httpResponse = payPalHttpClient.execute(ordersCaptureRequest);
             if (httpResponse.result().status() != null) {
                 orderService.updateStatusByPayId(token, OrderStatus.IN_PROCESS);
+                paymentOrderRepository.updateStatusAndDateOfPaymentByPayId(token, "payed", httpResponse.result().updateTime());
                 return new CompletedOrder("success", token);
             }
         } catch (IOException e) {
@@ -82,10 +86,6 @@ public class PaypalService {
         if (order.getPayId() == null) {
             return createPayment(orderId);
         }
-        return new PaymentOrder("success", order.getPayId(), getPayPalPaymentLink(order.getPayId()));
-    }
-
-    private String getPayPalPaymentLink(String payId) {
-        return PAYPAL_URL + payId;
+        return paymentOrderRepository.findByPayId(order.getPayId());
     }
 }

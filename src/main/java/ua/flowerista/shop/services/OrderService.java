@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderItem;
 import ua.flowerista.shop.models.OrderStatus;
+import ua.flowerista.shop.models.PaymentOrder;
 import ua.flowerista.shop.repo.AddressRepository;
 import ua.flowerista.shop.repo.OrderItemRepository;
 import ua.flowerista.shop.repo.OrderRepository;
+import ua.flowerista.shop.repo.PaymentOrderRepository;
 
 import java.time.Instant;
 import java.util.List;
@@ -25,6 +27,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final AddressRepository addressRepository;
+    private final PaymentOrderRepository paymentOrderRepository;
 
     public void updateStatus(Integer orderId, OrderStatus status) {
         orderRepository.updateStatus(orderId, status);
@@ -65,10 +68,11 @@ public class OrderService {
     public boolean isOrderPayed(Integer orderId) {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isEmpty()) {
-            //TODO: trow exception for not found order
-            return true;
+            //not exists order can't be payed
+            return false;
         }
-        return order.get().getStatus().compareTo(OrderStatus.PENDING) > 0;
+        PaymentOrder paymentOrder = paymentOrderRepository.findByPayId(order.get().getPayId());
+        return paymentOrder != null && paymentOrder.getStatus().equals("payed");
     }
 
     public boolean isOrderWaitingForPayment(Integer orderId) {
