@@ -4,6 +4,7 @@ import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.models.OrderItem;
@@ -90,7 +91,7 @@ public class OrderService {
     }
 
     public List<Order> getOrdersByUserId(Integer userId) {
-        return orderRepository.findByUserId(userId);
+        return orderRepository.findByUserId(userId, Sort.by(Sort.Direction.DESC, "created"));
     }
 
     public void updateOrder(Integer id, Order entity) {
