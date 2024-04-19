@@ -1,6 +1,7 @@
 package ua.flowerista.shop.repo;
 
 import com.querydsl.core.types.dsl.StringPath;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,7 +26,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer>, Querydsl
         bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) (path, s) -> path.equalsIgnoreCase(s));
     }
 
-    List<Order> findByUserId(Integer userId);
+    List<Order> findByUserId(Integer userId, Sort sort);
 
     @Modifying
     @Transactional
