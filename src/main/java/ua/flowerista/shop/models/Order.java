@@ -34,7 +34,7 @@ public class Order {
     BigInteger sum;
     @Column(name = "currency")
     String currency;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "order_id")
     @ToString.Exclude
     private Set<OrderItem> orderItems;
