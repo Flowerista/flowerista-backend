@@ -35,6 +35,12 @@ public class FlowerAPController {
         return new ModelAndView("admin/flowers/flowersList").addObject("flowers", flowers);
     }
 
+    @PostMapping
+    public ModelAndView saveFlower(@RequestParam("flowerName") String flowerName) {
+        flowerService.saveByName(flowerName);
+        return new ModelAndView("redirect:/api/admin/flowers");
+    }
+
     @GetMapping("/{id}")
     public ModelAndView getFlowerById(@PathVariable int id) {
         ModelAndView result = new ModelAndView("admin/flowers/flowerView");
