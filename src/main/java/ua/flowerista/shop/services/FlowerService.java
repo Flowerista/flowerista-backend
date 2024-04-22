@@ -31,6 +31,14 @@ public class FlowerService {
 		repo.save(mapper.toEntity(flowerDto));
 	}
 
+	public void saveByName(String flowerName) {
+		if (repo.findByName(flowerName) == null) {
+			Flower flower = new Flower();
+			flower.setName(flowerName);
+			repo.save(flower);
+		}
+	}
+
 	public void deleteById(int id) {
 		repo.deleteById(id);
 	}
