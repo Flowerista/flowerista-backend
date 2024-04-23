@@ -14,6 +14,10 @@ import ua.flowerista.shop.dto.FlowerDto;
 import ua.flowerista.shop.mappers.FlowerMapper;
 import ua.flowerista.shop.models.Flower;
 import ua.flowerista.shop.services.FlowerService;
+import ua.flowerista.shop.services.validators.FlowerValidator;
+
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/api/admin/flowers")
@@ -21,6 +25,7 @@ import ua.flowerista.shop.services.FlowerService;
 public class FlowerAPController {
     private final FlowerService flowerService;
     private final FlowerMapper flowerMapper;
+    private final FlowerValidator flowerValidator;
 
     @GetMapping
     public ModelAndView getFlowers(@QuerydslPredicate(root = Flower.class)
@@ -32,12 +37,19 @@ public class FlowerAPController {
                                    Pageable pageable) {
         Page<FlowerDto> flowers = flowerService.getAllFlowers(predicate,
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))).map(flowerMapper::toDto);
-        return new ModelAndView("admin/flowers/flowersList").addObject("flowers", flowers);
+        return new ModelAndView("admin/flowers/flowersList").addAllObjects(Map.of("flowers", flowers, "flowerDto", new FlowerDto()));
     }
 
     @PostMapping
     public ModelAndView saveFlower(@RequestParam("flowerName") String flowerName) {
-        flowerService.saveByName(flowerName);
+        FlowerDto flower = new FlowerDto(flowerName);
+        List<String> errors = flowerValidator.validate(flower);
+        if (!errors.isEmpty()) {
+            ModelAndView modelAndView = new ModelAndView("admin/error");
+            modelAndView.addObject("errors", errors);
+            return modelAndView;
+        }
+        flowerService.insert(flower);
         return new ModelAndView("redirect:/api/admin/flowers");
     }
 
