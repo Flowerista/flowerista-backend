@@ -17,7 +17,6 @@ import ua.flowerista.shop.services.FlowerService;
 import ua.flowerista.shop.services.validators.FlowerValidator;
 
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/api/admin/flowers")
@@ -37,7 +36,7 @@ public class FlowerAPController {
                                    Pageable pageable) {
         Page<FlowerDto> flowers = flowerService.getAllFlowers(predicate,
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))).map(flowerMapper::toDto);
-        return new ModelAndView("admin/flowers/flowersList").addAllObjects(Map.of("flowers", flowers, "flowerDto", new FlowerDto()));
+        return new ModelAndView("admin/flowers/flowersList").addObject("flowers", flowers);
     }
 
     @PostMapping
