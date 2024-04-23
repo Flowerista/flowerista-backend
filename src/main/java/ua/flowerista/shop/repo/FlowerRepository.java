@@ -18,5 +18,5 @@ public interface FlowerRepository extends JpaRepository<Flower, Integer>, Queryd
         bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) (path, s) -> path.equalsIgnoreCase(s));
     }
 
-    Flower findByName(String name);
+    boolean existsByName(String name);
 }
