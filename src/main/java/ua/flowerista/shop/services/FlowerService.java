@@ -54,4 +54,8 @@ public class FlowerService {
 	public Optional<Flower> getFlower(Integer id) {
 		return repo.findById(id);
 	}
+
+	public boolean isNameExist(String name) {
+		return repo.existsByName(name);
+	}
 }

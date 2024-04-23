@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+</head>
+<body>
+<main layout:fragment="main">
+    <div class="container d-flex flex-column align-items-center"
+         style="background:white; opacity: 0.7; overflow-y: auto">
+        <h4>Error:</h4>
+        <ul>
+            <li th:each="err : ${errors}" th:text="${err}" />
+        </ul>
+        <br>
+    </div>
+</main>
+
+</body>
+</html>

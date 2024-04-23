@@ -17,4 +17,6 @@ public interface FlowerRepository extends JpaRepository<Flower, Integer>, Queryd
     default void customize(QuerydslBindings bindings, QFlower root) {
         bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) (path, s) -> path.equalsIgnoreCase(s));
     }
+
+    boolean existsByName(String name);
 }
