@@ -31,14 +31,6 @@ public class FlowerService {
 		repo.save(mapper.toEntity(flowerDto));
 	}
 
-	public void saveByName(String flowerName) {
-		if (repo.findByName(flowerName) == null) {
-			Flower flower = new Flower();
-			flower.setName(flowerName);
-			repo.save(flower);
-		}
-	}
-
 	public void deleteById(int id) {
 		repo.deleteById(id);
 	}
@@ -61,5 +53,9 @@ public class FlowerService {
 	}
 	public Optional<Flower> getFlower(Integer id) {
 		return repo.findById(id);
+	}
+
+	public boolean isNameExist(String name) {
+		return repo.existsByName(name);
 	}
 }
