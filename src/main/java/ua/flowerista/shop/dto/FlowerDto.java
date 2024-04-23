@@ -14,4 +14,7 @@ public class FlowerDto {
 	private int id;
 	private String name;
 
+	public FlowerDto(String name) {
+		this.name = name;
+	}
 }
