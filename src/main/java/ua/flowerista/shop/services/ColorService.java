@@ -37,7 +37,6 @@ public class ColorService {
 	}
 
 	public List<ColorDto> getAllColors() {
-		trans();
 		return repo.findAll().stream().map(color -> mapper.toDto(color)).collect(Collectors.toList());
 	}
 	public List<ColorDto> getAllColors(Languages lang) {
