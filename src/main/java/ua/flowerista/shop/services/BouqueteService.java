@@ -190,36 +190,4 @@ public class BouqueteService {
     public Page<Bouquete> searchBouquetsByName(String name, Pageable pageable) {
         return repo.findByNameContainingIgnoreCase(name, pageable);
     }
-
-    private void trans(){
-        List<Bouquete> bouqueteList = repo.findAll();
-        for (Bouquete bouquete : bouqueteList) {
-            Translate translateEn = Translate.builder()
-                    .bouquete(bouquete)
-                    .language(Languages.EN)
-                    .text(bouquete.getName())
-                    .build();
-            Translate translateUa = Translate.builder()
-                    .bouquete(bouquete)
-                    .language(Languages.UK)
-                    .text(translate(bouquete.getName()))
-                    .build();
-            bouquete.getTranslates().add(translateEn);
-            bouquete.getTranslates().add(translateUa);
-        }
-        repo.saveAll(bouqueteList);
-    }
-
-    public String translate(String str) {
-
-
-        //Translate utility.translate = TranslateOptions.getDefaultInstance().getService();
-        com.google.cloud.translate.Translate translate = TranslateOptions.newBuilder().setApiKey("AIzaSyADFI6uM11stLydgP9J0IweQx3WHJD_eo4").build().getService();
-        Translation translation = translate.translate(
-                str,
-                com.google.cloud.translate.Translate.TranslateOption.sourceLanguage("en"),
-                com.google.cloud.translate.Translate.TranslateOption.targetLanguage("uk"));
-        return translation.getTranslatedText();
-    }
-
 }

@@ -66,36 +66,4 @@ public class FlowerService {
 	public boolean isNameExist(String name) {
 		return repo.existsByName(name);
 	}
-
-	private void trans(){
-		List<Flower> colors = repo.findAll();
-		for (Flower flower : colors) {
-			Translate translateEn = Translate.builder()
-					.flower(flower)
-					.language(Languages.EN)
-					.text(flower.getName())
-					.build();
-			Translate translateUa = Translate.builder()
-					.flower(flower)
-					.language(Languages.UK)
-					.text(translate(flower.getName()))
-					.build();
-			flower.getNameTranslate().add(translateEn);
-			flower.getNameTranslate().add(translateUa);
-			repo.save(flower);
-		}
-		repo.saveAll(colors);
-	}
-
-	public String translate(String str) {
-
-
-		//Translate utility.translate = TranslateOptions.getDefaultInstance().getService();
-		com.google.cloud.translate.Translate translate = TranslateOptions.newBuilder().setApiKey("AIzaSyADFI6uM11stLydgP9J0IweQx3WHJD_eo4").build().getService();
-		Translation translation = translate.translate(
-				str,
-				com.google.cloud.translate.Translate.TranslateOption.sourceLanguage("en"),
-				com.google.cloud.translate.Translate.TranslateOption.targetLanguage("uk"));
-		return translation.getTranslatedText();
-	}
 }

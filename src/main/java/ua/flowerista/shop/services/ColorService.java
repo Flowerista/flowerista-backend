@@ -55,37 +55,4 @@ public class ColorService {
     public Boolean isColorExist(Integer colorId) {
 		return repo.existsById(colorId);
     }
-
-
-	private void trans(){
-		List<Color> colors = repo.findAll();
-		for (Color color : colors) {
-			Translate translateEn = Translate.builder()
-					.color(color)
-					.language(Languages.EN)
-					.text(color.getName())
-					.build();
-			Translate translateUa = Translate.builder()
-					.color(color)
-					.language(Languages.UK)
-					.text(translate(color.getName()))
-					.build();
-			color.getNameTranslate().add(translateEn);
-			color.getNameTranslate().add(translateUa);
-			repo.save(color);
-		}
-		repo.saveAll(colors);
-	}
-
-	public String translate(String str) {
-
-
-		//Translate utility.translate = TranslateOptions.getDefaultInstance().getService();
-		com.google.cloud.translate.Translate translate = TranslateOptions.newBuilder().setApiKey("AIzaSyADFI6uM11stLydgP9J0IweQx3WHJD_eo4").build().getService();
-		Translation translation = translate.translate(
-				str,
-				com.google.cloud.translate.Translate.TranslateOption.sourceLanguage("en"),
-				com.google.cloud.translate.Translate.TranslateOption.targetLanguage("uk"));
-		return translation.getTranslatedText();
-	}
 }
