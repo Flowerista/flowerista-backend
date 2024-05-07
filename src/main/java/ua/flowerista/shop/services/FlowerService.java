@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.google.cloud.translate.TranslateOptions;
-import com.google.cloud.translate.Translation;
 import com.querydsl.core.types.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,10 +12,8 @@ import org.springframework.stereotype.Service;
 
 import ua.flowerista.shop.dto.FlowerDto;
 import ua.flowerista.shop.mappers.FlowerMapper;
-import ua.flowerista.shop.models.Color;
 import ua.flowerista.shop.models.Flower;
 import ua.flowerista.shop.models.Languages;
-import ua.flowerista.shop.models.Translate;
 import ua.flowerista.shop.repo.FlowerRepository;
 
 @Service

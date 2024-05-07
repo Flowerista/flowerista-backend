@@ -3,17 +3,12 @@ package ua.flowerista.shop.services;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.google.cloud.translate.TranslateOptions;
-import com.google.cloud.translate.Translation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ua.flowerista.shop.dto.ColorDto;
 import ua.flowerista.shop.mappers.ColorMapper;
-import ua.flowerista.shop.models.Bouquete;
-import ua.flowerista.shop.models.Color;
 import ua.flowerista.shop.models.Languages;
-import ua.flowerista.shop.models.Translate;
 import ua.flowerista.shop.repo.ColorRepository;
 
 @Service

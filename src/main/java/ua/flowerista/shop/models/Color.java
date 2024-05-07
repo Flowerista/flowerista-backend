@@ -24,7 +24,7 @@ public class Color {
 	@NotBlank
 	private String name;
 	@ToString.Exclude
-	@OneToMany(mappedBy = "color", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "color", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Set<Translate> nameTranslate = new LinkedHashSet<>();
 
 }

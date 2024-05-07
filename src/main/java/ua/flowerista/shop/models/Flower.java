@@ -24,6 +24,6 @@ public class Flower {
 	@NotBlank
 	private String name;
 	@ToString.Exclude
-	@OneToMany(mappedBy = "flower", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "flower", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Set<Translate> nameTranslate = new LinkedHashSet<>();
 }

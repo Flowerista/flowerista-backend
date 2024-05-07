@@ -1,7 +1,5 @@
 package ua.flowerista.shop.services;
 
-import com.google.cloud.translate.TranslateOptions;
-import com.google.cloud.translate.Translation;
 import com.querydsl.core.types.Predicate;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;

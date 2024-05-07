@@ -51,7 +51,7 @@ public class Bouquete {
 	@Column(name = "soldquantity")
 	private int soldQuantity;
 	@ToString.Exclude
-	@OneToMany(mappedBy = "bouquete", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "bouquete", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Set<Translate> translates = new LinkedHashSet<>();
 
 }
