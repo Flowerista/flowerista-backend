@@ -108,7 +108,7 @@ public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto>, Enti
 		dto.setId(entity.getId());
 		dto.setFlowers(
 				entity.getFlowers().stream().map(flower -> flowerMapper.toDto(flower)).collect(Collectors.toSet()));
-		dto.setColors(entity.getColors().stream().map(color -> colorMapper.toDto(color)).collect(Collectors.toSet()));
+		dto.setColors(entity.getColors().stream().map(color -> colorMapper.toDto(color, language)).collect(Collectors.toSet()));
 		dto.setItemCode(entity.getItemCode());
 		dto.setName(entity.getTranslates().stream()
 				.filter((t) -> t.getLanguage() == language)

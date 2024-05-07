@@ -20,8 +20,8 @@ public class Translate {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "bouquete_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "bouquete_id")
     private Bouquete bouquete;
 
     @Column(name = "lang", nullable = false)
@@ -30,5 +30,9 @@ public class Translate {
 
     @Column(name = "text", nullable = false)
     private String text;
+
+    @ManyToOne
+    @JoinColumn(name = "color_id")
+    private Color color;
 
 }
