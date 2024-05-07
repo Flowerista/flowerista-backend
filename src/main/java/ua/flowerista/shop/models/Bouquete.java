@@ -1,25 +1,15 @@
 package ua.flowerista.shop.models;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.hypersistence.utils.hibernate.type.json.JsonType;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -60,4 +50,8 @@ public class Bouquete {
 	private int quantity;
 	@Column(name = "soldquantity")
 	private int soldQuantity;
+	@ToString.Exclude
+	@OneToMany(mappedBy = "bouquete", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<Translate> translates = new LinkedHashSet<>();
+
 }

@@ -1,5 +1,7 @@
 package ua.flowerista.shop.services;
 
+import com.google.cloud.translate.TranslateOptions;
+import com.google.cloud.translate.Translation;
 import com.querydsl.core.types.Predicate;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -15,9 +17,7 @@ import ua.flowerista.shop.dto.BouqueteDto;
 import ua.flowerista.shop.dto.BouqueteSmallDto;
 import ua.flowerista.shop.dto.PriceRangeDto;
 import ua.flowerista.shop.mappers.BouqueteMapper;
-import ua.flowerista.shop.models.Bouquete;
-import ua.flowerista.shop.models.BouqueteSize;
-import ua.flowerista.shop.models.Size;
+import ua.flowerista.shop.models.*;
 import ua.flowerista.shop.repo.BouqueteRepository;
 
 import java.io.IOException;
@@ -86,15 +86,27 @@ public class BouqueteService {
         return repo.findTop5ByOrderBySoldQuantityDesc().stream().map(bouquete -> mapper.toSmallDto(bouquete))
                 .collect(Collectors.toList());
     }
-
+    public List<BouqueteSmallDto> getBouquetesBestSellers(Languages lang) {
+        return repo.findTop5ByOrderBySoldQuantityDesc().stream().map(bouquete -> mapper.toSmallDto(bouquete, lang))
+                .collect(Collectors.toList());
+    }
     public List<BouqueteSmallDto> getBouquetesTop5Sales() {
         return repo.findTop5ByOrderByDiscountDesc().stream().map(bouquete -> mapper.toSmallDto(bouquete))
+                .collect(Collectors.toList());
+    }
+    public List<BouqueteSmallDto> getBouquetesTop5Sales(Languages lang) {
+        return repo.findTop5ByOrderByDiscountDesc().stream().map(bouquete -> mapper.toSmallDto(bouquete, lang))
                 .collect(Collectors.toList());
     }
 
     public Page<BouqueteSmallDto> getBouquetesCatalogFiltered(List<Integer> flowerIds, List<Integer> colorIds, Integer minPrice, Integer maxPrice, Boolean sortByNewest, Boolean sortByPriceHighToLow, Boolean sortByPriceLowToHigh, int page) {
         Pageable pageable = PageRequest.of(page - 1, 20);
         return repo.findByFilters(flowerIds, colorIds, minPrice, maxPrice, sortByNewest, sortByPriceHighToLow, sortByPriceLowToHigh, pageable).map(mapper::toSmallDto);
+
+    }
+    public Page<BouqueteSmallDto> getBouquetesCatalogFiltered(List<Integer> flowerIds, List<Integer> colorIds, Integer minPrice, Integer maxPrice, Boolean sortByNewest, Boolean sortByPriceHighToLow, Boolean sortByPriceLowToHigh, int page, Languages lang) {
+        Pageable pageable = PageRequest.of(page - 1, 20);
+        return repo.findByFilters(flowerIds, colorIds, minPrice, maxPrice, sortByNewest, sortByPriceHighToLow, sortByPriceLowToHigh, pageable).map(t->mapper.toSmallDto(t, lang));
 
     }
 
@@ -108,12 +120,21 @@ public class BouqueteService {
     public BouqueteCardDto getById(int id) {
         return mapper.toCardDto(repo.getReferenceById(id));
     }
+    public BouqueteCardDto getById(int id, Languages lang) {
+        return mapper.toCardDto(repo.getReferenceById(id), lang);
+    }
 
     public List<BouqueteSmallDto> searchBouquetesByName(String name) {
         if (name == null || name.length() < 3) {
             return Collections.emptyList();
         }
         return repo.searchByName(name).stream().map(boquete -> mapper.toSmallDto(boquete)).collect(Collectors.toList());
+    }
+    public List<BouqueteSmallDto> searchBouquetesByName(String name, Languages lang) {
+        if (name == null || name.length() < 3) {
+            return Collections.emptyList();
+        }
+        return repo.searchByName(name).stream().map(boquete -> mapper.toSmallDto(boquete, lang)).collect(Collectors.toList());
     }
 
     public Boolean isBouqueteExist(Integer id) {
@@ -169,4 +190,36 @@ public class BouqueteService {
     public Page<Bouquete> searchBouquetsByName(String name, Pageable pageable) {
         return repo.findByNameContainingIgnoreCase(name, pageable);
     }
+
+    private void trans(){
+        List<Bouquete> bouqueteList = repo.findAll();
+        for (Bouquete bouquete : bouqueteList) {
+            Translate translateEn = Translate.builder()
+                    .bouquete(bouquete)
+                    .language(Languages.EN)
+                    .text(bouquete.getName())
+                    .build();
+            Translate translateUa = Translate.builder()
+                    .bouquete(bouquete)
+                    .language(Languages.UK)
+                    .text(translate(bouquete.getName()))
+                    .build();
+            bouquete.getTranslates().add(translateEn);
+            bouquete.getTranslates().add(translateUa);
+        }
+        repo.saveAll(bouqueteList);
+    }
+
+    public String translate(String str) {
+
+
+        //Translate utility.translate = TranslateOptions.getDefaultInstance().getService();
+        com.google.cloud.translate.Translate translate = TranslateOptions.newBuilder().setApiKey("AIzaSyADFI6uM11stLydgP9J0IweQx3WHJD_eo4").build().getService();
+        Translation translation = translate.translate(
+                str,
+                com.google.cloud.translate.Translate.TranslateOption.sourceLanguage("en"),
+                com.google.cloud.translate.Translate.TranslateOption.targetLanguage("uk"));
+        return translation.getTranslatedText();
+    }
+
 }
