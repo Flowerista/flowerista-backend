@@ -1,23 +1,20 @@
 package ua.flowerista.shop.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import ua.flowerista.shop.dto.user.UserAuthenticationResponseDto;
 import ua.flowerista.shop.dto.user.UserLoginBodyDto;
+import ua.flowerista.shop.models.RefreshToken;
 import ua.flowerista.shop.models.Token;
 import ua.flowerista.shop.models.TokenType;
 import ua.flowerista.shop.models.User;
 import ua.flowerista.shop.repo.TokenRepository;
 import ua.flowerista.shop.repo.UserRepository;
-
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +22,7 @@ public class AuthenticationService {
   private final UserRepository repository;
   private final TokenRepository tokenRepository;
   private final JwtService jwtService;
+  private final RefreshTokenService refreshTokenService;
   private final AuthenticationManager authenticationManager;
 
 
@@ -38,13 +36,13 @@ public class AuthenticationService {
     var user = repository.findByEmail(loginBody.getEmail())
         .orElseThrow();
     var jwtToken = jwtService.generateToken(user);
-    var refreshToken = jwtService.generateRefreshToken(user);
+    var refreshToken = refreshTokenService.createRefreshToken(user.getEmail()).getToken();
     revokeAllUserTokens(user);
     saveUserToken(user, jwtToken);
     return UserAuthenticationResponseDto.builder()
-        .accessToken(jwtToken)
+            .accessToken(jwtToken)
             .refreshToken(refreshToken)
-        .build();
+            .build();
   }
 
   private void saveUserToken(User user, String jwtToken) {
@@ -69,31 +67,19 @@ public class AuthenticationService {
     tokenRepository.saveAll(validUserTokens);
   }
 
-  public void refreshToken(
-          HttpServletRequest request,
-          HttpServletResponse response
-  ) throws IOException {
-    final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-    final String refreshToken;
-    final String userEmail;
-    if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
-      return;
-    }
-    refreshToken = authHeader.substring(7);
-    userEmail = jwtService.extractUsername(refreshToken);
-    if (userEmail != null) {
-      var user = this.repository.findByEmail(userEmail)
-              .orElseThrow();
-      if (jwtService.isTokenValid(refreshToken, user)) {
-        var accessToken = jwtService.generateToken(user);
-        revokeAllUserTokens(user);
-        saveUserToken(user, accessToken);
-        var authResponse = UserAuthenticationResponseDto.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-        new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-      }
-    }
+  public UserAuthenticationResponseDto refreshToken(HttpServletRequest request)  {
+    String refreshToken = request.getHeader(org.springframework.http.HttpHeaders.AUTHORIZATION).substring(7);
+    return refreshTokenService.findByToken(refreshToken)
+            .map(refreshTokenService::verifyExpiration)
+            .map(RefreshToken::getUserInfo)
+            .map(user -> {
+              String accessToken = jwtService.generateToken(user);
+              revokeAllUserTokens(user);
+              saveUserToken(user, accessToken);
+              return UserAuthenticationResponseDto.builder()
+                      .accessToken(accessToken)
+                      .refreshToken(refreshToken)
+                      .build();
+            }).orElseThrow(() -> new RuntimeException("Invalid refresh token"));
   }
 }

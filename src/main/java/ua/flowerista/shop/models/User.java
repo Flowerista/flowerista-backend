@@ -50,7 +50,7 @@ public class User implements UserDetails {
 	@Column(name = "enabled")
 	private boolean enabled;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
 

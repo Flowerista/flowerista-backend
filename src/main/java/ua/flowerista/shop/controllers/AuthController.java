@@ -1,6 +1,5 @@
 package ua.flowerista.shop.controllers;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Locale;
@@ -34,7 +33,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import ua.flowerista.shop.dto.user.UserAuthenticationResponseDto;
 import ua.flowerista.shop.dto.user.UserLoginBodyDto;
@@ -118,8 +116,14 @@ public class AuthController {
 
 	@PostMapping("/refresh-token")
 	@Operation(summary = "Api to refresh token", description = "Returns refreshed tokens")
-	public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		authService.refreshToken(request, response);
+	public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+		try {
+			UserAuthenticationResponseDto responseDto = authService.refreshToken(request);
+			return ResponseEntity.ok(responseDto);
+		} catch (Exception e) {
+			return ResponseEntity.status(401).body(e.getMessage());
+		}
+
 	}
 
 	@PostMapping("/registrationConfirm/{token}")
@@ -182,7 +186,7 @@ public class AuthController {
 		email.setFrom(env.getProperty("support.email"));
 		return email;
 	}
-	
+
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	private Map<String, String> handleValidationExceptions(
