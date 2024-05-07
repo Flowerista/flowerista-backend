@@ -35,4 +35,8 @@ public class Translate {
     @JoinColumn(name = "color_id")
     private Color color;
 
+    @ManyToOne
+    @JoinColumn(name = "flower_id")
+    private Flower flower;
+
 }

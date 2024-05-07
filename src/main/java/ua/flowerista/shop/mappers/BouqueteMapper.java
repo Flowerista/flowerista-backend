@@ -14,7 +14,7 @@ import ua.flowerista.shop.dto.BouqueteSmallDto;
 import ua.flowerista.shop.models.*;
 
 @Component
-public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto>, EntityMultiLanguagesMapper<Bouquete, BouqueteDto> {
+public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto>, EntityMultiLanguagesDtoMapper<Bouquete, BouqueteDto> {
 
 	private ColorMapper colorMapper;
 	private FlowerMapper flowerMapper;
@@ -83,13 +83,6 @@ public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto>, Enti
 		throw new RuntimeException("Size not found for Bouquete: " + bouquete.getId());
 	}
 
-	//TODO: implement
-	//Will be implemented in the future
-	@Override
-	public Bouquete toEntity(BouqueteDto dto, Languages language) {
-		return null;
-	}
-
 	@Override
 	public BouqueteDto toDto(Bouquete entity, Languages language) {
 		BouqueteDto dto = new BouqueteDto();
@@ -130,8 +123,6 @@ public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto>, Enti
 
 	private BouqueteDto mapGenericField(Bouquete entity, BouqueteDto dto) {
 		dto.setId(entity.getId());
-		dto.setFlowers(
-				entity.getFlowers().stream().map(flower -> flowerMapper.toDto(flower)).collect(Collectors.toSet()));
 		dto.setItemCode(entity.getItemCode());
 		dto.setQuantity(entity.getQuantity());
 		dto.setImageUrls(entity.getImageUrls());
@@ -141,13 +132,19 @@ public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto>, Enti
 	}
 	private BouqueteDto translateFields(Bouquete entity, BouqueteDto dto, Languages language) {
 		//choose color
-		dto.setColors(entity.getColors().stream().map(color -> colorMapper.toDto(color, language)).collect(Collectors.toSet()));
+		dto.setColors(entity.getColors().stream()
+				.map(color -> colorMapper.toDto(color, language))
+				.collect(Collectors.toSet()));
 		//choose name
 		dto.setName(entity.getTranslates().stream()
 				.filter((t) -> t.getLanguage() == language)
 				.findFirst()
 				.get()
 				.getText());
+		//choose flowers
+		dto.setFlowers(entity.getFlowers().stream()
+				.map(flower -> flowerMapper.toDto(flower, language))
+				.collect(Collectors.toSet()));
 		return dto;
 	}
 

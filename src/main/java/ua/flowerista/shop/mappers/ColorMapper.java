@@ -7,7 +7,7 @@ import ua.flowerista.shop.models.Color;
 import ua.flowerista.shop.models.Languages;
 
 @Component
-public class ColorMapper implements EntityMapper<Color, ColorDto>, EntityMultiLanguagesMapper<Color, ColorDto>{
+public class ColorMapper implements EntityMapper<Color, ColorDto>, EntityMultiLanguagesDtoMapper<Color, ColorDto>{
 
 	@Override
 	public Color toEntity(ColorDto dto) {
@@ -23,12 +23,6 @@ public class ColorMapper implements EntityMapper<Color, ColorDto>, EntityMultiLa
 		dto.setId(entity.getId());
 		dto.setName(entity.getName());
 		return dto;
-	}
-	//TODO: Implement the following methods
-	//In future
-	@Override
-	public Color toEntity(ColorDto dto, Languages language) {
-		return null;
 	}
 
 	@Override

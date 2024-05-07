@@ -1,4 +1,4 @@
-package ua.flowerista.shop.controllers;
+package ua.flowerista.shop.controllers.translateTestingControllerV1;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
