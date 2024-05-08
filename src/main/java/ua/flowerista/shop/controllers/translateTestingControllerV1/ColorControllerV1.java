@@ -22,7 +22,7 @@ public class ColorControllerV1 {
 
 	@GetMapping
 	@Operation(summary = "Get all collors", description = "Returns list of all colors")
-	public ResponseEntity<List<ColorDto>> getAllCollors(@RequestParam(defaultValue = "EN") Languages lang) {
+	public ResponseEntity<List<ColorDto>> getAllCollors(@RequestParam(defaultValue = "en") Languages lang) {
 		List<ColorDto> colors = service.getAllColors(lang);
 		return ResponseEntity.ok(colors);
 	}

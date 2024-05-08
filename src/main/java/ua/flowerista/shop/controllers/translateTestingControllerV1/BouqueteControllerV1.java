@@ -27,14 +27,14 @@ public class BouqueteControllerV1 {
 
 	@GetMapping("/bs")
 	@Operation(summary = "Get bestsellers", description = "Returns list (5 units) of bestsellers")
-	public ResponseEntity<List<BouqueteSmallDto>> getBouqueteBestSellers(@RequestParam(defaultValue = "EN") Languages lang) {
+	public ResponseEntity<List<BouqueteSmallDto>> getBouqueteBestSellers(@RequestParam(defaultValue = "en") Languages lang) {
 		List<BouqueteSmallDto> bouquetesModels = service.getBouquetesBestSellers(lang);
 		return ResponseEntity.ok(bouquetesModels);
 	}
 
 	@GetMapping("/ts")
 	@Operation(summary = "Get topsales", description = "Returns list (5 units) of topsales")
-	public ResponseEntity<List<BouqueteSmallDto>> getBouqueteTopSales(@RequestParam(defaultValue = "EN") Languages lang) {
+	public ResponseEntity<List<BouqueteSmallDto>> getBouqueteTopSales(@RequestParam(defaultValue = "en") Languages lang) {
 		List<BouqueteSmallDto> bouquetesModels = service.getBouquetesTop5Sales(lang);
 		return ResponseEntity.ok(bouquetesModels);
 	}
@@ -49,7 +49,7 @@ public class BouqueteControllerV1 {
 			@RequestParam(defaultValue = "false") Boolean sortByPriceHighToLow,
 			@RequestParam(defaultValue = "false") Boolean sortByPriceLowToHigh,
 			@RequestParam(defaultValue = "1") int page,
-			@RequestParam(defaultValue = "EN") Languages lang) {
+			@RequestParam(defaultValue = "en") Languages lang) {
 
 		return ResponseEntity.ok(service.getBouquetesCatalogFiltered(flowerIds, colorIds, minPrice, maxPrice,
 				sortByNewest, sortByPriceHighToLow, sortByPriceLowToHigh, page, lang));
@@ -67,7 +67,7 @@ public class BouqueteControllerV1 {
 	@Operation(summary = "Get bouquete card dto by id", description = "Returns bouquete card dto")
 	@ApiResponses(value = { @ApiResponse(responseCode = "404", description = "If bouquete was not found"),
 			@ApiResponse(responseCode = "200", description = "If bouquete was found") })
-	public ResponseEntity<BouqueteCardDto> getById(@PathVariable("id") int id, @RequestParam(defaultValue = "EN") Languages lang) {
+	public ResponseEntity<BouqueteCardDto> getById(@PathVariable("id") int id, @RequestParam(defaultValue = "en") Languages lang) {
 		BouqueteCardDto dto = service.getById(id, lang);
 		if (dto == null) {
 			return ResponseEntity.notFound().build();
@@ -77,7 +77,7 @@ public class BouqueteControllerV1 {
 
 	@GetMapping("/search")
 	@Operation(summary = "Search bouquetes by names", description = "Returns empty list if in request was less than 3 symbols")
-	public ResponseEntity<List<BouqueteSmallDto>> searchBouquetesByName(@RequestParam("name") String name, @RequestParam(defaultValue = "EN") Languages lang) {
+	public ResponseEntity<List<BouqueteSmallDto>> searchBouquetesByName(@RequestParam("name") String name, @RequestParam(defaultValue = "en") Languages lang) {
 		return ResponseEntity.ok(service.searchBouquetesByName(name, lang));
 	}
 }

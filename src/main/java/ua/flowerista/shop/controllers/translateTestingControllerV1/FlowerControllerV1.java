@@ -22,7 +22,7 @@ public class FlowerControllerV1 {
 
 	@GetMapping
 	@Operation(summary = "Get all flowers", description = "Returns list of all flowers")
-	public ResponseEntity<List<FlowerDto>> getAllFlowers(@RequestParam(defaultValue = "EN") Languages lang) {
+	public ResponseEntity<List<FlowerDto>> getAllFlowers(@RequestParam(defaultValue = "en") Languages lang) {
 		List<FlowerDto> flowers = service.getAllFlowers(lang);
 		return ResponseEntity.ok(flowers);
 	}
