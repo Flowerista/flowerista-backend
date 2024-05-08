@@ -26,11 +26,12 @@ public interface BouqueteRepository extends JpaRepository<Bouquete, Integer>, Qu
 		bindings.bind(String.class).first((SingleValueBinding<StringPath, String>) (path, s) -> path.containsIgnoreCase(s));
 	}
 	@Override
-	@Cacheable("colors")
+	@Cacheable("boquets")
 	@Query("SELECT b FROM Bouquete b JOIN FETCH b.flowers JOIN FETCH b.colors JOIN FETCH b.sizes ")
 	List<Bouquete> findAll();
+	@Cacheable("boquetsTop5BySoldQuantity")
 	List<Bouquete> findTop5ByOrderBySoldQuantityDesc();
-
+	@Cacheable("boquetsTop5Discount")
 	@Query("SELECT b FROM Bouquete b JOIN b.sizes bs WHERE bs.discount IS NOT NULL AND bs.size = 'MEDIUM' ORDER BY bs.discount DESC LIMIT 5")
 	List<Bouquete> findTop5ByOrderByDiscountDesc();
 
