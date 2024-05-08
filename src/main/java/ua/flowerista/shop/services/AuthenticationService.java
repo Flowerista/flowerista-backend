@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import ua.flowerista.shop.dto.user.UserAuthenticationResponseDto;
 import ua.flowerista.shop.dto.user.UserLoginBodyDto;
+import ua.flowerista.shop.mappers.UserMapper;
 import ua.flowerista.shop.models.RefreshToken;
 import ua.flowerista.shop.models.Token;
 import ua.flowerista.shop.models.TokenType;
@@ -24,6 +25,7 @@ public class AuthenticationService {
   private final JwtService jwtService;
   private final RefreshTokenService refreshTokenService;
   private final AuthenticationManager authenticationManager;
+  private final UserMapper userMapper;
 
 
   public UserAuthenticationResponseDto authenticate(UserLoginBodyDto loginBody) {
@@ -42,6 +44,7 @@ public class AuthenticationService {
     return UserAuthenticationResponseDto.builder()
             .accessToken(jwtToken)
             .refreshToken(refreshToken)
+            .user(userMapper.toDto(user))
             .build();
   }
 

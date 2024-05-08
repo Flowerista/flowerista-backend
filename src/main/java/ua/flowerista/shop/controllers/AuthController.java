@@ -38,6 +38,7 @@ import ua.flowerista.shop.dto.user.UserAuthenticationResponseDto;
 import ua.flowerista.shop.dto.user.UserLoginBodyDto;
 import ua.flowerista.shop.dto.user.UserPasswordResetDto;
 import ua.flowerista.shop.dto.user.UserRegistrationBodyDto;
+import ua.flowerista.shop.mappers.UserMapper;
 import ua.flowerista.shop.models.User;
 import ua.flowerista.shop.registration.OnRegistrationCompleteEvent;
 import ua.flowerista.shop.services.AuthenticationService;
@@ -51,6 +52,9 @@ public class AuthController {
 
 	@Autowired
 	private UserService service;
+
+	@Autowired
+	private UserMapper userMapper;
 
 	@Autowired
 	private AuthenticationService authService;
@@ -79,7 +83,7 @@ public class AuthController {
 		final User registered = service.registerNewUserAccount(regDto);
 		eventPublisher
 				.publishEvent(new OnRegistrationCompleteEvent(registered, request.getLocale(), getAppUrl(request)));
-		return ResponseEntity.accepted().build();
+		return ResponseEntity.accepted().body(UserAuthenticationResponseDto.builder().user(userMapper.toDto(registered)).build());
 	}
 
 	@GetMapping("/checkEmail/{email}")
