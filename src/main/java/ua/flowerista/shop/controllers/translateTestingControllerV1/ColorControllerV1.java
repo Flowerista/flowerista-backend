@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/color")
 @CrossOrigin
-@Tag(name="Color controller")
+@Tag(name="Color controller for translation testing")
 public class ColorControllerV1 {
 
 	@Autowired

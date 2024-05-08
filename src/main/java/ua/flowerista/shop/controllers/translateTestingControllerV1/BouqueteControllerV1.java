@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/bouquete")
 @CrossOrigin(origins = "*")
-@Tag(name = "Bouquete controller")
+@Tag(name = "Bouquete controller for translation testing")
 public class BouqueteControllerV1 {
 
 	@Autowired

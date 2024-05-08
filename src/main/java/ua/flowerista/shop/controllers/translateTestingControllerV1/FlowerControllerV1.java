@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/flower")
 @CrossOrigin
-@Tag(name="Flower controller")
+@Tag(name="Flower controller for translation testing")
 public class FlowerControllerV1 {
 
 	@Autowired
