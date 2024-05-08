@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -98,14 +99,50 @@ public class BouqueteService {
     }
 
     public Page<BouqueteSmallDto> getBouquetesCatalogFiltered(List<Integer> flowerIds, List<Integer> colorIds, Integer minPrice, Integer maxPrice, Boolean sortByNewest, Boolean sortByPriceHighToLow, Boolean sortByPriceLowToHigh, int page) {
+        //cached query for all bouquetes
+        List<Bouquete> bouquetes = repo.findAll();
+        List<BouqueteSmallDto> result = null;
+        //if all filters are null, return all bouquetes
+        if ((flowerIds == null) && (colorIds == null) && (minPrice == null) && (maxPrice == null) && (sortByNewest == null) && (sortByPriceHighToLow == null) && (sortByPriceLowToHigh == null)) {
+            result = bouquetes.stream().map(bouquete -> mapper.toSmallDto(bouquete)).collect(Collectors.toList());
+        }
+        //else return bouquetes filtered by ids from db query with filters
+        else {
+            List<Integer> ids = repo.findByFilters(flowerIds, colorIds, minPrice, maxPrice, sortByNewest, sortByPriceHighToLow, sortByPriceLowToHigh);
+            result = ids.stream()
+                    .map(id -> bouquetes.stream().filter(bouquete -> bouquete.getId() == id).findFirst().orElse(null))
+                    .map(bouquete -> mapper.toSmallDto(bouquete))
+                    .collect(Collectors.toList());
+        }
+        //pagination
         Pageable pageable = PageRequest.of(page - 1, 20);
-        return repo.findByFilters(flowerIds, colorIds, minPrice, maxPrice, sortByNewest, sortByPriceHighToLow, sortByPriceLowToHigh, pageable).map(mapper::toSmallDto);
-
+        final int start = (int)pageable.getOffset();
+        final int end = Math.min((start + pageable.getPageSize()), result.size());
+        final Page<BouqueteSmallDto> bouquetePage = new PageImpl<>(result.subList(start, end), pageable, result.size());
+        return bouquetePage;
     }
     public Page<BouqueteSmallDto> getBouquetesCatalogFiltered(List<Integer> flowerIds, List<Integer> colorIds, Integer minPrice, Integer maxPrice, Boolean sortByNewest, Boolean sortByPriceHighToLow, Boolean sortByPriceLowToHigh, int page, Languages lang) {
+        //cached query for all bouquetes
+        List<Bouquete> bouquetes = repo.findAll();
+        List<BouqueteSmallDto> result = null;
+        //if all filters are null, return all bouquetes
+        if ((flowerIds == null) && (colorIds == null) && (minPrice == null) && (maxPrice == null) && (sortByNewest == null) && (sortByPriceHighToLow == null) && (sortByPriceLowToHigh == null)) {
+            result = bouquetes.stream().map(bouquete -> mapper.toSmallDto(bouquete, lang)).collect(Collectors.toList());
+        }
+        //else return bouquetes filtered by ids from db query with filters
+        else {
+            List<Integer> ids = repo.findByFilters(flowerIds, colorIds, minPrice, maxPrice, sortByNewest, sortByPriceHighToLow, sortByPriceLowToHigh);
+            result = ids.stream()
+                    .map(id -> bouquetes.stream().filter(bouquete -> bouquete.getId() == id).findFirst().orElse(null))
+                    .map(bouquete -> mapper.toSmallDto(bouquete, lang))
+                    .collect(Collectors.toList());
+        }
+        //pagination
         Pageable pageable = PageRequest.of(page - 1, 20);
-        return repo.findByFilters(flowerIds, colorIds, minPrice, maxPrice, sortByNewest, sortByPriceHighToLow, sortByPriceLowToHigh, pageable).map(t->mapper.toSmallDto(t, lang));
-
+        final int start = (int)pageable.getOffset();
+        final int end = Math.min((start + pageable.getPageSize()), result.size());
+        final Page<BouqueteSmallDto> bouquetePage = new PageImpl<>(result.subList(start, end), pageable, result.size());
+        return bouquetePage;
     }
 
     public PriceRangeDto getMinMaxPrices() {
