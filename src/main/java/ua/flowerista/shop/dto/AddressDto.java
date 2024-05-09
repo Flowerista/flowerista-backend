@@ -13,7 +13,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddressDto {
 	@NotBlank(message = "City name must not be empty")
 	@Pattern(regexp = "^[\\p{L}\\p{IsCyrillic} -]*$", message = "Only letters, spaces, hyphens, and combinations are allowed in the city name")
@@ -29,10 +28,13 @@ public class AddressDto {
 	@Pattern(regexp = "^[0-9]*$", message = "Only numbers are allowed in the flat")
 	private String flat;
 	@JsonProperty("date")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String dateDelivery;
 	@JsonProperty("time")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String timeDelivery;
 	@JsonProperty("type")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String typeDelivery;
 
 	@Override
