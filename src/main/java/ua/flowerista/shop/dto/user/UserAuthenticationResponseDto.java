@@ -1,5 +1,6 @@
 package ua.flowerista.shop.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -17,7 +18,7 @@ public class UserAuthenticationResponseDto {
 
 	  @JsonProperty("access_token")
 	  private String accessToken;
-	  @JsonProperty("refresh_token")
+	  @JsonIgnore
 	  private String refreshToken;
 	  @JsonProperty("user")
 	  private UserDto user;
