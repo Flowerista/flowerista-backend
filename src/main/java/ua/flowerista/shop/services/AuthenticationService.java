@@ -116,7 +116,7 @@ public class AuthenticationService {
     saveUserToken(user, jwtToken);
     return UserAuthenticationResponseDto.builder()
             .accessToken(jwtToken)
-            .user(userMapper.toDto(user))
+            .user(userMapper.toProfileDto(user))
             .build();
   }
 }

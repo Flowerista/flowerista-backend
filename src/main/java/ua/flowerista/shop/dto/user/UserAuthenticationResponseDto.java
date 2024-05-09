@@ -21,6 +21,6 @@ public class UserAuthenticationResponseDto {
 	  @JsonIgnore
 	  private String refreshToken;
 	  @JsonProperty("user")
-	  private UserDto user;
+	  private UserProfileDto user;
 
 }

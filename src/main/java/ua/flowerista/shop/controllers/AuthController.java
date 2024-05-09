@@ -84,7 +84,7 @@ public class AuthController {
 		final User registered = service.registerNewUserAccount(regDto);
 		eventPublisher
 				.publishEvent(new OnRegistrationCompleteEvent(registered, request.getLocale(), getAppUrl(request)));
-		return ResponseEntity.accepted().body(UserAuthenticationResponseDto.builder().user(userMapper.toDto(registered)).build());
+		return ResponseEntity.accepted().body(UserAuthenticationResponseDto.builder().user(userMapper.toProfileDto(registered)).build());
 	}
 
 	@GetMapping("/checkEmail/{email}")

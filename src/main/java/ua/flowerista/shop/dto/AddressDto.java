@@ -1,5 +1,6 @@
 package ua.flowerista.shop.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -12,6 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddressDto {
 	@NotBlank(message = "City name must not be empty")
 	@Pattern(regexp = "^[\\p{L}\\p{IsCyrillic} -]*$", message = "Only letters, spaces, hyphens, and combinations are allowed in the city name")
