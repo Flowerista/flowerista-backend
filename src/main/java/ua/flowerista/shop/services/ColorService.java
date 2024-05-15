@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import ua.flowerista.shop.dto.ColorDto;
 import ua.flowerista.shop.mappers.ColorMapper;
+import ua.flowerista.shop.models.Languages;
 import ua.flowerista.shop.repo.ColorRepository;
 
 @Service
@@ -32,6 +33,9 @@ public class ColorService {
 
 	public List<ColorDto> getAllColors() {
 		return repo.findAll().stream().map(color -> mapper.toDto(color)).collect(Collectors.toList());
+	}
+	public List<ColorDto> getAllColors(Languages lang) {
+		return repo.findAll().stream().map(color -> mapper.toDto(color, lang)).collect(Collectors.toList());
 	}
 
 	public ColorDto getColorById(int id) {

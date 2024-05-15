@@ -1,23 +1,24 @@
 package ua.flowerista.shop.mappers;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import ua.flowerista.shop.dto.BouqueteCardDto;
 import ua.flowerista.shop.dto.BouqueteDto;
 import ua.flowerista.shop.dto.BouqueteSmallDto;
-import ua.flowerista.shop.models.Bouquete;
-import ua.flowerista.shop.models.BouqueteSize;
-import ua.flowerista.shop.models.Size;
+import ua.flowerista.shop.models.*;
 
 @Component
-public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto> {
+public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto>, EntityMultiLanguagesDtoMapper<Bouquete, BouqueteDto> {
 
 	private ColorMapper colorMapper;
 	private FlowerMapper flowerMapper;
+
 
 	@Autowired
 	public BouqueteMapper(ColorMapper colorMapper, FlowerMapper flowerMapper) {
@@ -27,20 +28,7 @@ public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto> {
 
 	@Override
 	public Bouquete toEntity(BouqueteDto dto) {
-		Bouquete entity = new Bouquete();
-
-		entity.setId(dto.getId());
-		entity.setSizes(dto.getSizes());
-		entity.setFlowers(dto.getFlowers().stream().map(flowerDto -> flowerMapper.toEntity(flowerDto))
-				.collect(Collectors.toSet()));
-		entity.setColors(
-				dto.getColors().stream().map(colorDto -> colorMapper.toEntity(colorDto)).collect(Collectors.toSet()));
-		entity.setItemCode(dto.getItemCode());
-		entity.setName(dto.getName());
-		entity.setQuantity(dto.getQuantity());
-		entity.setSoldQuantity(dto.getSoldQuantity());
-		entity.setImageUrls(dto.getImageUrls());
-		return entity;
+		return null;
 	}
 
 	@Override
@@ -76,7 +64,7 @@ public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto> {
 	public BouqueteCardDto toCardDto(Bouquete entity) {
 		BouqueteCardDto dto = new BouqueteCardDto();
 		dto.setId(entity.getId());
-		dto.setFlowers(entity.getFlowers());
+		dto.setFlowers(entity.getFlowers().stream().map(flower -> flowerMapper.toDto(flower)).collect(Collectors.toSet()));
 		dto.setImageUrls(entity.getImageUrls());
 		dto.setItemCode(entity.getItemCode());
 		dto.setName(entity.getName());
@@ -93,6 +81,71 @@ public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto> {
 			}
 		}
 		throw new RuntimeException("Size not found for Bouquete: " + bouquete.getId());
+	}
+
+	@Override
+	public BouqueteDto toDto(Bouquete entity, Languages language) {
+		BouqueteDto dto = new BouqueteDto();
+		dto = mapGenericField(entity, dto);
+		dto = translateFields(entity, dto, language);
+		return dto;
+	}
+
+	public BouqueteSmallDto toSmallDto(Bouquete entity, Languages language) {
+		BouqueteDto dto = toDto(entity, language);
+
+		BouqueteSmallDto bouqueteSmallDto = new BouqueteSmallDto();
+		BouqueteSize size = findBouqueteSize(entity);
+		bouqueteSmallDto.setId(dto.getId());
+		bouqueteSmallDto.setDefaultPrice(size.getDefaultPrice());
+		bouqueteSmallDto.setDiscount(size.getDiscount());
+		bouqueteSmallDto.setDiscountPrice(size.getDiscountPrice());
+		bouqueteSmallDto.setName(dto.getName());
+		bouqueteSmallDto.setImageUrls(dto.getImageUrls());
+		bouqueteSmallDto.setSizes(dto.getSizes());
+		bouqueteSmallDto.setStockQuantity(dto.getQuantity());
+		return bouqueteSmallDto;
+	}
+
+	public BouqueteCardDto toCardDto(Bouquete entity, Languages language) {
+		BouqueteDto dto = toDto(entity, language);
+
+		BouqueteCardDto bouqueteCardDto = new BouqueteCardDto();
+		bouqueteCardDto.setId(dto.getId());
+		bouqueteCardDto.setFlowers(dto.getFlowers());
+		bouqueteCardDto.setImageUrls(dto.getImageUrls());
+		bouqueteCardDto.setItemCode(dto.getItemCode());
+		bouqueteCardDto.setName(dto.getName());
+		bouqueteCardDto.setSizes(dto.getSizes());
+		bouqueteCardDto.setStockQuantity(dto.getQuantity());
+		return bouqueteCardDto;
+	}
+
+	private BouqueteDto mapGenericField(Bouquete entity, BouqueteDto dto) {
+		dto.setId(entity.getId());
+		dto.setItemCode(entity.getItemCode());
+		dto.setQuantity(entity.getQuantity());
+		dto.setImageUrls(entity.getImageUrls());
+		dto.setSizes(entity.getSizes());
+		dto.setSoldQuantity(entity.getSoldQuantity());
+		return dto;
+	}
+	private BouqueteDto translateFields(Bouquete entity, BouqueteDto dto, Languages language) {
+		//choose color
+		dto.setColors(entity.getColors().stream()
+				.map(color -> colorMapper.toDto(color, language))
+				.collect(Collectors.toSet()));
+		//choose name
+		dto.setName(entity.getTranslates().stream()
+				.filter((t) -> t.getLanguage() == language)
+				.findFirst()
+				.get()
+				.getText());
+		//choose flowers
+		dto.setFlowers(entity.getFlowers().stream()
+				.map(flower -> flowerMapper.toDto(flower, language))
+				.collect(Collectors.toSet()));
+		return dto;
 	}
 
 
