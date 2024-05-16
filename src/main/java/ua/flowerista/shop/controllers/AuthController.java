@@ -6,10 +6,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -26,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpHeaders;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -83,7 +84,7 @@ public class AuthController {
 		final User registered = service.registerNewUserAccount(regDto);
 		eventPublisher
 				.publishEvent(new OnRegistrationCompleteEvent(registered, request.getLocale(), getAppUrl(request)));
-		return ResponseEntity.accepted().body(UserAuthenticationResponseDto.builder().user(userMapper.toDto(registered)).build());
+		return ResponseEntity.accepted().build();
 	}
 
 	@GetMapping("/checkEmail/{email}")
@@ -110,20 +111,22 @@ public class AuthController {
 	@Operation(summary = "User login endpoint", description = "Returns refresh and access tokens")
 	@ApiResponses(value = { @ApiResponse(responseCode = "403", description = "If email or password didnt match"),
 			@ApiResponse(responseCode = "200", description = "If data was accepted") })
-	public ResponseEntity<?> authenticate(@RequestBody UserLoginBodyDto request) {
-		UserAuthenticationResponseDto response = authService.authenticate(request);
-		if (response.getAccessToken().equals(null) || response.getRefreshToken().equals(null)) {
-			return ResponseEntity.badRequest().body("Email or password dont match");
+	public ResponseEntity<?> authenticate(@RequestBody UserLoginBodyDto request, HttpServletResponse response) {
+		try {
+			UserAuthenticationResponseDto responseDto = authService.authenticate(request, response);
+			return ResponseEntity.ok(responseDto);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body("Email or password dont match +\n" + e.getMessage());
 		}
-		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping("/refresh-token")
-	@Operation(summary = "Api to refresh token", description = "Returns refreshed tokens")
-	public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+	@Operation(summary = "Api to refresh token", description = "Returns refreshed access token if refresh token is valid" +
+			" and present in cookies")
+	public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
 		try {
-			UserAuthenticationResponseDto responseDto = authService.refreshToken(request);
-			return ResponseEntity.ok(responseDto);
+			UserAuthenticationResponseDto authenticationResponseDto = authService.refreshToken(request, response);
+			return ResponseEntity.ok(authenticationResponseDto);
 		} catch (Exception e) {
 			return ResponseEntity.status(401).body(e.getMessage());
 		}

@@ -1,5 +1,6 @@
 package ua.flowerista.shop.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -27,10 +28,13 @@ public class AddressDto {
 	@Pattern(regexp = "^[0-9]*$", message = "Only numbers are allowed in the flat")
 	private String flat;
 	@JsonProperty("date")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String dateDelivery;
 	@JsonProperty("time")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String timeDelivery;
 	@JsonProperty("type")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String typeDelivery;
 
 	@Override
