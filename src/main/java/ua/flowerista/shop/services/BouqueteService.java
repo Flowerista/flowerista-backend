@@ -69,8 +69,8 @@ public class BouqueteService {
         return repo.findAll().stream().map(bouquete -> mapper.toDto(bouquete)).collect(Collectors.toList());
     }
 
-    public BouqueteDto getBouqueteById(int id) {
-        return mapper.toDto(repo.getReferenceById(id));
+    public BouqueteDto getBouqueteById(int id, Languages lang) {
+        return mapper.toDto(repo.getReferenceById(id), lang);
     }
 
     public Bouquete getBouquet(int id) {
@@ -222,7 +222,11 @@ public class BouqueteService {
         repo.save(bouquete);
     }
 
-    public Page<Bouquete> searchBouquetsByName(String name, Pageable pageable) {
-        return repo.findByNameContainingIgnoreCase(name, pageable);
+    public Page<BouqueteDto> searchBouquetsByName(Languages lang, String name, Pageable pageable) {
+        return repo.findByNameContainingIgnoreCase(name, pageable).map(boquete -> mapper.toDto(boquete, lang));
+    }
+
+    public Page<BouqueteDto> searchBouquetsByTranslatesName(Languages lang, String name, Pageable pageable) {
+        return repo.findByTranslatesTextContainingIgnoreCase(name, pageable).map(boquete -> mapper.toDto(boquete, lang));
     }
 }
