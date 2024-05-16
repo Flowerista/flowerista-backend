@@ -13,6 +13,7 @@ import org.springframework.web.servlet.ModelAndView;
 import ua.flowerista.shop.dto.FlowerDto;
 import ua.flowerista.shop.mappers.FlowerMapper;
 import ua.flowerista.shop.models.Flower;
+import ua.flowerista.shop.models.Languages;
 import ua.flowerista.shop.services.FlowerService;
 import ua.flowerista.shop.services.validators.FlowerValidator;
 
@@ -33,9 +34,10 @@ public class FlowerAPController {
                                    Integer page,
                                    @RequestParam(name = "size", defaultValue = "10", required = false)
                                    Integer size,
-                                   Pageable pageable) {
+                                   Pageable pageable,
+                                   @RequestParam(defaultValue = "en") Languages lang) {
         Page<FlowerDto> flowers = flowerService.getAllFlowers(predicate,
-                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))).map(flowerMapper::toDto);
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))).map(flower -> flowerMapper.toDto(flower, lang));
         return new ModelAndView("admin/flowers/flowersList").addObject("flowers", flowers);
     }
 
@@ -53,9 +55,9 @@ public class FlowerAPController {
     }
 
     @GetMapping("/{id}")
-    public ModelAndView getFlowerById(@PathVariable int id) {
+    public ModelAndView getFlowerById(@PathVariable int id, @RequestParam(defaultValue = "en") Languages lang) {
         ModelAndView result = new ModelAndView("admin/flowers/flowerView");
-        FlowerDto flower = flowerMapper.toDto(flowerService.getFlower(id).orElseThrow());
+        FlowerDto flower = flowerService.getFlower(id).map(flow -> flowerMapper.toDto(flow, lang)).orElse(null);
         result.addObject("flower", flower);
         return result;
     }
