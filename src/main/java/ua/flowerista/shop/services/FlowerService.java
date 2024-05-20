@@ -55,17 +55,17 @@ public class FlowerService {
     }
 
     public void update(FlowerDto flower, Languages lang) {
-        Flower entity = getFlower(flower.getId()).orElse(null); // достаем цветок для того, чтоб его изменить и сохранить
+        Flower entity = getFlower(flower.getId()).orElse(null);
 
 		if (lang == Languages.en) {
 			entity.setName(flower.getName());
 		}
 
-        Set<Translate> translates = entity != null ? entity.getNameTranslate() : null; // достаем переводы цветка, для того, чтоб изх изменить
+        Set<Translate> translates = entity != null ? entity.getNameTranslate() : null;
 
 		Translate translate;
-        if (translates != null) { // проверяем есть ли вообще у цветка переводы
-            translate = translates.stream().filter(t -> t.getLanguage() == lang).findFirst().orElse(new Translate()); // достаем нужный нам перевод
+        if (translates != null) {
+            translate = translates.stream().filter(t -> t.getLanguage() == lang).findFirst().orElse(new Translate());
 			translates.remove(translate);
         } else {
 			translate = new Translate();
