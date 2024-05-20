@@ -2,6 +2,7 @@ package ua.flowerista.shop.controllers.adminPanel;
 
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ public class FlowerAPController {
     private final FlowerService flowerService;
     private final FlowerMapper flowerMapper;
     private final FlowerValidator flowerValidator;
+    private final DataSourceTransactionManagerAutoConfiguration dataSourceTransactionManagerAutoConfiguration;
 
     @GetMapping
     public ModelAndView getFlowers(@QuerydslPredicate(root = Flower.class)
@@ -63,9 +65,12 @@ public class FlowerAPController {
     }
 
     @PostMapping("/{id}")
-    public ModelAndView changeFlowerName(@PathVariable int id, @RequestParam("inputName") String flowerName) {
-        flowerService.update(new FlowerDto(id, flowerName));
-        return new ModelAndView("redirect:/api/admin/flowers/" + id);
+    public ModelAndView changeFlowerName(@PathVariable int id,
+                                         @RequestParam("inputName") String flowerName,
+                                         @RequestParam(name = "lang", defaultValue = "en") Languages lang) {
+        System.out.println(lang);
+        flowerService.update(new FlowerDto(id, flowerName), lang);
+        return new ModelAndView("redirect:/api/admin/flowers/" + id + "?lang=" + lang);
     }
 
 }
