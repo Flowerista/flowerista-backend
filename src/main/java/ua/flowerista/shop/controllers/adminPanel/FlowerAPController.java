@@ -68,7 +68,6 @@ public class FlowerAPController {
     public ModelAndView changeFlowerName(@PathVariable int id,
                                          @RequestParam("inputName") String flowerName,
                                          @RequestParam(name = "lang", defaultValue = "en") Languages lang) {
-        System.out.println(lang);
         flowerService.update(new FlowerDto(id, flowerName), lang);
         return new ModelAndView("redirect:/api/admin/flowers/" + id + "?lang=" + lang);
     }
