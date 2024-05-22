@@ -64,13 +64,16 @@ public class BouqueteAPController {
     }
 
     @PostMapping("/{id}")
-    public ModelAndView updateBouquet(@PathVariable Integer id, @RequestBody BouqueteDto bouqueteDto) {
+    public ModelAndView updateBouquet(@PathVariable Integer id,
+                                      @RequestBody BouqueteDto bouqueteDto,
+                                      @RequestParam(defaultValue = "en") Languages lang) {
+        System.out.println(lang);
         Bouquete bouquete = bouqueteService.getBouquet(id);
         bouqueteDto.getSizes().stream().forEach(bouqueteSize -> bouqueteSize.setBouquete(bouquete));
         bouqueteDto.setImageUrls(bouquete.getImageUrls());
 
         bouqueteSizeService.saveAll(bouqueteDto.getSizes());
-        bouqueteService.update(bouqueteDto);
+        bouqueteService.update(bouqueteDto, lang);
         return new ModelAndView("redirect:/api/admin/bouquets/" + id);
     }
 

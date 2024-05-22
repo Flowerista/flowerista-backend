@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ua.flowerista.shop.dto.ColorDto;
 import ua.flowerista.shop.models.Color;
 import ua.flowerista.shop.models.Languages;
+import ua.flowerista.shop.models.Translate;
 
 @Component
 public class ColorMapper implements EntityMapper<Color, ColorDto>, EntityMultiLanguagesDtoMapper<Color, ColorDto>{
@@ -32,7 +33,7 @@ public class ColorMapper implements EntityMapper<Color, ColorDto>, EntityMultiLa
 		dto.setName(entity.getNameTranslate().stream()
 				.filter((t) -> t.getLanguage() == language)
 				.findFirst()
-				.get()
+				.orElse(Translate.builder().text(entity.getName()).build())
 				.getText());
 		return dto;
 	}

@@ -450,9 +450,10 @@
     });
 
     function sendDataToController(bouquetDto) {
+        const lang = getLanguageFromCookie();
         // AJAX request to send bouquetDto to the controller
         var xhr = new XMLHttpRequest();
-        var url = "/api/admin/bouquets/" + bouquetDto.id;
+        var url = "/api/admin/bouquets/" + bouquetDto.id + "?lang=" + lang;
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/json");
 

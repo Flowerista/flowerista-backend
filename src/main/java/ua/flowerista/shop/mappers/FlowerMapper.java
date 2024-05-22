@@ -33,7 +33,7 @@ public class FlowerMapper implements EntityMapper<Flower, FlowerDto> , EntityMul
 		dto.setName(entity.getNameTranslate().stream()
 				.filter((t) -> t.getLanguage() == language)
 				.findFirst()
-				.orElse(Translate.builder().text("Default name - not found translate for flower").build())
+				.orElse(Translate.builder().text(entity.getName()).build())
 				.getText());
 		return dto;
 	}

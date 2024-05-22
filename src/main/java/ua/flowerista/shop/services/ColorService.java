@@ -1,6 +1,7 @@
 package ua.flowerista.shop.services;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import ua.flowerista.shop.dto.ColorDto;
 import ua.flowerista.shop.mappers.ColorMapper;
+import ua.flowerista.shop.models.Color;
 import ua.flowerista.shop.models.Languages;
 import ua.flowerista.shop.repo.ColorRepository;
 
@@ -40,6 +42,10 @@ public class ColorService {
 
 	public ColorDto getColorById(int id) {
 		return mapper.toDto(repo.getReferenceById(id));
+	}
+
+	public Optional<Color> getColor(int id) {
+		return repo.findById(id);
 	}
 
 	public void update(ColorDto color) {
