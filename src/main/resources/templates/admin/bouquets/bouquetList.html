@@ -19,6 +19,7 @@
         <form th:action="@{/api/admin/bouquets}" method="get" style="display: flex; width: 35%">
             <input type="text" name="bouquetName" id="searchInput" class="form-control"
                    placeholder="Search by bouquet name">
+            <input type="hidden" name="lang" id="languageInput">
             <button type="submit" class="btn btn-primary" style="margin: 0 2%">Search</button>
         </form>
     </div>

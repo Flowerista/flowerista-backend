@@ -32,6 +32,10 @@ public class BouqueteService {
     private BouqueteMapper mapper;
     private CloudinaryService cloudinary;
     private static final Logger logger = LoggerFactory.getLogger(BouqueteService.class);
+    @Autowired
+    private FlowerService flowerService;
+    @Autowired
+    private ColorService colorService;
 
     @Autowired
     public BouqueteService(BouqueteRepository repo, BouqueteMapper mapper, CloudinaryService cloudinary) {
@@ -69,8 +73,8 @@ public class BouqueteService {
         return repo.findAll().stream().map(bouquete -> mapper.toDto(bouquete)).collect(Collectors.toList());
     }
 
-    public BouqueteDto getBouqueteById(int id) {
-        return mapper.toDto(repo.getReferenceById(id));
+    public BouqueteDto getBouqueteById(int id, Languages lang) {
+        return mapper.toDto(repo.getReferenceById(id), lang);
     }
 
     public Bouquete getBouquet(int id) {
@@ -79,6 +83,32 @@ public class BouqueteService {
 
     public void update(BouqueteDto dto) {
         repo.save(mapper.toEntity(dto));
+    }
+
+    public void update(BouqueteDto dto, Languages lang) {
+        Bouquete entity = repo.findById(dto.getId());
+
+        if (lang == Languages.en) {
+            entity.setName(dto.getName());
+        }
+
+        Set<Translate> translates = entity != null ? entity.getTranslates() : null;
+
+        Translate translate;
+        if (translates != null) {
+            translate = translates.stream().filter(t -> t.getLanguage() == lang).findFirst().orElse(new Translate());
+            translates.remove(translate);
+        } else {
+            translate = new Translate();
+        }
+        translate.setText(dto.getName());
+        translate.setLanguage(lang);
+        translate.setBouquete(entity);
+        translates.add(translate);
+        entity.setTranslates(translates);
+        entity.setFlowers(dto.getFlowers().stream().map(flowerDto -> flowerService.getFlower(flowerDto.getId()).orElse(null)).collect(Collectors.toSet()));
+        entity.setColors(dto.getColors().stream().map(colorDto -> colorService.getColor(colorDto.getId()).orElse(null)).collect(Collectors.toSet()));
+        repo.save(entity);
     }
 
     public List<BouqueteSmallDto> getBouquetesBestSellers() {
@@ -222,7 +252,11 @@ public class BouqueteService {
         repo.save(bouquete);
     }
 
-    public Page<Bouquete> searchBouquetsByName(String name, Pageable pageable) {
-        return repo.findByNameContainingIgnoreCase(name, pageable);
+    public Page<BouqueteDto> searchBouquetsByName(Languages lang, String name, Pageable pageable) {
+        return repo.findByNameContainingIgnoreCase(name, pageable).map(boquete -> mapper.toDto(boquete, lang));
+    }
+
+    public Page<BouqueteDto> searchBouquetsByTranslatesName(Languages lang, String name, Pageable pageable) {
+        return repo.findByTranslatesTextContainingIgnoreCase(name, pageable).map(boquete -> mapper.toDto(boquete, lang));
     }
 }

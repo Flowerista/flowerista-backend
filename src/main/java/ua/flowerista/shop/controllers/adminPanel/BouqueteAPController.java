@@ -14,6 +14,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import ua.flowerista.shop.dto.*;
 import ua.flowerista.shop.mappers.BouqueteMapper;
 import ua.flowerista.shop.models.Bouquete;
+import ua.flowerista.shop.models.Languages;
 import ua.flowerista.shop.services.*;
 
 import java.util.List;
@@ -32,47 +33,56 @@ public class BouqueteAPController {
     public ModelAndView getAllBouquets(@QuerydslPredicate(root = Bouquete.class) Predicate predicate,
                                        @RequestParam(name = "page", defaultValue = "0", required = false) Integer page,
                                        @RequestParam(name = "size", defaultValue = "10", required = false) Integer size,
-                                       @RequestParam(name = "bouquetName", defaultValue = "", required = false) String name) {
+                                       @RequestParam(name = "bouquetName", defaultValue = "", required = false) String name,
+                                       @RequestParam(name = "lang", defaultValue = "en", required = false) Languages lang) {
         Page<BouqueteDto> bouquets;
         if (!name.equals("")) {
-            bouquets = bouqueteService.searchBouquetsByName(name, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")))
-                    .map(bouqueteMapper::toDto);
+            if (lang == Languages.en) {
+                bouquets = bouqueteService.searchBouquetsByName(lang, name, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+            } else {
+                bouquets = bouqueteService.searchBouquetsByTranslatesName(lang, name, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")));
+            }
         } else {
             bouquets = bouqueteService.getAllBouquetes(predicate, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id")))
-                    .map(bouqueteMapper::toDto);
+                    .map(bouquete -> bouqueteMapper.toDto(bouquete, lang));
         }
         return new ModelAndView("admin/bouquets/bouquetList").addObject("bouquets", bouquets);
     }
 
     @GetMapping("/{id}")
-    public ModelAndView getBouquet(@PathVariable Integer id) {
+    public ModelAndView getBouquet(@PathVariable Integer id, @RequestParam(defaultValue = "en") Languages lang) {
         ModelAndView result = new ModelAndView("admin/bouquets/bouquetView");
-        BouqueteDto bouqueteDto = bouqueteService.getBouqueteById(id);
+        BouqueteDto bouqueteDto = bouqueteService.getBouqueteById(id, lang);
         result.addObject("bouquet", bouqueteDto);
 
-        List<FlowerDto> flowersDto = flowerService.getAllFlowers();
+        List<FlowerDto> flowersDto = flowerService.getAllFlowers(lang);
         result.addObject("flowers", flowersDto);
 
-        List<ColorDto> colorsDto = colorService.getAllColors();
+        List<ColorDto> colorsDto = colorService.getAllColors(lang);
         result.addObject("colors", colorsDto);
         return result;
     }
 
     @PostMapping("/{id}")
-    public ModelAndView updateBouquet(@PathVariable Integer id, @RequestBody BouqueteDto bouqueteDto) {
+    public ModelAndView updateBouquet(@PathVariable Integer id,
+                                      @RequestBody BouqueteDto bouqueteDto,
+                                      @RequestParam(defaultValue = "en") Languages lang) {
+        System.out.println(lang);
         Bouquete bouquete = bouqueteService.getBouquet(id);
         bouqueteDto.getSizes().stream().forEach(bouqueteSize -> bouqueteSize.setBouquete(bouquete));
         bouqueteDto.setImageUrls(bouquete.getImageUrls());
 
         bouqueteSizeService.saveAll(bouqueteDto.getSizes());
-        bouqueteService.update(bouqueteDto);
+        bouqueteService.update(bouqueteDto, lang);
         return new ModelAndView("redirect:/api/admin/bouquets/" + id);
     }
 
     @PostMapping("/image/{id}")
-    public ModelAndView uploadImages(@PathVariable Integer id, @RequestParam("images") List<MultipartFile> images) {
+    public ModelAndView uploadImages(@PathVariable Integer id,
+                                     @RequestParam("images") List<MultipartFile> images,
+                                     @RequestParam(defaultValue = "en") Languages lang) {
         if (!images.isEmpty() && !images.stream().allMatch(MultipartFile::isEmpty)) {
-            BouqueteDto bouquetDto = bouqueteService.getBouqueteById(id);
+            BouqueteDto bouquetDto = bouqueteService.getBouqueteById(id, lang);
             bouqueteService.insert(bouquetDto, images);
         }
         return new ModelAndView("redirect:/api/admin/bouquets/" + id);

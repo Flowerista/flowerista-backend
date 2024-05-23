@@ -2,7 +2,7 @@ package ua.flowerista.shop.repo;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.ClassRule;
@@ -11,9 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -26,6 +23,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import ua.flowerista.shop.config.PostgresTestProfileJPAConfig;
 import ua.flowerista.shop.models.Bouquete;
+import ua.flowerista.shop.models.Languages;
+import ua.flowerista.shop.models.Translate;
 
 @SpringBootTest(classes = PostgresTestProfileJPAConfig.class)
 @Testcontainers
@@ -61,18 +60,26 @@ class BouqueteRepositoryTest extends AbstractTransactionalJUnit4SpringContextTes
 	@Test
 	void testInsertBouquete() {
 		Bouquete expected = new Bouquete();
-		expected.setName("Spring Bouquet1");
+		expected.setName("Spring Bouquet 2");
+		Translate nameEN = Translate.builder()
+				.language(Languages.en)
+				.text("Spring Bouquet")
+				.build();
+		Translate nameUK = Translate.builder()
+				.language(Languages.uk)
+				.text("Весняний букет")
+				.build();
+		expected.setTranslates(new HashSet<>(List.of(nameEN, nameUK)));
 		expected.setItemCode("BQ005");
 		expected.setQuantity(20);
 		expected.setSoldQuantity(5);
 
-		repository.save(expected);
+		Bouquete saved = repository.save(expected);
 
-		Bouquete actual = repository.getReferenceById(repository.findAll().size());
-		assertEquals(expected.getName(), actual.getName());
-		assertEquals(expected.getItemCode(), actual.getItemCode());
-		assertEquals(expected.getQuantity(), actual.getQuantity());
-		assertEquals(expected.getSoldQuantity(), actual.getSoldQuantity());
+		assertEquals(expected.getName(), saved.getName());
+		assertEquals(expected.getItemCode(), saved.getItemCode());
+		assertEquals(expected.getQuantity(), saved.getQuantity());
+		assertEquals(expected.getSoldQuantity(), saved.getSoldQuantity());
 	}
 
 	@Test

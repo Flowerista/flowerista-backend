@@ -1,10 +1,8 @@
 package ua.flowerista.shop.mappers;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -139,7 +137,7 @@ public class BouqueteMapper implements EntityMapper<Bouquete, BouqueteDto>, Enti
 		dto.setName(entity.getTranslates().stream()
 				.filter((t) -> t.getLanguage() == language)
 				.findFirst()
-				.get()
+				.orElse(Translate.builder().text(entity.getName()).build())
 				.getText());
 		//choose flowers
 		dto.setFlowers(entity.getFlowers().stream()

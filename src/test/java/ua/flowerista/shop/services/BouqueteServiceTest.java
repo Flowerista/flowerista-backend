@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ua.flowerista.shop.dto.BouqueteDto;
 import ua.flowerista.shop.mappers.BouqueteMapper;
 import ua.flowerista.shop.models.Bouquete;
+import ua.flowerista.shop.models.Languages;
 import ua.flowerista.shop.repo.BouqueteRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,7 +52,7 @@ class BouqueteServiceTest {
 
 	@Test
 	void testGetBouqueteById() {
-		service.getBouqueteById(anyInt());
+		service.getBouqueteById(anyInt(), Languages.en);
 		verify(repository, times(1)).getReferenceById(anyInt());
 	}
 
@@ -75,7 +76,7 @@ class BouqueteServiceTest {
 		service.getBouquetesTop5Sales();
 		verify(repository, times(1)).findTop5ByOrderByDiscountDesc();
 	}
-	
+
 	@Test
 	void testGetMinMaxPrices() {
 		service.getMinMaxPrices();

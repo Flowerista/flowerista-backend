@@ -66,4 +66,6 @@ public interface BouqueteRepository extends JpaRepository<Bouquete, Integer>, Qu
 	Boolean isBouqueteAvailableForSale(Integer productId);
 
 	Page<Bouquete> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+	Page<Bouquete> findByTranslatesTextContainingIgnoreCase(String text, Pageable pageable);
 }

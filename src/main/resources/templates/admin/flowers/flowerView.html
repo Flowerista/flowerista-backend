@@ -19,6 +19,7 @@
                             <form th:action="@{/api/admin/flowers/{id}(id=${flower.id})}" method="post">
                                 <p><strong>Flower ID: </strong><span th:text="${flower.id}"></span></p>
                                 <p style="display: flex"><strong style="width: 30%">Flower Name: </strong><input class="form-control" th:type="text" th:name="inputName" th:value="${flower.name}"/></p>
+                                <input type="hidden" name="lang" id="languageInput">
                                 <button type="submit" class="btn btn-primary">Update Name</button>
                             </form>
                         </div>
