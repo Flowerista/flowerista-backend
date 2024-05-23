@@ -73,7 +73,7 @@ public class SecurityConfig {
         cors.setAllowedOrigins(List.of("https://flowerista-frontend.vercel.app", "http://localhost:3000"));
         cors.setAllowedMethods(List.of("GET", "POST", "DELETE", "PATCH", "PUT", "OPTIONS"));
         cors.setAllowedHeaders(List.of("Content-Type", "Authorization", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin"));
-	corsConfiguration.setAllowCredentials(true);
+	cors.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cors);
         return source;
