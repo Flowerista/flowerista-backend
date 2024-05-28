@@ -67,6 +67,7 @@ public class BouqueteAPController {
     public ModelAndView updateBouquet(@PathVariable Integer id,
                                       @RequestBody BouqueteDto bouqueteDto,
                                       @RequestParam(defaultValue = "en") Languages lang) {
+
         System.out.println(lang);
         Bouquete bouquete = bouqueteService.getBouquet(id);
         bouqueteDto.getSizes().stream().forEach(bouqueteSize -> bouqueteSize.setBouquete(bouquete));
