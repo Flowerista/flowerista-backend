@@ -108,7 +108,7 @@ public class AuthenticationService {
             .httpOnly(true)
             .secure(true)
             .sameSite("None")
-            .path("/api/auth/refresh-token")
+//            .path("/api/auth/refresh-token")
             .maxAge(cookieExpiration)
             .build();
     response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
