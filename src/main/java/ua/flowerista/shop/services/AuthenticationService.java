@@ -21,11 +21,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.logging.Logger;
 
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
+  Logger logger = Logger.getLogger(AuthenticationService.class.getName());
+
   private final UserRepository repository;
   private final TokenRepository tokenRepository;
   private final JwtService jwtService;
@@ -76,6 +79,7 @@ public class AuthenticationService {
 
   public UserAuthenticationResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response)  {
     String refreshToken = getRefreshTokenFromCookie(request);
+    logger.info("Refresh token: " + refreshToken);
     return refreshTokenService.findByToken(refreshToken)
             .map(refreshTokenService::verifyExpiration)
             .map(RefreshToken::getUserInfo)
