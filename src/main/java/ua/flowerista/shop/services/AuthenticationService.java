@@ -64,14 +64,7 @@ public class AuthenticationService {
         .expired(false)
         .revoked(false)
         .build();
-    try {
-      tokenRepository.save(token);
-    } catch (Exception e) {
-      if (tokenRepository.findByToken(jwtToken).isPresent()) {
-        return;
-      }
-      throw new RuntimeException("Access token save error");
-    }
+    tokenRepository.save(token);
   }
 
   private void revokeAllUserTokens(User user) {
@@ -84,7 +77,7 @@ public class AuthenticationService {
     });
     tokenRepository.saveAll(validUserTokens);
   }
-
+  @Transactional
   public UserAuthenticationResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response)  {
     String refreshToken = getRefreshTokenFromCookie(request);
     return refreshTokenService.findByToken(refreshToken)
