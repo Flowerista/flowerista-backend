@@ -79,8 +79,6 @@ public class AuthenticationService {
 
   public UserAuthenticationResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response)  {
     String refreshToken = getRefreshTokenFromCookie(request);
-    logger.info("Refresh token: " + refreshToken);
-    logger.info("Refresh token: " + refreshTokenService.findByToken(refreshToken));
     return refreshTokenService.findByToken(refreshToken)
             .map(refreshTokenService::verifyExpiration)
             .map(RefreshToken::getUserInfo)
@@ -90,6 +88,7 @@ public class AuthenticationService {
 
   private String getRefreshTokenFromCookie(HttpServletRequest request) {
     String refreshToken = null;
+    logger.info("Cookie: " + request.getCookies());
     if(request.getCookies() != null){
       for(Cookie cookie: request.getCookies()){
         if(cookie.getName().equals("refreshToken")){
@@ -97,6 +96,7 @@ public class AuthenticationService {
         }
       }
     }
+    logger.info("Refresh token: " + refreshToken);
     if(refreshToken == null){
       throw new RuntimeException("Refresh token not found in cookies");
     }
