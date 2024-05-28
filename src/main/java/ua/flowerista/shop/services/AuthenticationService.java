@@ -80,6 +80,7 @@ public class AuthenticationService {
   public UserAuthenticationResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response)  {
     String refreshToken = getRefreshTokenFromCookie(request);
     logger.info("Refresh token: " + refreshToken);
+    logger.info("Refresh token: " + refreshTokenService.findByToken(refreshToken));
     return refreshTokenService.findByToken(refreshToken)
             .map(refreshTokenService::verifyExpiration)
             .map(RefreshToken::getUserInfo)
