@@ -64,6 +64,9 @@ public class AuthenticationService {
         .expired(false)
         .revoked(false)
         .build();
+    if (tokenRepository.findByToken(jwtToken).isPresent()) {
+      tokenRepository.deleteByToken(jwtToken);
+    }
     tokenRepository.save(token);
   }
 
@@ -77,7 +80,7 @@ public class AuthenticationService {
     });
     tokenRepository.saveAll(validUserTokens);
   }
-  @Transactional
+
   public UserAuthenticationResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response)  {
     String refreshToken = getRefreshTokenFromCookie(request);
     return refreshTokenService.findByToken(refreshToken)
