@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import ua.flowerista.shop.dto.user.UserAuthenticationResponseDto;
 import ua.flowerista.shop.dto.user.UserLoginBodyDto;
 import ua.flowerista.shop.mappers.UserMapper;
@@ -21,11 +22,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.logging.Logger;
 
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
+  Logger logger = Logger.getLogger(AuthenticationService.class.getName());
+
   private final UserRepository repository;
   private final TokenRepository tokenRepository;
   private final JwtService jwtService;
@@ -51,16 +55,27 @@ public class AuthenticationService {
       throw new RuntimeException("Authentication failed");
     }
   }
+  @Transactional
+  public void saveUserToken(User user, String jwtToken) {
+    try {
+      if (tokenRepository.findByToken(jwtToken).isPresent()) {
+        tokenRepository.deleteByToken(jwtToken);
+      }
+      var token = Token.builder()
+              .user(user)
+              .token(jwtToken)
+              .tokenType(TokenType.BEARER)
+              .expired(false)
+              .revoked(false)
+              .build();
+      //this for request with same time
+      tokenRepository.deleteByToken(jwtToken);
+      tokenRepository.save(token);
 
-  private void saveUserToken(User user, String jwtToken) {
-    var token = Token.builder()
-        .user(user)
-        .token(jwtToken)
-        .tokenType(TokenType.BEARER)
-        .expired(false)
-        .revoked(false)
-        .build();
-    tokenRepository.save(token);
+    } catch (Exception e) {
+      logger.info("Error saving token: " + e.getMessage());
+    }
+
   }
 
   private void revokeAllUserTokens(User user) {
@@ -73,7 +88,7 @@ public class AuthenticationService {
     });
     tokenRepository.saveAll(validUserTokens);
   }
-
+  @Transactional
   public UserAuthenticationResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response)  {
     String refreshToken = getRefreshTokenFromCookie(request);
     return refreshTokenService.findByToken(refreshToken)
@@ -102,7 +117,8 @@ public class AuthenticationService {
     ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
             .httpOnly(true)
             .secure(true)
-            .path("/")
+            .sameSite("None")
+            .path("/api/auth/refresh-token")
             .maxAge(cookieExpiration)
             .build();
     response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
