@@ -68,8 +68,10 @@ public class AuthenticationService {
               .expired(false)
               .revoked(false)
               .build();
-      if (tokenRepository.findByToken(jwtToken).isEmpty()) {
-        tokenRepository.save(token);
+      synchronized (user) {
+        if (tokenRepository.findByToken(jwtToken).isEmpty()) {
+          tokenRepository.save(token);
+        }
       }
     } catch (Exception e) {
       logger.info("Error saving token: " + e.getMessage());
