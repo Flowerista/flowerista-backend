@@ -68,7 +68,9 @@ public class AuthenticationService {
               .expired(false)
               .revoked(false)
               .build();
-      tokenRepository.save(token);
+      if (!tokenRepository.findByToken(jwtToken).isPresent()) {
+        tokenRepository.save(token);
+      }
     } catch (Exception e) {
       logger.info("Error saving token: " + e.getMessage());
     }
@@ -114,9 +116,9 @@ public class AuthenticationService {
 
   private void setRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
     ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-            .httpOnly(true)
-            .secure(true)
-            .sameSite("None")
+            .httpOnly(false)
+            .secure(false)
+            .sameSite("Lax")
             .path("/api/auth/refresh-token")
             .maxAge(cookieExpiration)
             .build();

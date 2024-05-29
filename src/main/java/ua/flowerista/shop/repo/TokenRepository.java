@@ -19,6 +19,7 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
 		      """)
 		  List<Token> findAllValidTokenByUser(Integer id);
 
+		@Transactional()
 		  Optional<Token> findByToken(String token);
 
 	void deleteByToken(String jwtToken);
