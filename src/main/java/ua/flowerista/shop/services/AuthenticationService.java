@@ -80,7 +80,7 @@ public class AuthenticationService {
     });
     tokenRepository.saveAll(validUserTokens);
   }
-
+  @Transactional
   public UserAuthenticationResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response)  {
     String refreshToken = getRefreshTokenFromCookie(request);
     return refreshTokenService.findByToken(refreshToken)
