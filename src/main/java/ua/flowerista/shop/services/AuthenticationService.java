@@ -66,8 +66,10 @@ public class AuthenticationService {
         .build();
     if (tokenRepository.findByToken(jwtToken).isPresent()) {
       tokenRepository.deleteByToken(jwtToken);
+      tokenRepository.save(token);
+    } else {
+      tokenRepository.save(token);
     }
-    tokenRepository.save(token);
   }
 
   private void revokeAllUserTokens(User user) {
@@ -78,7 +80,7 @@ public class AuthenticationService {
       token.setExpired(true);
       token.setRevoked(true);
     });
-    tokenRepository.saveAll(validUserTokens);
+    tokenRepository.updateRevokedAndExpiredByTokenIn(validUserTokens);
   }
   @Transactional
   public UserAuthenticationResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response)  {
@@ -119,10 +121,10 @@ public class AuthenticationService {
   }
 
   private UserAuthenticationResponseDto getUserAuthenticationResponseDtoWithRefreshTokenInCookie(HttpServletResponse response, User user) {
+    revokeAllUserTokens(user);
     var jwtToken = jwtService.generateToken(user);
     var refreshToken = refreshTokenService.createRefreshToken(user.getEmail()).getToken();
     setRefreshTokenToCookie(response, refreshToken);
-    revokeAllUserTokens(user);
     saveUserToken(user, jwtToken);
     return UserAuthenticationResponseDto.builder()
             .accessToken(jwtToken)
