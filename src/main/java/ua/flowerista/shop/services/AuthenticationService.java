@@ -55,12 +55,12 @@ public class AuthenticationService {
       throw new RuntimeException("Authentication failed");
     }
   }
-
-  private void saveUserToken(User user, String jwtToken) {
+  @Transactional
+  public void saveUserToken(User user, String jwtToken) {
     try {
-//      if (tokenRepository.findByToken(jwtToken).isPresent()) {
-//        tokenRepository.deleteByToken(jwtToken);
-//      }
+      if (tokenRepository.findByToken(jwtToken).isPresent()) {
+        tokenRepository.deleteByToken(jwtToken);
+      }
       var token = Token.builder()
               .user(user)
               .token(jwtToken)
@@ -68,10 +68,10 @@ public class AuthenticationService {
               .expired(false)
               .revoked(false)
               .build();
+      //this for request with same time
+      tokenRepository.deleteByToken(jwtToken);
+      tokenRepository.save(token);
 
-      if (tokenRepository.findByToken(jwtToken).isEmpty()) {
-        tokenRepository.save(token);
-      }
     } catch (Exception e) {
       logger.info("Error saving token: " + e.getMessage());
     }
