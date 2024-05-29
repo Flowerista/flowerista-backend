@@ -26,5 +26,5 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
 	@Transactional
 	@Modifying
 	@Query("update Token t set t.revoked = true, t.expired = true where t.token in ?1")
-	int updateRevokedAndExpiredByTokenIn(List<Token> tokens);
+	int updateRevokedAndExpiredByTokenIn(List<String> tokens);
 }

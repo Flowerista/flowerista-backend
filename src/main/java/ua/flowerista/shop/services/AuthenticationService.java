@@ -80,7 +80,7 @@ public class AuthenticationService {
       token.setExpired(true);
       token.setRevoked(true);
     });
-    tokenRepository.updateRevokedAndExpiredByTokenIn(validUserTokens);
+    tokenRepository.updateRevokedAndExpiredByTokenIn(validUserTokens.stream().map(Token::getToken).toList());
   }
   @Transactional
   public UserAuthenticationResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response)  {
