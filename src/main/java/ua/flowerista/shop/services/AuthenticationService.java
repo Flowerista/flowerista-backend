@@ -57,14 +57,14 @@ public class AuthenticationService {
   }
 
   private void saveUserToken(User user, String jwtToken) {
-    var token = Token.builder()
-        .user(user)
-        .token(jwtToken)
-        .tokenType(TokenType.BEARER)
-        .expired(false)
-        .revoked(false)
-        .build();
     try {
+      var token = Token.builder()
+              .user(user)
+              .token(jwtToken)
+              .tokenType(TokenType.BEARER)
+              .expired(false)
+              .revoked(false)
+              .build();
       if (tokenRepository.findByToken(jwtToken).isPresent()) {
         tokenRepository.deleteByToken(jwtToken);
         tokenRepository.save(token);
