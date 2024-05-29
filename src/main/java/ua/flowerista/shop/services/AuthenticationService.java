@@ -58,6 +58,9 @@ public class AuthenticationService {
 
   private void saveUserToken(User user, String jwtToken) {
     try {
+      if (tokenRepository.findByToken(jwtToken).isPresent()) {
+        tokenRepository.deleteByToken(jwtToken);
+      }
       var token = Token.builder()
               .user(user)
               .token(jwtToken)
@@ -65,12 +68,7 @@ public class AuthenticationService {
               .expired(false)
               .revoked(false)
               .build();
-      if (tokenRepository.findByToken(jwtToken).isPresent()) {
-        tokenRepository.deleteByToken(jwtToken);
-        tokenRepository.save(token);
-      } else {
-        tokenRepository.save(token);
-      }
+      tokenRepository.save(token);
     } catch (Exception e) {
       logger.info("Error saving token: " + e.getMessage());
     }
