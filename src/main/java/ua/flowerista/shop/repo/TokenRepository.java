@@ -1,9 +1,7 @@
 package ua.flowerista.shop.repo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Transactional;
 import ua.flowerista.shop.models.Token;
 
 import java.util.List;

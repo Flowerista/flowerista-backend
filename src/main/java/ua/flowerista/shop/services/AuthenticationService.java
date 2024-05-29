@@ -86,7 +86,6 @@ public class AuthenticationService {
       token.setExpired(true);
       token.setRevoked(true);
     });
-//    tokenRepository.updateRevokedAndExpiredByTokenIn(validUserTokens.stream().map(Token::getToken).toList());
     tokenRepository.saveAll(validUserTokens);
   }
   @Transactional
