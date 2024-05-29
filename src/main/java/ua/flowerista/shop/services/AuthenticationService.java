@@ -58,9 +58,9 @@ public class AuthenticationService {
 
   private void saveUserToken(User user, String jwtToken) {
     try {
-      if (tokenRepository.findByToken(jwtToken).isPresent()) {
-        tokenRepository.deleteByToken(jwtToken);
-      }
+//      if (tokenRepository.findByToken(jwtToken).isPresent()) {
+//        tokenRepository.deleteByToken(jwtToken);
+//      }
       var token = Token.builder()
               .user(user)
               .token(jwtToken)
@@ -68,7 +68,7 @@ public class AuthenticationService {
               .expired(false)
               .revoked(false)
               .build();
-      if (!tokenRepository.findByToken(jwtToken).isPresent()) {
+      if (tokenRepository.findByToken(jwtToken).isEmpty()) {
         tokenRepository.save(token);
       }
     } catch (Exception e) {
@@ -85,7 +85,8 @@ public class AuthenticationService {
       token.setExpired(true);
       token.setRevoked(true);
     });
-    tokenRepository.updateRevokedAndExpiredByTokenIn(validUserTokens.stream().map(Token::getToken).toList());
+//    tokenRepository.updateRevokedAndExpiredByTokenIn(validUserTokens.stream().map(Token::getToken).toList());
+    tokenRepository.saveAll(validUserTokens);
   }
   @Transactional
   public UserAuthenticationResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response)  {
@@ -99,7 +100,6 @@ public class AuthenticationService {
 
   private String getRefreshTokenFromCookie(HttpServletRequest request) {
     String refreshToken = null;
-    logger.info("Cookie: " + request.getCookies());
     if(request.getCookies() != null){
       for(Cookie cookie: request.getCookies()){
         if(cookie.getName().equals("refreshToken")){
@@ -107,7 +107,6 @@ public class AuthenticationService {
         }
       }
     }
-    logger.info("Refresh token: " + refreshToken);
     if(refreshToken == null){
       throw new RuntimeException("Refresh token not found in cookies");
     }
@@ -126,10 +125,10 @@ public class AuthenticationService {
   }
 
   private UserAuthenticationResponseDto getUserAuthenticationResponseDtoWithRefreshTokenInCookie(HttpServletResponse response, User user) {
-    revokeAllUserTokens(user);
     var jwtToken = jwtService.generateToken(user);
     var refreshToken = refreshTokenService.createRefreshToken(user.getEmail()).getToken();
     setRefreshTokenToCookie(response, refreshToken);
+    revokeAllUserTokens(user);
     saveUserToken(user, jwtToken);
     return UserAuthenticationResponseDto.builder()
             .accessToken(jwtToken)
