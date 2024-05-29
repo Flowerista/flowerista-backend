@@ -116,9 +116,9 @@ public class AuthenticationService {
 
   private void setRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
     ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-            .httpOnly(false)
-            .secure(false)
-            .sameSite("Lax")
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("None")
             .path("/api/auth/refresh-token")
             .maxAge(cookieExpiration)
             .build();
