@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserLoginBodyDto {
+public class CredentialsDto {
 
 	@Email
 	private String email;
