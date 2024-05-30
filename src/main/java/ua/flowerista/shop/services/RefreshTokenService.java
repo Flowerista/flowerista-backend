@@ -22,6 +22,10 @@ public class RefreshTokenService {
     @Value("${security.jwt.refresh-token.expiration}")
     private Long refreshTokenExpiration;
 
+    @Value("${jwt.cookie.expiration}")
+    private Long cookieExpiration;
+
+
     public void setRefreshToken(String login, HttpServletResponse response) {
         String refreshToken = createRefreshToken(login);
         setRefreshTokenCookie(refreshToken, response);
@@ -157,7 +161,7 @@ public class RefreshTokenService {
                 .secure(true)
                 .sameSite("None")
                 .path("/api/auth/")
-                .maxAge(refreshTokenExpiration)
+                .maxAge(cookieExpiration)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
