@@ -22,6 +22,5 @@ public class LogoutService implements LogoutHandler {
             Authentication authentication
     ) {
         refreshTokenService.logoutDeleteTokenFromServerAndCookie(request, response);
-        SecurityContextHolder.clearContext();
     }
 }
