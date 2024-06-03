@@ -29,11 +29,9 @@ class FlowerServiceTest {
 
 	@Test
 	void testInsert() {
-		FlowerDto dto = new FlowerDto();
-		Mockito.when(mapper.toEntity(any(FlowerDto.class))).thenReturn(new Flower());
-		service.insert(dto);
+		Flower flower = new Flower();
+		service.insert(flower);
 		verify(repository, times(1)).save(any(Flower.class));
-		verify(mapper, times(1)).toEntity(any(FlowerDto.class));
 	}
 
 	@Test
@@ -44,23 +42,21 @@ class FlowerServiceTest {
 
 	@Test
 	void testGetAllFlowers() {
-		service.getAllFlowers();
+		service.getAll();
 		verify(repository, times(1)).findAll();
 	}
 
 	@Test
 	void testGetFlowerById() {
-		service.getFlowerById(anyInt());
+		service.getById(anyInt());
 		verify(repository, times(1)).getReferenceById(anyInt());
 	}
 
 	@Test
 	void testUpdate() {
-		FlowerDto dto = new FlowerDto();
-		Mockito.when(mapper.toEntity(any(FlowerDto.class))).thenReturn(new Flower());
+		Flower dto = new Flower();
 		service.update(dto);
 		verify(repository, times(1)).save(any(Flower.class));
-		verify(mapper, times(1)).toEntity(any(FlowerDto.class));
 	}
 
 }

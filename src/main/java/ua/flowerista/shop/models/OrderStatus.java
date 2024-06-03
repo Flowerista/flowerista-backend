@@ -1,10 +1,10 @@
 package ua.flowerista.shop.models;
 
 public enum OrderStatus {
-    PLACED,
-    PENDING,
-    IN_PROCESS,
-    SHIPPED,
-    COMPLETED,
-    CANCELLED
+    PLACED,     // Order has been placed
+    PENDING,    // Order is started payment and waiting
+    IN_PROCESS, // Order paid and in process of forming
+    SHIPPED,    // Order has been shipped
+    COMPLETED,  // Order has been delivered and completed
+    CANCELLED   // Order has been cancelled
 }

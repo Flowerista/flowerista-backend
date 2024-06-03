@@ -25,13 +25,12 @@ public class RefreshTokenService {
     @Value("${jwt.cookie.expiration}")
     private Long cookieExpiration;
 
-
-    public void setRefreshToken(String login, HttpServletResponse response) {
-        String refreshToken = createRefreshToken(login);
+    public void setRefreshToken(Integer userId, HttpServletResponse response) {
+        String refreshToken = createRefreshToken(userId);
         setRefreshTokenCookie(refreshToken, response);
     }
 
-    public String refreshRefreshTokenAndGetLogin(HttpServletRequest request, HttpServletResponse response) {
+    public Integer refreshRefreshTokenAndGetUserId(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = extractRefreshTokenFromCookie(request);
 
         Map<String, String> tokenInfo = redisService.getHashMap(refreshToken);
@@ -41,12 +40,13 @@ public class RefreshTokenService {
             //revoking old token
             revokeRefreshToken(tokenInfo);
 
-            String newRefreshToken = createRefreshToken(tokenInfo.get("login"));
+            String newRefreshToken = createRefreshToken(tokenInfo.get("userId"));
 
             setRefreshTokenCookie(newRefreshToken, response);
 
-            return tokenInfo.get("login");
+            return Integer.valueOf(tokenInfo.get("userId"));
         } else {
+            deleteRefreshTokenFromCookie(response);
             throw new AppException("Refresh token not found in server", HttpStatus.UNAUTHORIZED);
         }
     }
@@ -61,11 +61,15 @@ public class RefreshTokenService {
         }
     }
 
-    public void logoutDeleteTokenFromServerAndCookie(HttpServletRequest request, HttpServletResponse response) {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
         Map<String, String> tokenInfo = redisService.getHashMap(extractRefreshTokenFromCookie(request));
         if (tokenInfo != null) {
-            deleteRefreshTokenForUser(tokenInfo.get("login"), tokenInfo.get("token"));
+            deleteRefreshTokenForUser(tokenInfo.get("userId"), tokenInfo.get("token"));
         }
+        deleteRefreshTokenFromCookie(response);
+    }
+
+    private static void deleteRefreshTokenFromCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(true)
@@ -98,6 +102,12 @@ public class RefreshTokenService {
         }
     }
 
+    private void deleteAllRefreshTokensForUser(Integer userId) {
+        Set<String> tokens = redisService.getSet(userId.toString());
+        for (String token : tokens) {
+            redisService.deleteByKey(token);
+        }
+    }
     private void deleteRefreshTokenForUser(String login, String refreshToken) {
         Set<String> tokens = redisService.getSet(login);
         if (tokens != null) {
@@ -114,24 +124,28 @@ public class RefreshTokenService {
 
     private void validateToken(Map<String, String> tokenInfo) {
         if (tokenInfo.get("revoked").equals("true")) {
-            deleteAllRefreshTokensForUser(tokenInfo.get("login"));
+            deleteAllRefreshTokensForUser(tokenInfo.get("userId"));
             throw new AppException("Using revoked token", HttpStatus.UNAUTHORIZED);
         }
     }
 
-    private String createRefreshToken(String login) {
+    private String createRefreshToken(String userId) {
         String refreshToken = UUID.randomUUID().toString();
 
         Map<String, String> tokenInfo = new HashMap<>();
-        tokenInfo.put("login", login);
+        tokenInfo.put("userId", userId);
         tokenInfo.put("revoked", "false");
         tokenInfo.put("token", refreshToken);
 
         redisService.saveHashMap(refreshToken, tokenInfo, refreshTokenExpiration);
 
-        addTokenToUserTokensList(login, refreshToken);
+        addTokenToUserTokensList(userId, refreshToken);
 
         return refreshToken;
+    }
+
+    private String createRefreshToken(Integer userId) {
+        return createRefreshToken(userId.toString());
     }
 
     private void addTokenToUserTokensList(String login, String refreshToken) {

@@ -3,9 +3,11 @@ package ua.flowerista.shop.repo;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.transaction.annotation.Transactional;
 import ua.flowerista.shop.models.User;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -18,4 +20,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
 	Optional<User> findByEmail(String email);
 
+	@Transactional
+	@Modifying
+	@Query("update User u set u.enabled = true where u.email = ?1")
+	void updateEnabledByEmail(String email);
+
+	@Transactional
+	@Modifying
+	@Query("update User u set u.password = ?1 where u.email = ?2")
+	int updatePasswordByEmail(String password, String email);
 }

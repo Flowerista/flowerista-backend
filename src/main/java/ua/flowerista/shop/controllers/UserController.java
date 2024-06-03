@@ -1,122 +1,119 @@
 package ua.flowerista.shop.controllers;
 
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.bind.annotation.*;
 import ua.flowerista.shop.dto.AddressDto;
-import ua.flowerista.shop.dto.IdDto;
-import ua.flowerista.shop.dto.user.UserChangePasswordRequestDto;
-import ua.flowerista.shop.dto.user.UserChangePersonalInfoDto;
+import ua.flowerista.shop.dto.user.PersonalInfoDto;
+import ua.flowerista.shop.dto.user.UpdatePasswordDto;
+import ua.flowerista.shop.exceptions.AppException;
+import ua.flowerista.shop.mappers.UserMapper;
+import ua.flowerista.shop.models.User;
 import ua.flowerista.shop.services.UserService;
 
+import java.security.Principal;
+import java.util.Map;
+
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/user")
 @CrossOrigin
 @Tag(name = "USER controller", description = "Operations that auth`d user can do")
 public class UserController {
+    Logger logger = LoggerFactory.getLogger(UserController.class);
 
-	@Autowired
-	private UserService service;
+    private final UserService userService;
+    private final UserMapper userMapper;
 
-	@GetMapping("/profile")
-	@Operation(summary = "Get user profile dto", description = "Returns bad request if something went wrong, and accepted if everything fine")
-	@ApiResponses(value = { @ApiResponse(responseCode = "403", description = "If user is not authenticated"),
-			@ApiResponse(responseCode = "200", description = "If user is authenticated") })
-	public ResponseEntity<?> profile(Principal connectedUser) {
-		return ResponseEntity.ok(service.getUserDto(connectedUser));
-	}
+    @GetMapping("/profile")
+    @Operation(summary = "Get user profile dto",
+            description = "Returns user profile dto")
+    public ResponseEntity<?> profile(Principal principal) {
+        Integer id = getIdFromPrincipal(principal);
+        return ResponseEntity.ok(userService.findById(id)
+                .map(userMapper::toProfileDto)
+                .orElseThrow(() -> {
+                    logger.error("Authenticated user not found in db: {}!", principal.getName());
+                    return new AppException("Authenticated user not found in db!", HttpStatus.INTERNAL_SERVER_ERROR);
+                }));
+    }
 
-	@Operation(summary = "Change password endpoint", description = "Changing authenticated users passwords")
-	@ApiResponses(value = { @ApiResponse(responseCode = "403", description = "If user is not authenticated"),
-			@ApiResponse(responseCode = "400", description = "If something went wrong with exception in body"),
-			@ApiResponse(responseCode = "202", description = "If user is authenticated") })
-	@PatchMapping("/changePassword")
-	public ResponseEntity<?> changePassword(@RequestBody UserChangePasswordRequestDto request,
-			Principal connectedUser) {
-		String response = service.changePassword(request, connectedUser);
-		if (!response.equals("Password changed")) {
-			return ResponseEntity.badRequest().body(response);
-		}
-		return ResponseEntity.accepted().body(response);
-	}
+    @Operation(summary = "Change password endpoint",
+            description = "Changing authenticated users passwords")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "If passwords is not valid or not equals"),
+            @ApiResponse(responseCode = "202", description = "If password was changed")})
+    @PatchMapping("/changePassword")
+    public ResponseEntity<?> updatePassword(@RequestBody @Valid UpdatePasswordDto request,
+                                            @NotNull Principal principal) {
+        userService.updatePassword(request, principal);
+        return ResponseEntity.accepted().build();
+    }
 
-	@PatchMapping("/changeAddress")
-	@Operation(summary = "Change address endpoint", description = "Changing authenticated users addresses")
-	@ApiResponses(value = { @ApiResponse(responseCode = "403", description = "If not valid data"),
-			@ApiResponse(responseCode = "202", description = "If user is authenticated") })
-	public ResponseEntity<?> changeAddress(@RequestBody @Valid AddressDto address, Principal connectedUser) {
-		service.changeAddress(address, connectedUser);
-		return ResponseEntity.accepted().build();
-	}
+    @PatchMapping("/changeAddress")
+    @Operation(summary = "Change address endpoint",
+            description = "Changing authenticated users addresses")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "If address was updated")})
+    public ResponseEntity<?> updateAddress(@RequestBody @Valid AddressDto address,
+                                           @NotNull Principal principal) {
+        userService.changeAddress(address, principal);
+        return ResponseEntity.accepted().build();
+    }
 
-	@PatchMapping("/changePersonalInfo")
-	@Operation(summary = "Change user personal info endpoint", description = "Changing authenticated users personal info`s")
-	@ApiResponses(value = { @ApiResponse(responseCode = "400", description = "If not valid data"),
-			@ApiResponse(responseCode = "202", description = "If user is authenticated") })
-	public ResponseEntity<?> changePersonalInfo(@RequestBody @Valid UserChangePersonalInfoDto dto,
-			Principal connectedUser) {
-		service.changePersonalInfo(dto, connectedUser);
-		return ResponseEntity.accepted().build();
-	}
+    @PatchMapping("/changePersonalInfo")
+    @Operation(summary = "Change user personal info endpoint",
+            description = "Changing authenticated users personal info`s")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "When personal info was updated")})
+    public ResponseEntity<?> updatePersonalInfo(@RequestBody @Valid PersonalInfoDto dto,
+                                                Principal principal) {
+        userService.changePersonalInfo(dto, principal);
+        return ResponseEntity.accepted().build();
+    }
 
-	@GetMapping("/wishlist")
-	@Operation(summary = "Get users wishlist", description = "Returns set of bouquetes that user have in wishlist")
-	@ApiResponses(value = { @ApiResponse(responseCode = "403", description = "If user not auth`d"),
-			@ApiResponse(responseCode = "200", description = "If user is authenticated") })
-	public ResponseEntity<?> getWishList(Principal connectedUser) {
-		return ResponseEntity.ok(service.getWishList(connectedUser));
-	}
+    @GetMapping("/wishlist")
+    @Operation(summary = "Get users wishlist",
+            description = "Returns set of bouquets that user have in wishlist")
+    public ResponseEntity<?> getWishList(Principal principal) {
+        Integer id = getIdFromPrincipal(principal);
+        return ResponseEntity.ok(userService.getWishList(id));
+    }
 
-	@PostMapping("/wishlist")
-	@Operation(summary = "Add bouquete to wishlist", description = "Accepting bouquete id in body and auth in header")
-	@ApiResponses(value = { @ApiResponse(responseCode = "403", description = "If user not auth`d"),
-			@ApiResponse(responseCode = "202", description = "If user is authenticated") })
-	public ResponseEntity<?> addBouqueteToWishList(@RequestBody IdDto idDto, Principal connectedUser) {
-		service.addBouqueteToWishList(idDto.getId(), connectedUser);
-		return ResponseEntity.accepted().build();
-	}
+    @PostMapping("/wishlist")
+    @Operation(summary = "Add bouquet to wishlist",
+            description = "Accepting bouquet id in body")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "When bouquet was added to wishlist")})
+    public ResponseEntity<?> addBouquetToWishList(@RequestBody Map<String, Integer> map, Principal principal) {
+        userService.addBouquetToWishList(map.get("id"), principal);
+        return ResponseEntity.accepted().build();
+    }
 
-	@DeleteMapping("/wishlist")
-	@Operation(summary = "Remove bouquete from wishlist", description = "Accepting bouquete id in body and auth in header")
-	@ApiResponses(value = { @ApiResponse(responseCode = "403", description = "If user not auth`d"),
-			@ApiResponse(responseCode = "202", description = "If user is authenticated") })
-	public ResponseEntity<?> deleteBouqueteFromWishList(@RequestBody IdDto idDto, Principal connectedUser) {
-		service.deleteBouqueteFromWishList(idDto.getId(), connectedUser);
-		return ResponseEntity.accepted().build();
-	}
+    @DeleteMapping("/wishlist")
+    @Operation(summary = "Remove bouquet from wishlist", description = "Accepting bouquet id in body")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "Bouquet was removed from wishlist")})
+    public ResponseEntity<?> deleteBouquetFromWishList(@RequestBody Map<String, Integer> map, Principal principal) {
+        userService.removeBouquetFromWishList(map.get("id"), principal);
+        return ResponseEntity.accepted().build();
+    }
 
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	private Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-		Map<String, String> errors = new HashMap<>();
-		ex.getBindingResult().getAllErrors().forEach((error) -> {
-			String fieldName = ((FieldError) error).getField();
-			String errorMessage = error.getDefaultMessage();
-			errors.put(fieldName, errorMessage);
-		});
-		return errors;
-	}
-
+    private static Integer getIdFromPrincipal(Principal principal) {
+        if (((UsernamePasswordAuthenticationToken) principal).getPrincipal() instanceof User) {
+            return ((User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal()).getId();
+        } else {
+            return Integer.valueOf(principal.getName());
+        }
+    }
 }

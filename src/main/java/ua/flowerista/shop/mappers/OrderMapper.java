@@ -1,11 +1,14 @@
 package ua.flowerista.shop.mappers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import ua.flowerista.shop.dto.OrderDto;
+import ua.flowerista.shop.exceptions.AppException;
 import ua.flowerista.shop.models.Order;
 import ua.flowerista.shop.services.UserService;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -21,7 +24,8 @@ public class OrderMapper implements EntityMapper<Order, OrderDto>{
         entity.setId(dto.getId());
         entity.setStatus(dto.getStatus());
         entity.setPayId(dto.getPayId());
-        entity.setUser(userService.getUserById(dto.getUserId()));
+        entity.setUser(userService.findById(dto.getUserId())
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND)));
         entity.setSum(dto.getSum());
         entity.setOrderItems(dto.getOrderItems().stream()
                 .map(orderItemMapper::toEntity)
@@ -50,5 +54,11 @@ public class OrderMapper implements EntityMapper<Order, OrderDto>{
         dto.setCreated(entity.getCreated());
         dto.setUpdated(entity.getUpdated());
         return dto;
+    }
+
+    public List<OrderDto> toDto(List<Order> entities) {
+        return entities.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 }

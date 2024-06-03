@@ -31,7 +31,7 @@ public class OrderAPController {
                                   @RequestParam(name = "size", defaultValue = "10", required = false)
                                   Integer size,
                                   Pageable pageable) {
-        Page<OrderDto> orders = orderService.getAllOrders(predicate,
+        Page<OrderDto> orders = orderService.getAll(predicate,
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))).map(orderMapper::toDto);
         return new ModelAndView("admin/orders/ordersList").addObject("orders", orders);
     }
@@ -39,7 +39,7 @@ public class OrderAPController {
     @GetMapping("/orders/{id}")
     public ModelAndView getById(@PathVariable Integer id) {
         ModelAndView result = new ModelAndView("admin/orders/orderView");
-        OrderDto order = orderMapper.toDto(orderService.getOrder(id).orElseThrow());
+        OrderDto order = orderMapper.toDto(orderService.getById(id).orElseThrow());
         result.addObject("order", order);
         result.addObject("statuses", OrderStatus.values());
         return result;
@@ -53,7 +53,7 @@ public class OrderAPController {
 
     @PostMapping("/orders/{id}")
     public ModelAndView updateOrder(@PathVariable Integer id, OrderDto order) {
-        orderService.updateOrder(id, orderMapper.toEntity(order));
+        orderService.update(orderMapper.toEntity(order));
         return new ModelAndView("redirect:/api/admin/orders/" + id);
     }
 

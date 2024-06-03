@@ -31,7 +31,7 @@ public class PaypalService {
     private final PaymentOrderRepository paymentOrderRepository;
 
     public PaymentOrder createPayment(Integer orderId) {
-        ua.flowerista.shop.models.Order order = orderService.getOrder(orderId).get(); //check for null made in controller
+        ua.flowerista.shop.models.Order order = orderService.getById(orderId).get(); //check for null made in controller
         BigDecimal fee = BigDecimal.valueOf(order.getSum().longValue());
         String currencyCode = order.getCurrency();
         OrderRequest orderRequest = new OrderRequest();
@@ -82,7 +82,7 @@ public class PaypalService {
     }
 
     public PaymentOrder getPaymentForOrder(Integer orderId) {
-        ua.flowerista.shop.models.Order order = orderService.getOrder(orderId).get();
+        ua.flowerista.shop.models.Order order = orderService.getById(orderId).get();
         if (order.getPayId() == null) {
             return createPayment(orderId);
         }

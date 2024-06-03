@@ -12,12 +12,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
+import ua.flowerista.shop.dto.user.UserDto;
+import ua.flowerista.shop.models.User;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Component
@@ -39,13 +43,15 @@ public class UserAuthenticationProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String createAccessToken(String login) {
+    public String createAccessToken(UserDto user) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + tokenExpiration);
 
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
         return JWT.create()
-                .withSubject(login)
+                .withSubject(user.getEmail())
+                .withClaim("role", user.getRole())
+                .withClaim("id", user.getId())
                 .withIssuedAt(now)
                 .withExpiresAt(validity)
                 .sign(algorithm);
@@ -56,9 +62,26 @@ public class UserAuthenticationProvider {
         JWTVerifier verifier = JWT.require(algorithm).build();
         try {
             DecodedJWT decoded = verifier.verify(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(decoded.getSubject());
             return new UsernamePasswordAuthenticationToken(
-                    userDetails,
+                    decoded.getClaim("id"),
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + decoded.getClaim("role").asString()))
+            );
+        } catch (JWTVerificationException e) {
+            logger.error("Invalid Token: " + token + ". ", e.getMessage());
+            throw e;
+        }
+    }
+
+    public Authentication validateTokenStrongly(String token) {
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        try {
+            DecodedJWT decoded = verifier.verify(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(decoded.getSubject());
+            User user = (User) userDetails;
+            return new UsernamePasswordAuthenticationToken(
+                    user,
                     null,
                     userDetails.getAuthorities()
             );
@@ -67,5 +90,6 @@ public class UserAuthenticationProvider {
             throw e;
         }
     }
+
 
 }

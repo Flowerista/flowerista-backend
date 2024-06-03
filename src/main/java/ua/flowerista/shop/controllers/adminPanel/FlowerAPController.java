@@ -2,16 +2,18 @@ package ua.flowerista.shop.controllers.adminPanel;
 
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import ua.flowerista.shop.dto.FlowerDto;
+import ua.flowerista.shop.exceptions.AppException;
 import ua.flowerista.shop.mappers.FlowerMapper;
 import ua.flowerista.shop.models.Flower;
 import ua.flowerista.shop.models.Languages;
@@ -24,10 +26,12 @@ import java.util.List;
 @RequestMapping("/api/admin/flowers")
 @RequiredArgsConstructor
 public class FlowerAPController {
+    private static final Logger logger = LoggerFactory.getLogger(FlowerAPController.class);
+
     private final FlowerService flowerService;
     private final FlowerMapper flowerMapper;
     private final FlowerValidator flowerValidator;
-    private final DataSourceTransactionManagerAutoConfiguration dataSourceTransactionManagerAutoConfiguration;
+
 
     @GetMapping
     public ModelAndView getFlowers(@QuerydslPredicate(root = Flower.class)
@@ -36,9 +40,8 @@ public class FlowerAPController {
                                    Integer page,
                                    @RequestParam(name = "size", defaultValue = "10", required = false)
                                    Integer size,
-                                   Pageable pageable,
                                    @RequestParam(defaultValue = "en") Languages lang) {
-        Page<FlowerDto> flowers = flowerService.getAllFlowers(predicate,
+        Page<FlowerDto> flowers = flowerService.getAll(predicate,
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))).map(flower -> flowerMapper.toDto(flower, lang));
         return new ModelAndView("admin/flowers/flowersList").addObject("flowers", flowers);
     }
@@ -52,14 +55,18 @@ public class FlowerAPController {
             modelAndView.addObject("errors", errors);
             return modelAndView;
         }
-        flowerService.insert(flower);
+        flowerService.insert(flowerMapper.toEntity(flower));
         return new ModelAndView("redirect:/api/admin/flowers");
     }
 
     @GetMapping("/{id}")
     public ModelAndView getFlowerById(@PathVariable int id, @RequestParam(defaultValue = "en") Languages lang) {
         ModelAndView result = new ModelAndView("admin/flowers/flowerView");
-        FlowerDto flower = flowerService.getFlower(id).map(flow -> flowerMapper.toDto(flow, lang)).orElse(null);
+        FlowerDto flower = flowerService.getById(id).map(flow -> flowerMapper.toDto(flow, lang)).
+                orElseThrow(() -> {
+                    logger.error("Flower not found {}", id);
+                    return new AppException("Flower not found. {} " + id, HttpStatus.INTERNAL_SERVER_ERROR);
+                });
         result.addObject("flower", flower);
         return result;
     }

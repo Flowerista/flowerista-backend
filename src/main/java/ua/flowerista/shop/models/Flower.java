@@ -20,7 +20,7 @@ public class Flower {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-	@Column(name = "name", nullable = true, unique = true)
+	@Column(name = "name", unique = true)
 	@NotBlank
 	private String name;
 	@ToString.Exclude

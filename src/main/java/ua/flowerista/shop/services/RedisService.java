@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import ua.flowerista.shop.exceptions.AppException;
+import ua.flowerista.shop.models.VerificationToken;
 
 import java.util.Map;
 import java.util.Set;
@@ -55,6 +56,35 @@ public class RedisService {
         } catch (Exception e) {
             logger.error("Error while getting set: " + key, e);
             throw new AppException("Error while getting set", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public void saveToken(String key, VerificationToken token, Long expiration) {
+        try (Jedis jedis = pool.getResource()) {
+            jedis.hset(key, "id", token.getId());
+            jedis.hset(key, "login", token.getUserLogin());
+            jedis.expire(key, expiration);
+        } catch (Exception e) {
+            logger.error("Error while saving token: " + key + "\nvalue:\n" + token, e);
+            throw new AppException("Error while saving string", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public VerificationToken getToken(String key) {
+        try (Jedis jedis = pool.getResource()) {
+            String id = jedis.hget(key, "id");
+            if (id == null) {
+                return null;
+            }
+            String login = jedis.hget(key, "login");
+            VerificationToken token = VerificationToken.builder()
+                    .id(id)
+                    .userLogin(login)
+                    .build();
+            return token;
+        } catch (Exception e) {
+            logger.error("Error while getting token: " + key, e);
+            throw new AppException("Error while getting string", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

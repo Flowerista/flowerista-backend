@@ -2,9 +2,6 @@ package ua.flowerista.shop.models;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.proxy.HibernateProxy;
-
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -20,23 +17,26 @@ public class Translate {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "bouquete_id")
-    private Bouquete bouquete;
-
     @Column(name = "lang", nullable = false)
     @Enumerated(EnumType.STRING)
     private Languages language;
 
+//    @Column(name = "title", nullable = false)
+//    private String title;
+
     @Column(name = "text", nullable = false)
     private String text;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "color_id")
     private Color color;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "flower_id")
     private Flower flower;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bouquete_id")
+    private Bouquet bouquet;
 
 }

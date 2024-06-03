@@ -19,7 +19,7 @@ CREATE SEQUENCE IF NOT EXISTS public.flower_id_seq
     MAXVALUE 2147483647
     CACHE 1;
 
-CREATE TABLE IF NOT EXISTS public.bouquete
+CREATE TABLE IF NOT EXISTS public.bouquet
 (
     id SERIAL PRIMARY KEY,
     itemcode VARCHAR(255) NOT NULL,
@@ -29,13 +29,13 @@ CREATE TABLE IF NOT EXISTS public.bouquete
     soldquantity INTEGER
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uk_koe7o3qi2bawao29w4s2g04vh ON public.bouquete (itemcode);
-CREATE UNIQUE INDEX IF NOT EXISTS uk_o9reytbtg4x0o1hyv82iek4ra ON public.bouquete (name);
+CREATE UNIQUE INDEX IF NOT EXISTS uk_koe7o3qi2bawao29w4s2g04vh ON public.bouquet (itemcode);
+CREATE UNIQUE INDEX IF NOT EXISTS uk_o9reytbtg4x0o1hyv82iek4ra ON public.bouquet (name);
 
 CREATE TABLE IF NOT EXISTS public.bouquete_size
 (
     id SERIAL PRIMARY KEY,
-    bouquete_id INTEGER REFERENCES public.bouquete(id) ON DELETE CASCADE,
+    bouquete_id INTEGER REFERENCES public.bouquet(id) ON DELETE CASCADE,
     size VARCHAR(255) NOT NULL CHECK (size IN ('SMALL', 'MEDIUM', 'LARGE')),
     defaultprice NUMERIC NOT NULL,
     discount NUMERIC,
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS public.bouquete_color
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT fkpbxo7lgdss3s3ndypoyhhcid2 FOREIGN KEY (bouquete_id)
-        REFERENCES public.bouquete (id) MATCH SIMPLE
+        REFERENCES public.bouquet (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 );
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS public.bouquete_flower
     flower_id integer NOT NULL,
     CONSTRAINT bouquete_flower_pkey PRIMARY KEY (bouquete_id, flower_id),
     CONSTRAINT fkg56tt3cvnepsgnslife1vvtkt FOREIGN KEY (bouquete_id)
-        REFERENCES public.bouquete (id) MATCH SIMPLE
+        REFERENCES public.bouquet (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT fkgp0o370t9kmxtl96ky4c91cua FOREIGN KEY (flower_id)
@@ -101,7 +101,7 @@ INSERT INTO flower(name) VALUES ('DaoTest2');
 INSERT INTO flower(name) VALUES ('DaoTest3');
 INSERT INTO flower(name) VALUES ('DaoTest4');
 
-INSERT INTO public.bouquete (itemcode, name, quantity, soldquantity) VALUES
+INSERT INTO public.bouquet (itemcode, name, quantity, soldquantity) VALUES
 ('BQ001', 'Spring Bouquet', 20, 5),
 ('BQ002', 'Summer Bouquet', 15, 2),
 ('BQ003', 'Autumn Bouquet', 25, 8);

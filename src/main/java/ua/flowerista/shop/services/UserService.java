@@ -1,9 +1,8 @@
 package ua.flowerista.shop.services;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,82 +10,66 @@ import ua.flowerista.shop.dto.AddressDto;
 import ua.flowerista.shop.dto.BouqueteSmallDto;
 import ua.flowerista.shop.dto.user.*;
 import ua.flowerista.shop.exceptions.AppException;
-import ua.flowerista.shop.exceptions.UserAlreadyExistException;
 import ua.flowerista.shop.mappers.AddressMapper;
-import ua.flowerista.shop.mappers.BouqueteMapper;
+import ua.flowerista.shop.mappers.BouquetMapper;
 import ua.flowerista.shop.mappers.UserMapper;
 import ua.flowerista.shop.models.*;
-import ua.flowerista.shop.repo.BouqueteRepository;
-import ua.flowerista.shop.repo.PasswordResetTokenRepository;
+import ua.flowerista.shop.repo.BouquetRepository;
 import ua.flowerista.shop.repo.UserRepository;
-import ua.flowerista.shop.repo.VerificationTokenRepository;
 
 import java.security.Principal;
-import java.util.Calendar;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final RedisService redisService;
+    private final MailService mailService;
 
-    @Autowired
-    private BouqueteRepository bouqueteRepository;
+    private final UserRepository userRepository;
+    private final BouquetRepository bouquetRepository;
 
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+    private final AddressMapper addressMapper;
+    private final BouquetMapper bouquetMapper;
 
-    @Autowired
-    private AddressMapper addressMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private BouqueteMapper bouqueteMapper;
+    private static final long PASSWORD_TOKEN_EXPIRATION = 60 * 24L;
+    private static final long REGISTRATION_TOKEN_EXPIRATION = 60 * 24L;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private VerificationTokenRepository tokenRepository;
-
-    @Autowired
-    private PasswordResetTokenRepository passwordTokenRepository;
-
-    public static final String TOKEN_INVALID = "invalidToken";
-    public static final String TOKEN_EXPIRED = "expired";
-    public static final String TOKEN_VALID = "valid";
-
-    public UserProfileDto findByLogin(String login) {
-        User user = userRepository.findByEmail(login)
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-        return userMapper.toProfileDto(user);
+    public Optional<User> findByLogin(String login) {
+        return userRepository.findByEmail(login);
     }
 
-    public UserProfileDto login(CredentialsDto credentialsDto) {
+    public Optional<User> findById(Integer id) {
+        return userRepository.findById(id);
+    }
+
+    public Optional<User> login(CredentialsDto credentialsDto) {
         User user = userRepository.findByEmail(credentialsDto.getEmail())
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.UNAUTHORIZED));
-
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.FORBIDDEN));
         if (passwordEncoder.matches(credentialsDto.getPassword(), user.getPassword())) {
-            return userMapper.toProfileDto(user);
+            return Optional.of(user);
         }
-
-        throw new AppException("Invalid password", HttpStatus.UNAUTHORIZED);
+        throw new AppException("Invalid password", HttpStatus.FORBIDDEN);
     }
 
-    public User registerNewUserAccount(UserRegistrationBodyDto regDto) {
+    @Transactional
+    public User registerNewUserAccount(SignUpDto regDto) {
         if (existsByEmail(regDto.getEmail())) {
-            throw new UserAlreadyExistException("There is an account with that email address: " + regDto.getEmail());
+            throw new AppException(
+                    "There is an account with that email address: " + regDto.getEmail(),
+                    HttpStatus.BAD_REQUEST);
         }
         if (existsByPhoneNumber(regDto.getPhoneNumber())) {
-            throw new UserAlreadyExistException(
-                    "There is an account with that phone number: " + String.valueOf(regDto.getPhoneNumber()));
+            throw new AppException(
+                    "There is an account with that phone number: " + regDto.getPhoneNumber(),
+                    HttpStatus.BAD_REQUEST);
         }
         User user = userMapper.toEntity(regDto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -95,171 +78,108 @@ public class UserService {
         return userRepository.save(user);
     }
 
-//	public Authentication userLogIn(CredentialsDto logDto) {
-//		Authentication authentication = authenticationManager
-//				.authenticate(new UsernamePasswordAuthenticationToken(logDto.getEmail(), logDto.getPassword()));
-//		return authentication;
-//	}
-
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
 
-    public boolean existsByPhoneNumber(int phoneNumber) {
+    public boolean existsByPhoneNumber(Integer phoneNumber) {
         return userRepository.existsByPhoneNumber(String.valueOf(phoneNumber));
     }
 
-    public void createVerificationTokenForUser(final User user, final String token) {
-        final VerificationToken myToken = new VerificationToken(token, user);
-        tokenRepository.save(myToken);
+    public void sendRegistrationVerificationEmail(User user, Locale locale, String appUrl) {
+        VerificationToken token = createVerificationTokenForUser(user, REGISTRATION_TOKEN_EXPIRATION);
+        mailService.sendRegistrationVerificationEmail(user, token.getId(), appUrl, locale);
     }
 
-    public VerificationToken generateNewVerificationToken(final String existingVerificationToken) {
-        VerificationToken vToken = tokenRepository.findByToken(existingVerificationToken);
-        vToken.updateToken(UUID.randomUUID().toString());
-        vToken = tokenRepository.save(vToken);
-        return vToken;
+    public void sendPasswordResetEmail(User user) {
+        VerificationToken token = createVerificationTokenForUser(user, PASSWORD_TOKEN_EXPIRATION);
+        mailService.sendResetPasswordEmail(user, token.getId());
     }
 
-    public String validateVerificationToken(String token) {
-        final VerificationToken verificationToken = tokenRepository.findByToken(token);
-        if (verificationToken == null) {
-            return TOKEN_INVALID;
+    @Transactional
+    public void processRegistrationToken(String token) {
+        VerificationToken savedToken = redisService.getToken(token);
+        if (savedToken == null) {
+            throw new AppException("Token is expired or invalid", HttpStatus.BAD_REQUEST);
         }
-
-        final User user = verificationToken.getUser();
-        final Calendar cal = Calendar.getInstance();
-        if ((verificationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
-            tokenRepository.delete(verificationToken);
-            userRepository.delete(user);
-            return TOKEN_EXPIRED;
-        }
-
-        user.setEnabled(true);
-        tokenRepository.delete(verificationToken);
-        userRepository.save(user);
-        return TOKEN_VALID;
+        userRepository.updateEnabledByEmail(savedToken.getUserLogin());
     }
 
-    public User findUserByEmail(final String email) {
-        if (userRepository.findByEmail(email).isPresent()) {
-            return userRepository.findByEmail(email).get();
+    @Transactional
+    public void resetPassword(ResetPasswordDto dto) {
+        if (!dto.getPassword().equals(dto.getPasswordRepeated())) {
+            throw new AppException("Passwords do not match", HttpStatus.BAD_REQUEST);
         }
-        return new User();
+        VerificationToken savedToken = redisService.getToken(dto.getToken());
+        if (savedToken == null) {
+            throw new AppException("Token is expired or invalid", HttpStatus.BAD_REQUEST);
+        }
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        userRepository.updatePasswordByEmail(savedToken.getUserLogin(), encodedPassword);
     }
 
-    public void createPasswordResetTokenForUser(final User user, final String token) {
-        final PasswordResetToken myToken = new PasswordResetToken(token, user);
-        passwordTokenRepository.save(myToken);
-    }
-
-    public PasswordResetToken getPasswordResetToken(final String token) {
-        return passwordTokenRepository.findByToken(token);
-    }
-
-    public Optional<User> getUserByPasswordResetToken(final String token) {
-        return Optional.ofNullable(passwordTokenRepository.findByToken(token).getUser());
-    }
-
-    public String resetPassword(UserPasswordResetDto dto) {
-        if (dto.getPassword().equals(dto.getPasswordRepeated()) == false) {
-            return "Passwords not matching";
-        }
-        String validatedToken = validatePasswordResetToken(dto.getToken());
-        if (validatedToken != null) {
-            return validatedToken;
-        }
-        Optional<User> user = Optional.ofNullable(passwordTokenRepository.findByToken(dto.getToken()).getUser());
-
-        if (user.isPresent()) {
-            final PasswordResetToken token = passwordTokenRepository.findByToken(dto.getToken());
-            user.get().setPassword(passwordEncoder.encode(dto.getPasswordRepeated()));
-            userRepository.save(user.get());
-            passwordTokenRepository.delete(token);
-            return "Password changed";
-        }
-
-        return "Something went wrong";
-    }
-
-    public UserProfileDto getUserDto(Principal connectedUser) {
-        var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
-        if (user != null) {
-            return userMapper.toProfileDto(userRepository.findByEmail(user.getEmail()).get());
-        }
-        return new UserProfileDto();
-    }
-
-    public String changePassword(UserChangePasswordRequestDto request, Principal connectedUser) {
-
-        var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
-        if (request.getNewPassword() == null) {
-            return "New password cannot be null";
-        }
-        if (request.getCurrentPassword() == null) {
-            return "Current password cannot be null";
-        }
-
+    @Transactional
+    public void updatePassword(UpdatePasswordDto request, Principal principal) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            return "Wrong password";
+            throw new AppException("Wrong password", HttpStatus.BAD_REQUEST);
         }
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-
         userRepository.save(user);
-        return "Password changed";
     }
 
-    public void changeAddress(AddressDto address, Principal connectedUser) {
-        var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    @Transactional
+    public void changeAddress(AddressDto address, Principal principal) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
         Address addressEntity = addressMapper.toEntity(address);
         addressEntity.setId(user.getAddress().getId());
         user.setAddress(addressEntity);
         userRepository.save(user);
-
     }
 
-    public void changePersonalInfo(UserChangePersonalInfoDto dto, Principal connectedUser) {
-        var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    @Transactional
+    public void changePersonalInfo(PersonalInfoDto dto, Principal principal) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         userRepository.save(user);
     }
 
-    public Set<BouqueteSmallDto> getWishList(Principal connectedUser) {
-        var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
-        return user.getWishlist().stream().map(bouquete -> bouqueteMapper.toSmallDto(bouquete)).collect(Collectors.toSet());
+    public Set<BouqueteSmallDto> getWishList(Integer userId) {
+        return userRepository.findById(userId)
+                .map(User::getWishlist)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND))
+                .stream()
+                .map(bouquetMapper::toSmallDto)
+                .collect(Collectors.toSet());
     }
 
-    public void addBouqueteToWishList(int id, Principal connectedUser) {
-        var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
-        Bouquete bouquete = bouqueteRepository.getReferenceById(id);
-        user.getWishlist().add(bouquete);
+    @Transactional
+    public void addBouquetToWishList(int id, Principal principal) {
+        User loggedUser = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
+        User user = userRepository.findById(loggedUser.getId())
+                .orElseThrow(() -> new AppException("Logged User not found. {} " + loggedUser,
+                        HttpStatus.INTERNAL_SERVER_ERROR));
+        Bouquet bouquet = bouquetRepository.getReferenceById(id);
+        user.getWishlist().add(bouquet);
         userRepository.save(user);
     }
 
-    public void deleteBouqueteFromWishList(int id, Principal connectedUser) {
-        var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
-        Bouquete bouquete = bouqueteRepository.getReferenceById(id);
-        user.getWishlist().remove(bouquete);
+    @Transactional
+    public void removeBouquetFromWishList(int id, Principal principal) {
+        User loggedUser = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
+        User user = userRepository.findById(loggedUser.getId())
+                .orElseThrow(() -> new AppException("Logged User not found. {} " + loggedUser,
+                        HttpStatus.INTERNAL_SERVER_ERROR));
+        Bouquet bouquet = bouquetRepository.getReferenceById(id);
+        user.getWishlist().remove(bouquet);
         userRepository.save(user);
     }
 
-    private String validatePasswordResetToken(String token) {
-        final PasswordResetToken passToken = passwordTokenRepository.findByToken(token);
-
-        return !isTokenFound(passToken) ? "invalidToken" : isTokenExpired(passToken) ? "expired" : null;
+    private VerificationToken createVerificationTokenForUser(User user, Long expirationTime) {
+        VerificationToken token = new VerificationToken(user.getEmail());
+        redisService.saveToken(token.getId(), token, expirationTime);
+        return token;
     }
 
-    private boolean isTokenFound(PasswordResetToken passToken) {
-        return passToken != null;
-    }
-
-    private boolean isTokenExpired(PasswordResetToken passToken) {
-        final Calendar cal = Calendar.getInstance();
-        return passToken.getExpiryDate().before(cal.getTime());
-    }
-
-    public User getUserById(Integer userId) {
-        return userRepository.findById(userId).orElse(null);
-    }
 }

@@ -23,9 +23,9 @@ public class PaymentController {
 
     @PostMapping(value = "/init")
     @Operation(summary = "Create payment endpoint", description = "Returns link to paypal payment page")
-    @ApiResponses(value =
-            {@ApiResponse(responseCode = "200", description = "Return status creating payment, payId and redirectUrl"),
-                    @ApiResponse(responseCode = "400", description = "If order already payed")})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Return status creating payment, payId and redirectUrl"),
+            @ApiResponse(responseCode = "400", description = "If order already payed")})
     public ResponseEntity<?> createPayment(@RequestParam("orderId") Integer orderId) {
         if (orderService.isOrderPayed(orderId)) {
             return ResponseEntity.badRequest().body("Order already payed or not found");

@@ -4,12 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ua.flowerista.shop.models.BouqueteSize;
+import ua.flowerista.shop.models.Bouquet;
+import ua.flowerista.shop.models.BouquetSize;
 
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * DTO for {@link Bouquet}
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -21,6 +25,6 @@ public class BouqueteSmallDto {
     private BigInteger defaultPrice;
     private BigInteger discount;
     private BigInteger discountPrice;
-    private Set<BouqueteSize> sizes;
+    private Set<BouquetSize> sizes;
     private int stockQuantity;
 }

@@ -1,28 +1,22 @@
 package ua.flowerista.shop.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import ua.flowerista.shop.services.UserService;
 
 @Controller
+@RequiredArgsConstructor
 public class TokenVerificationController {
 
-	@Autowired
-	UserService service;
-
-	@GetMapping("/registrationConfirm")
-	public String registrationConfirm(@RequestParam("token") final String token) {
-		final String tokenValidated = service.validateVerificationToken(token);
-		if (tokenValidated.equals("invalidToken")) {
-			return "redirect://flowerista-frontend.vercel.app/";
-		}
-		if (tokenValidated.equals("expired")) {
-			return "redirect://flowerista-frontend.vercel.app/";
-		}
-		return "redirect://flowerista-frontend.vercel.app/login";
-	}
-
+    private final UserService userService;
+    @Value("${frontend.server.url}")
+    private String frontendUrl;
+    @GetMapping("/registrationConfirm")
+    public String registrationConfirm(@RequestParam("token") final String token) {
+        userService.processRegistrationToken(token);
+        return "redirect://" + frontendUrl + "/login";
+    }
 }

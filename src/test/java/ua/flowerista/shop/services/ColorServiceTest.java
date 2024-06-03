@@ -9,10 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import ua.flowerista.shop.dto.ColorDto;
 import ua.flowerista.shop.mappers.ColorMapper;
 import ua.flowerista.shop.models.Color;
 import ua.flowerista.shop.repo.ColorRepository;
@@ -29,11 +27,9 @@ class ColorServiceTest {
 
 	@Test
 	void testInsert() {
-		ColorDto dto = new ColorDto();
-		Mockito.when(mapper.toEntity(any(ColorDto.class))).thenReturn(new Color());
-		service.insert(dto);
+		Color color = new Color();
+		service.insert(color);
 		verify(repository, times(1)).save(any(Color.class));
-		verify(mapper, times(1)).toEntity(any(ColorDto.class));
 	}
 
 	@Test
@@ -44,23 +40,21 @@ class ColorServiceTest {
 
 	@Test
 	void testGetAllColors() {
-		service.getAllColors();
+		service.getAll();
 		verify(repository, times(1)).findAll();
 	}
 
 	@Test
 	void testGetColorById() {
-		service.getColorById(anyInt());
+		service.getById(anyInt());
 		verify(repository, times(1)).getReferenceById(anyInt());
 	}
 
 	@Test
 	void testUpdate() {
-		ColorDto dto = new ColorDto();
-		Mockito.when(mapper.toEntity(any(ColorDto.class))).thenReturn(new Color());
-		service.update(dto);
+		Color color = new Color();
+		service.update(color);
 		verify(repository, times(1)).save(any(Color.class));
-		verify(mapper, times(1)).toEntity(any(ColorDto.class));
 	}
 
 }

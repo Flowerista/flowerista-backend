@@ -1,58 +1,36 @@
 package ua.flowerista.shop.services;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import ua.flowerista.shop.dto.ColorDto;
-import ua.flowerista.shop.mappers.ColorMapper;
 import ua.flowerista.shop.models.Color;
-import ua.flowerista.shop.models.Languages;
 import ua.flowerista.shop.repo.ColorRepository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
+@RequiredArgsConstructor
 public class ColorService {
 
-	private ColorRepository repo;
-	private ColorMapper mapper;
+    private final ColorRepository repo;
 
-	@Autowired
-	public ColorService(ColorRepository repo, ColorMapper mapper) {
-		this.repo = repo;
-		this.mapper = mapper;
-	}
+    public void insert(Color color) {
+        repo.save(color);
+    }
 
-	public void insert(ColorDto colorDto) {
-		repo.save(mapper.toEntity(colorDto));
-	}
+    public void deleteById(int id) {
+        repo.deleteById(id);
+    }
 
-	public void deleteById(int id) {
-		repo.deleteById(id);
-	}
+    public List<Color> getAll() {
+        return repo.findAll();
+    }
 
-	public List<ColorDto> getAllColors() {
-		return repo.findAll().stream().map(color -> mapper.toDto(color)).collect(Collectors.toList());
-	}
-	public List<ColorDto> getAllColors(Languages lang) {
-		return repo.findAll().stream().map(color -> mapper.toDto(color, lang)).collect(Collectors.toList());
-	}
+    public Optional<Color> getById(Integer id) {
+        return repo.findById(id);
+    }
 
-	public ColorDto getColorById(int id) {
-		return mapper.toDto(repo.getReferenceById(id));
-	}
-
-	public Optional<Color> getColor(int id) {
-		return repo.findById(id);
-	}
-
-	public void update(ColorDto color) {
-		repo.save(mapper.toEntity(color));
-	}
-
-    public Boolean isColorExist(Integer colorId) {
-		return repo.existsById(colorId);
+    public void update(Color color) {
+        repo.save(color);
     }
 }

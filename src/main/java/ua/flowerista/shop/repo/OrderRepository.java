@@ -18,6 +18,7 @@ import ua.flowerista.shop.models.QOrder;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer>, QuerydslPredicateExecutor<Order>, QuerydslBinderCustomizer<QOrder> {
@@ -30,20 +31,9 @@ public interface OrderRepository extends JpaRepository<Order, Integer>, Querydsl
 
     @Modifying
     @Transactional
-    @Query("update Order o set o.status = :status where o.id = :id")
-    void updateStatus(@Param("id") Integer id, @Param("status") OrderStatus status);
-
-    @Modifying
-    @Transactional
-    @Query("update Order o set o.payId = :payId where o.id = :orderId")
-    void updatePayId(@Param("orderId") Integer orderId, @Param("payId") String payId);
-
-    @Modifying
-    @Transactional
     @Query("update Order o set o.status = :status where o.payId = :payId")
     void updateStatusByPayId(@Param("payId") String payId, @Param("status") OrderStatus status);
-    @Modifying
-    @Transactional
-    @Query("update Order o set o.updated = :now where o.id = :orderId")
-    void updateUpdatedDateTime(Integer orderId, Instant now);
+
+    @Query("select o.user.id from Order o where o.id = :orderId")
+    Integer findUserIdByOrderId(Integer orderId);
 }

@@ -29,14 +29,14 @@ public class OrderItemMapperTest {
         //given
         OrderItem orderItem = new OrderItem();
         orderItem.setId(1);
-        Bouquete bouquete = new Bouquete();
-        bouquete.setId(1);
-        orderItem.setBouquete(bouquete);
+        Bouquet bouquet = new Bouquet();
+        bouquet.setId(1);
+        orderItem.setBouquet(bouquet);
         orderItem.setName("Bouquete");
         orderItem.setQuantity(1);
         Color color = new Color();
         color.setId(1);
-        BouqueteSize size = new BouqueteSize();
+        BouquetSize size = new BouquetSize();
         size.setId(1);
         size.setSize(Size.SMALL);
         orderItem.setSize(size);

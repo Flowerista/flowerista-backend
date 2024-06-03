@@ -27,7 +27,7 @@ public class OrderItem {
     private Integer id;
     @ManyToOne
     @JoinColumn(name = "bouquete_id")
-    private Bouquete bouquete;
+    private Bouquet bouquet;
     @Column(name = "name")
     @NotBlank
     private String name;
@@ -35,7 +35,7 @@ public class OrderItem {
     private int quantity;
     @ManyToOne
     @JoinColumn(name = "size_id")
-    private BouqueteSize size;
+    private BouquetSize size;
     @Column(name = "price")
     private BigInteger price;
 

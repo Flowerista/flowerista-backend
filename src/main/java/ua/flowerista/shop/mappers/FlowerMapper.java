@@ -7,6 +7,8 @@ import ua.flowerista.shop.models.Flower;
 import ua.flowerista.shop.models.Languages;
 import ua.flowerista.shop.models.Translate;
 
+import java.util.List;
+
 @Component
 public class FlowerMapper implements EntityMapper<Flower, FlowerDto> , EntityMultiLanguagesDtoMapper<Flower, FlowerDto>{
 
@@ -36,5 +38,11 @@ public class FlowerMapper implements EntityMapper<Flower, FlowerDto> , EntityMul
 				.orElse(Translate.builder().text(entity.getName()).build())
 				.getText());
 		return dto;
+	}
+
+	public List<FlowerDto> toDto(List<Flower> flowers, Languages lang){
+		return flowers.stream()
+				.map(flower -> toDto(flower, lang))
+				.toList();
 	}
 }
