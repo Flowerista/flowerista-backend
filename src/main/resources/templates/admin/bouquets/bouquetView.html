@@ -25,14 +25,17 @@
                     <div class="col-md-12">
                         <h3>Bouquet Images</h3>
                         <div class="d-flex flex-wrap">
-                            <div th:each="image : ${bouquet.imageUrls}" class="card" style="width: 18rem; margin: 1% 1%">
-                                <img th:src="${image.getValue()}" class="card-img-top" th:alt="'Image id: ' + ${image.getKey()}">
+                            <div th:each="image : ${bouquet.imageUrls}" class="card"
+                                 style="width: 18rem; margin: 1% 1%">
+                                <img th:src="${image.getValue()}" class="card-img-top"
+                                     th:alt="'Image id: ' + ${image.getKey()}">
                                 <div class="card-body">
                                     <p class="card-text">Image id: <span th:text="${image.getKey()}"/></p>
                                 </div>
                                 <div class="card-footer text-center">
                                     <button class="delete-img-btn btn btn-primary" th:data-bouquet-id="${bouquet.id}"
-                                            th:data-image-id="${image.getKey()}">Delete</button>
+                                            th:data-image-id="${image.getKey()}">Delete
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -47,36 +50,110 @@
                     </div>
                 </div>
 
-                <form id="bouquetForm">
-                    <div th:if="${bouquet}">
-                        <div class="row">
-                            <div class="col-md-6">
+                <div th:if="${bouquet}">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <form th:action="@{/api/admin/bouquets/{id}(id=${bouquet.id})}" th:method="POST"
+                                  th:object="${bouquet}">
                                 <h3>Bouquet Details</h3>
-                                <p><strong>Bouquet ID: </strong><input id="id" class="form-control" th:type="number"
-                                                                       th:name="id"
-                                                                       th:value="${bouquet.id}" disabled/></p>
-                                <p><strong>Bouquet Item Code: </strong><input id="itemCode" class="form-control"
-                                                                              th:type="text"
-                                                                              th:name="itemCode"
-                                                                              th:value="${bouquet.itemCode}"/></p>
-                                <p><strong>Bouquet Name: </strong><input id="name" class="form-control" th:type="text"
-                                                                         th:name="name" th:value="${bouquet.name}"/></p>
-                                <p><strong>Bouquet Quantity: </strong><input id="quantity" class="form-control"
-                                                                             th:type="text"
-                                                                             th:name="quantity"
-                                                                             th:value="${bouquet.quantity}"/></p>
-                                <p><strong>Bouquet Sold Quantity: </strong><input id="soldQuantity" class="form-control"
-                                                                                  th:type="text"
-                                                                                  th:name="soldQuantity"
-                                                                                  th:value="${bouquet.soldQuantity}"
-                                                                                  disabled/>
-                                </p>
-                            </div>
-                        </div>
 
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h3>Bouquet flowers</h3>
+                                <p>
+                                    <strong>Bouquet ID: </strong>
+                                    <input th:field="*{id}" class="form-control" disabled>
+                                </p>
+
+                                <p>
+                                    <strong>Bouquet Item Code: </strong>
+                                    <input th:field="*{itemCode}"/>
+                                </p>
+
+                                <p>
+                                    <strong>Bouquet Name: </strong>
+                                    <input th:field="*{name.id}" type="hidden">
+                                    <input th:field="*{name.originalText}" class="form-control"> <br>
+                                    <input th:field="*{name.originalLanguageId}" type="hidden">
+                                    <input th:field="*{name.originalLanguageName}" type="hidden">
+                                </p>
+
+                                <p>
+                                    <strong>Bouquet translations: </strong> <br>
+                                <div th:each="translation, itemStat : *{name.translation}"
+                                     class="col-sm-10 col-sm-offset-2">
+                                    <label th:text="'Language: ' + *{name.translation[__${itemStat.index}__].translationEmbeddedIdLanguageName}"
+                                           class="col-sm-6 control-label"/>
+                                    <input th:field="*{name.translation[__${itemStat.index}__].translationEmbeddedIdLanguageId}"
+                                           type="hidden"/>
+                                    <input th:field="*{name.translation[__${itemStat.index}__].translationEmbeddedIdTextContentId}"
+                                           type="hidden"/>
+                                    <input th:field="*{name.translation[__${itemStat.index}__].translationEmbeddedIdLanguageName}"
+                                           type="hidden"/>
+                                    <input th:field="*{name.translation[__${itemStat.index}__].text}"
+                                           class="form-control"/> <br>
+                                </div>
+                                </p>
+
+                                <p>
+                                    <strong>Bouquet Quantity: </strong>
+                                    <input th:field="*{availableQuantity}"/>
+                                </p>
+
+                                <p>
+                                    <strong>Bouquet Sold Quantity: </strong>
+                                    <input th:field="*{soldQuantity}" disabled/>
+                                </p>
+
+                                <h3>Bouquet sizes</h3>
+                                <table id="sizesTable" class="table table-stripped">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Sizes</th>
+                                        <th>Default Price</th>
+                                        <th>Is Sale</th>
+                                        <th>Discount Price</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="item, itemState: ${bouquet.sizes}">
+                                        <td>
+                                            <input class="sizeId"
+                                                   th:field="*{sizes[__${itemState.index}__].id}"/>
+                                        </td>
+                                        <td>
+                                            <input class="sizeName" th:field="*{sizes[__${itemState.index}__].size}"
+                                                   disabled>
+                                        </td>
+                                        <td>
+                                            <input class="form-control defaultPrice"
+                                                   th:field="*{sizes[__${itemState.index}__].defaultPrice}"/>
+                                        </td>
+                                        <td>
+                                            <select class="form-control isSale"
+                                                    th:field="*{sizes[__${itemState.index}__].isSale}">
+                                                <option value="true" th:selected="${item.isSale}">True</option>
+                                                <option value="false" th:selected="${!item.isSale}">False</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input class="form-control discountPrice"
+                                                   th:field="*{sizes[__${itemState.index}__].discountPrice}"/>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="text-center">
+                                    <button class="btn btn-primary" style="font-size: large">Update General Info
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Bouquet flowers</h3>
+                            <form th:action="@{/api/admin/bouquets/{id}/flowers(id=${bouquet.id})}" th:method="POST">
                                 <table id="flowerTable" class="table table-striped">
                                     <thead>
                                     <tr>
@@ -88,17 +165,18 @@
                                     <tbody>
                                     <tr th:each="item : ${bouquet.flowers}">
                                         <td class="flowerId text-start" th:text="${item.id}"></td>
-                                        <td class="text-center elem"><select class="form-control" name="flower_name">
-                                            <option th:each="flower : ${item}"
-                                                    th:value="${flower.getId()}"
-                                                    th:text="${flower.getName()}" selected>
-                                            </option>
-                                            <option th:each="flower : ${flowers}"
-                                                    th:unless="${flower.getName() == item.getName()}"
-                                                    th:value="${flower.getId()}"
-                                                    th:text="${flower.getName()}">
-                                            </option>
-                                        </select></td>
+                                        <td class="text-center elem">
+                                            <select class="form-control" name="flowerIds">
+                                                <option th:each="flower : ${item}"
+                                                        th:value="${flower.id}"
+                                                        th:text="${flower.name.originalText}" selected>
+                                                </option>
+                                                <option th:each="flower : ${flowers}"
+                                                        th:unless="${flower.name.originalText == item.name.originalText}"
+                                                        th:value="${flower.id}"
+                                                        th:text="${flower.name.originalText}">
+                                                </option>
+                                            </select></td>
                                         <td class="text-end">
                                             <button class="delete-btn btn btn-primary"
                                                     th:data-bouquet-id="${bouquet.id}"
@@ -109,12 +187,15 @@
                                     </tbody>
                                 </table>
                                 <button class="btn btn-primary" type="button" id="addFlowerButton">Add Flower</button>
-                            </div>
+                                <button class="btn btn-primary" type="submit">Update Flowers</button>
+                            </form>
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h3>Bouquet colors</h3>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3>Bouquet colors</h3>
+                            <form th:action="@{/api/admin/bouquets/{id}/colors(id=${bouquet.id})}" th:method="POST">
                                 <table id="colorTable" class="table table-striped">
                                     <thead>
                                     <tr class="table-head">
@@ -126,15 +207,15 @@
                                     <tbody>
                                     <tr th:each="item : ${bouquet.colors}">
                                         <td class="colorId text-start" th:text="${item.id}"></td>
-                                        <td class="text-center elem"><select class="form-control" name="color_name">
+                                        <td class="text-center elem"><select class="form-control" name="colorIds">
                                             <option th:each="color : ${item}"
-                                                    th:value="${color.getId()}"
-                                                    th:text="${color.getName()}" selected>
+                                                    th:value="${color.id}"
+                                                    th:text="${color.name.originalText}" selected>
                                             </option>
                                             <option th:each="color : ${colors}"
-                                                    th:unless="${color.getName() == item.getName()}"
-                                                    th:value="${color.getId()}"
-                                                    th:text="${color.getName()}">
+                                                    th:unless="${color.name.originalText == item.name.originalText}"
+                                                    th:value="${color.id}"
+                                                    th:text="${color.name.originalText}">
                                             </option>
                                         </select></td>
                                         <td class="text-end">
@@ -147,57 +228,11 @@
                                     </tbody>
                                 </table>
                                 <button class="btn btn-primary" type="button" id="addColorButton">Add Flower</button>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h3>Bouquet sizes</h3>
-                                <table id="sizesTable" class="table table-stripped">
-                                    <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Sizes</th>
-                                        <th>Default Price</th>
-                                        <th>Is Sale</th>
-                                        <th>Discount</th>
-                                        <th>Discount Price</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr th:each="item : ${bouquet.sizes}">
-                                        <td class="sizeId" th:text="${item.id}"></td>
-                                        <td class="sizeName" th:text="${item.size.name()}"></td>
-                                        <td><input class="form-control defaultPrice" th:type="number"
-                                                   th:name="defaultPrice"
-                                                   th:value="${item.defaultPrice}"/></td>
-                                        <td>
-                                            <select class="form-control isSale" name="isSale">
-                                                <option value="true" th:if="${item.isSale}" selected>true</option>
-                                                <option value="false" th:if="${!item.isSale}" selected>false</option>
-                                                <option value="true" th:if="${!item.isSale}">true</option>
-                                                <option value="false" th:if="${item.isSale}">false</option>
-                                            </select>
-                                        </td>
-                                        <td><input class="form-control discountPercentage" th:type="number"
-                                                   th:name="discount"
-                                                   th:value="${item.discount}"/></td>
-                                        <td><input class="form-control discountPrice" th:type="number"
-                                                   th:name="discountPrice"
-                                                   th:value="${item.discountPrice}"/>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                                <div class="text-center">
-                                    <button class="btn btn-primary" id="submitFormBtn" style="font-size: large">Update
-                                        all data
-                                    </button>
-                                </div>
-                            </div>
+                                <button class="btn btn-primary" type="submit">Update Colors</button>
+                            </form>
                         </div>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>

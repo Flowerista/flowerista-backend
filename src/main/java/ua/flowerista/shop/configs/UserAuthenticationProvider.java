@@ -17,7 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import ua.flowerista.shop.dto.user.UserDto;
-import ua.flowerista.shop.models.User;
+import ua.flowerista.shop.models.user.User;
 
 import java.util.Base64;
 import java.util.Date;
@@ -50,7 +50,7 @@ public class UserAuthenticationProvider {
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
         return JWT.create()
                 .withSubject(user.getEmail())
-                .withClaim("role", user.getRole())
+                .withClaim("role", user.getRole().name())
                 .withClaim("id", user.getId())
                 .withIssuedAt(now)
                 .withExpiresAt(validity)

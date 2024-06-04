@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import ua.flowerista.shop.mappers.ColorMapper;
 import ua.flowerista.shop.models.Color;
-import ua.flowerista.shop.repo.ColorRepository;
+import ua.flowerista.shop.repositories.ColorRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ColorServiceTest {
@@ -47,7 +47,7 @@ class ColorServiceTest {
 	@Test
 	void testGetColorById() {
 		service.getById(anyInt());
-		verify(repository, times(1)).getReferenceById(anyInt());
+		verify(repository, times(1)).findById(anyInt());
 	}
 
 	@Test

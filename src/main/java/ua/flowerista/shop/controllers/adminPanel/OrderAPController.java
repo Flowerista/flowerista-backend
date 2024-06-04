@@ -10,10 +10,10 @@ import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import ua.flowerista.shop.dto.OrderDto;
+import ua.flowerista.shop.dto.order.OrderDto;
 import ua.flowerista.shop.mappers.OrderMapper;
-import ua.flowerista.shop.models.Order;
-import ua.flowerista.shop.models.OrderStatus;
+import ua.flowerista.shop.models.order.Order;
+import ua.flowerista.shop.models.order.OrderStatus;
 import ua.flowerista.shop.services.OrderService;
 
 @Controller

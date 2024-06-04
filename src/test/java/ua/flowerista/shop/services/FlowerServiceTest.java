@@ -9,13 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import ua.flowerista.shop.dto.FlowerDto;
 import ua.flowerista.shop.mappers.FlowerMapper;
 import ua.flowerista.shop.models.Flower;
-import ua.flowerista.shop.repo.FlowerRepository;
+import ua.flowerista.shop.repositories.FlowerRepository;
 
 @ExtendWith(MockitoExtension.class)
 class FlowerServiceTest {
@@ -49,7 +47,7 @@ class FlowerServiceTest {
 	@Test
 	void testGetFlowerById() {
 		service.getById(anyInt());
-		verify(repository, times(1)).getReferenceById(anyInt());
+		verify(repository, times(1)).findById(anyInt());
 	}
 
 	@Test

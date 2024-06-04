@@ -7,6 +7,7 @@ import lombok.Setter;
 import ua.flowerista.shop.models.Bouquet;
 import ua.flowerista.shop.models.BouquetSize;
 
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,7 +27,9 @@ public class BouquetDto {
     private String name;
     private Map<Integer, String> imageUrls;
     private Set<BouquetSize> sizes;
-    private int quantity;
-    private int soldQuantity;
+    private int stockQuantity;
+    private BigInteger defaultPrice;
+    private BigInteger discount;
+    private BigInteger discountPrice;
 
 }

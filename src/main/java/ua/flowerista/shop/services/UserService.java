@@ -2,22 +2,28 @@ package ua.flowerista.shop.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ua.flowerista.shop.dto.AddressDto;
-import ua.flowerista.shop.dto.BouqueteSmallDto;
 import ua.flowerista.shop.dto.user.*;
 import ua.flowerista.shop.exceptions.AppException;
 import ua.flowerista.shop.mappers.AddressMapper;
 import ua.flowerista.shop.mappers.BouquetMapper;
 import ua.flowerista.shop.mappers.UserMapper;
-import ua.flowerista.shop.models.*;
-import ua.flowerista.shop.repo.BouquetRepository;
-import ua.flowerista.shop.repo.UserRepository;
+import ua.flowerista.shop.models.Address;
+import ua.flowerista.shop.models.Bouquet;
+import ua.flowerista.shop.models.VerificationToken;
+import ua.flowerista.shop.models.user.Role;
+import ua.flowerista.shop.models.user.User;
+import ua.flowerista.shop.repositories.BouquetRepository;
+import ua.flowerista.shop.repositories.UserRepository;
 
 import java.security.Principal;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -26,6 +32,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final RedisService redisService;
     private final MailService mailService;
@@ -48,6 +55,14 @@ public class UserService {
 
     public Optional<User> findById(Integer id) {
         return userRepository.findById(id);
+    }
+
+    public User getById(Integer id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("User not found by id: {}", id);
+                    return new AppException("User not found", HttpStatus.NOT_FOUND);
+                });
     }
 
     public Optional<User> login(CredentialsDto credentialsDto) {
@@ -145,17 +160,14 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public Set<BouqueteSmallDto> getWishList(Integer userId) {
-        return userRepository.findById(userId)
+    public Set<Bouquet> getWishList(Integer userId) {
+        return new HashSet<>(userRepository.findById(userId)
                 .map(User::getWishlist)
-                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND))
-                .stream()
-                .map(bouquetMapper::toSmallDto)
-                .collect(Collectors.toSet());
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND)));
     }
 
     @Transactional
-    public void addBouquetToWishList(int id, Principal principal) {
+    public void addBouquetToWishList(Integer id, Principal principal) {
         User loggedUser = (User) ((UsernamePasswordAuthenticationToken) principal).getPrincipal();
         User user = userRepository.findById(loggedUser.getId())
                 .orElseThrow(() -> new AppException("Logged User not found. {} " + loggedUser,

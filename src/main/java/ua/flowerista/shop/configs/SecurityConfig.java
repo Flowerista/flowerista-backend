@@ -26,7 +26,6 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableWebMvc
-@EnableGlobalMethodSecurity(securedEnabled = true)
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {

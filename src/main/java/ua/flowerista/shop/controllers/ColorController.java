@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.flowerista.shop.dto.ColorDto;
 import ua.flowerista.shop.mappers.ColorMapper;
-import ua.flowerista.shop.models.Languages;
+import ua.flowerista.shop.models.textContent.Languages;
 import ua.flowerista.shop.services.ColorService;
 
 import java.util.List;
@@ -23,8 +23,8 @@ public class ColorController {
     private final ColorMapper colorMapper;
 
     @GetMapping
-    @Operation(summary = "Get all collors", description = "Returns list of all colors")
-    public ResponseEntity<List<ColorDto>> getAllCollors(@RequestParam(defaultValue = "en") Languages lang) {
+    @Operation(summary = "Get all colors", description = "Returns list of all colors")
+    public ResponseEntity<List<ColorDto>> getAllColors(@RequestParam(defaultValue = "en") Languages lang) {
         List<ColorDto> colors = service.getAll().stream()
                 .map(color -> colorMapper.toDto(color, lang))
                 .toList();

@@ -6,22 +6,28 @@ import com.paypal.http.HttpResponse;
 import com.paypal.orders.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ua.flowerista.shop.models.CompletedOrder;
-import ua.flowerista.shop.models.OrderStatus;
-import ua.flowerista.shop.models.PaymentOrder;
-import ua.flowerista.shop.repo.PaymentOrderRepository;
+import ua.flowerista.shop.exceptions.AppException;
+import ua.flowerista.shop.models.order.OrderStatus;
+import ua.flowerista.shop.models.paypal.CompletedOrder;
+import ua.flowerista.shop.models.paypal.PaymentOrder;
+import ua.flowerista.shop.repositories.paypal.PaymentOrderRepository;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaypalService {
+    private static final Logger logger = LoggerFactory.getLogger(PaypalService.class);
     public static final String SUCCESS_URL = "/capture";
     public static final String CANCEL_URL = "/cancel";
     @Value("${frontend.server.url}")
@@ -31,7 +37,7 @@ public class PaypalService {
     private final PaymentOrderRepository paymentOrderRepository;
 
     public PaymentOrder createPayment(Integer orderId) {
-        ua.flowerista.shop.models.Order order = orderService.getById(orderId).get(); //check for null made in controller
+        ua.flowerista.shop.models.order.Order order = orderService.getById(orderId).get(); //check for null made in controller
         BigDecimal fee = BigDecimal.valueOf(order.getSum().longValue());
         String currencyCode = order.getCurrency();
         OrderRequest orderRequest = new OrderRequest();
@@ -72,7 +78,8 @@ public class PaypalService {
             HttpResponse<Order> httpResponse = payPalHttpClient.execute(ordersCaptureRequest);
             if (httpResponse.result().status() != null) {
                 orderService.updateStatusByPayId(token, OrderStatus.IN_PROCESS);
-                paymentOrderRepository.updateStatusAndDateOfPaymentByPayId(token, "payed", httpResponse.result().updateTime());
+                paymentOrderRepository.updateStatusAndDateOfPaymentByPayId(token, "payed",
+                        httpResponse.result().updateTime());
                 return new CompletedOrder("success", token);
             }
         } catch (IOException e) {
@@ -82,10 +89,15 @@ public class PaypalService {
     }
 
     public PaymentOrder getPaymentForOrder(Integer orderId) {
-        ua.flowerista.shop.models.Order order = orderService.getById(orderId).get();
-        if (order.getPayId() == null) {
+        Optional<ua.flowerista.shop.models.order.Order> order = orderService.getById(orderId);
+        if (order.isEmpty()) {
+            logger.error("Order with id {} not found", orderId);
+            throw new AppException("Order with id " + orderId + " not found", HttpStatus.BAD_REQUEST);
+        }
+
+        if (order.get().getPayId() == null) {
             return createPayment(orderId);
         }
-        return paymentOrderRepository.findByPayId(order.getPayId());
+        return paymentOrderRepository.findByPayId(order.get().getPayId());
     }
 }

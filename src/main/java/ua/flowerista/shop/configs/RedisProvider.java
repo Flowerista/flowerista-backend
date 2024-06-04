@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Protocol;
 
 import java.net.URI;
 import java.time.Duration;
@@ -33,7 +32,7 @@ public class RedisProvider {
         return new JedisPool(poolConfig,
                 redisUri.getHost(),
                 redisUri.getPort(),
-                Protocol.DEFAULT_TIMEOUT,
+                6000,
                 //if no user info is provided in url it will use null by default
                 redisUri.getUserInfo() == null ? null : redisUri.getUserInfo().split(":", 2)[1],
                 true);

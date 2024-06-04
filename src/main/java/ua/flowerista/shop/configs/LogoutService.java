@@ -20,6 +20,10 @@ public class LogoutService implements LogoutHandler {
             HttpServletResponse response,
             Authentication authentication
     ) {
-        refreshTokenService.logout(request, response);
+        try {
+            refreshTokenService.logout(request, response);
+        } catch (Exception e) {
+            //do nothing - user is already logged out
+        }
     }
 }

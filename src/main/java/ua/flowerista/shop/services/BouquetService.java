@@ -7,15 +7,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ua.flowerista.shop.dto.BouquetDto;
 import ua.flowerista.shop.exceptions.AppException;
-import ua.flowerista.shop.models.*;
-import ua.flowerista.shop.repo.BouquetRepository;
+import ua.flowerista.shop.models.Bouquet;
+import ua.flowerista.shop.models.Color;
+import ua.flowerista.shop.models.Flower;
+import ua.flowerista.shop.models.QBouquet;
+import ua.flowerista.shop.models.order.OrderItem;
+import ua.flowerista.shop.repositories.BouquetRepository;
 
 import java.io.IOException;
 import java.util.*;
@@ -34,27 +38,43 @@ public class BouquetService {
     private final BouquetRepository bouquetRepository;
     private final CloudinaryService cloudinary;
 
-    public Optional<Bouquet> getBouquetById(Integer id) {
+    public Optional<Bouquet> getById(Integer id) {
         return bouquetRepository.findById(id);
     }
 
-    public List<Bouquet> getBouquetsBestSellers() {
+    public Bouquet findById(Integer id) {
+        return bouquetRepository.findById(id).orElseThrow(() -> {
+            logger.error("Bouquet not found {} ", id);
+            return new AppException("Bouquet not found", HttpStatus.INTERNAL_SERVER_ERROR);
+        });
+    }
+
+    public List<Bouquet> getBestSellers() {
         return bouquetRepository.findTop5ByOrderBySoldQuantityDesc();
     }
 
-    public List<Bouquet> getBouquetsTop5Sales() {
+    public List<Bouquet> getTop5Sales() {
         return bouquetRepository.findTop5ByOrderByDiscountDesc();
     }
 
-    public List<Bouquet> getBouquetsCatalogFiltered(List<Integer> flowerIds,
-                                                    List<Integer> colorIds,
-                                                    Integer minPrice,
-                                                    Integer maxPrice,
-                                                    Boolean sortByNewest,
-                                                    Boolean sortByPriceHighToLow,
-                                                    Boolean sortByPriceLowToHigh) {
+    @Cacheable("bouquets")
+    public List<Bouquet> findAll() {
+        return bouquetRepository.findAll();
+    }
+
+    public List<Bouquet> finnAllUncached() {
+        return bouquetRepository.findAll();
+    }
+
+    public List<Bouquet> getCatalogFiltered(List<Integer> flowerIds,
+                                            List<Integer> colorIds,
+                                            Integer minPrice,
+                                            Integer maxPrice,
+                                            Boolean sortByNewest,
+                                            Boolean sortByPriceHighToLow,
+                                            Boolean sortByPriceLowToHigh) {
         //cached query for all bouquets
-        List<Bouquet> bouquets = bouquetRepository.findAll();
+        List<Bouquet> bouquets = findAll();
         //if all filters are null, return all bouquets
         if ((flowerIds == null) && (colorIds == null) && (minPrice == null) && (maxPrice == null)
                 && (sortByNewest == null) && (sortByPriceHighToLow == null) && (sortByPriceLowToHigh == null)) {
@@ -68,7 +88,7 @@ public class BouquetService {
             //get bouquets by ids from cached results
             return ids.stream()
                     .map(id -> bouquets.stream()
-                            .filter(bouquete -> Objects.equals(bouquete.getId(), id))
+                            .filter(bouquet -> Objects.equals(bouquet.getId(), id))
                             .findFirst().orElse(null))
                     .collect(Collectors.toList());
         }
@@ -82,7 +102,7 @@ public class BouquetService {
         return bouquetRepository.findMaxPrice();
     }
 
-    public List<Bouquet> searchBouquets(String name) {
+    public List<Bouquet> search(String name) {
         if (name == null || name.length() < 3) {
             return Collections.emptyList();
         }
@@ -90,21 +110,21 @@ public class BouquetService {
         QBouquet bouquet = QBouquet.bouquet;
         return query
                 .from(bouquet)
-                .where(bouquet.translates.any().text.containsIgnoreCase(name))
+                .where(bouquet.name.translation.any().text.containsIgnoreCase(name))
                 .fetch();
     }
 
-    public Boolean isBouquetExist(Integer id) {
+    public Boolean isExist(Integer id) {
         return bouquetRepository.existsById(id);
     }
 
 
-    public boolean isBouquetAvailableForSale(Integer productId) {
+    public boolean isAvailableForSale(Integer productId) {
         return bouquetRepository.isBouquetAvailableForSale(productId);
     }
 
-    public Page<Bouquet> getAllBouquets(Predicate predicate,
-                                        Pageable pageable) {
+    public Page<Bouquet> getAll(Predicate predicate,
+                                Pageable pageable) {
         return bouquetRepository.findAll(predicate, pageable);
     }
 
@@ -122,51 +142,13 @@ public class BouquetService {
         bouquetRepository.save(bouquet);
     }
 
-    public void update(BouquetDto dto, Languages lang) {
-        Bouquet entity = bouquetRepository.findById(dto.getId());
-
-        if (lang == Languages.en) {
-            entity.setName(dto.getName());
-        }
-
-        Set<Translate> translates = entity != null ? entity.getTranslates() : null;
-
-        Translate translate;
-        if (translates != null) {
-            translate = translates.stream().filter(t -> t.getLanguage() == lang).findFirst().orElse(new Translate());
-            translates.remove(translate);
-        } else {
-            translate = new Translate();
-        }
-        translate.setText(dto.getName());
-        translate.setLanguage(lang);
-//        translate.setBouquet(entity);
-        translates.add(translate);
-        entity.setTranslates(translates);
-        entity.setFlowers(dto.getFlowers().stream()
-                .map(flowerDto -> flowerService.getById(flowerDto.getId())
-                        .orElseThrow(() -> {
-                            logger.error("Flower not found {} ", flowerDto.getId());
-                            return new AppException("Flower not found", HttpStatus.INTERNAL_SERVER_ERROR);
-                        }))
-                .collect(Collectors.toSet()));
-        entity.setColors(dto.getColors().stream()
-                .map(colorDto -> colorService.getById(colorDto.getId())
-                        .orElseThrow(() -> {
-                            logger.error("Color not found {} ", colorDto.getId());
-                            return new AppException("Color not found", HttpStatus.INTERNAL_SERVER_ERROR);
-                        }))
-                .collect(Collectors.toSet()));
-        bouquetRepository.save(entity);
-    }
-
     public void updateStock(Set<OrderItem> orderItems) {
         orderItems.forEach(orderItem -> {
             Bouquet bouquet = bouquetRepository.getReferenceById(orderItem.getBouquet().getId());
-            if (bouquet.getQuantity() < orderItem.getQuantity()) {
+            if (bouquet.getAvailableQuantity() < orderItem.getQuantity()) {
                 throw new AppException("Not enough stock for product " + bouquet.getName(), HttpStatus.BAD_REQUEST);
             }
-            bouquet.setQuantity(bouquet.getQuantity() - orderItem.getQuantity());
+            bouquet.setAvailableQuantity(bouquet.getAvailableQuantity() - orderItem.getQuantity());
             bouquet.setSoldQuantity(bouquet.getSoldQuantity() + orderItem.getQuantity());
             bouquetRepository.save(bouquet);
         });
@@ -179,16 +161,57 @@ public class BouquetService {
         int lastIndex = imageUrls.keySet().stream().max(Integer::compareTo).orElse(0);
         String imageUrl;
         for (int i = 0; i < images.size(); i++) {
-            imageUrl = null;
             try {
                 imageUrl = cloudinary.uploadImage(images.get(i));
+                imageUrls.put(lastIndex + i + 1, imageUrl);
             } catch (IOException e) {
                 logger.error("Error uploading the image", e);
                 throw new AppException("Error uploading the image", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            imageUrls.put(lastIndex + i + 1, imageUrl);
         }
         bouquet.setImageUrls(imageUrls);
+        bouquetRepository.save(bouquet);
+    }
+
+    public void save(Bouquet bouquet) {
+        try {
+            bouquetRepository.save(bouquet);
+        } catch (Exception e) {
+            logger.error("Error saving the bouquet", e);
+            throw new AppException("Error saving the bouquet " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    public void updateFlowers(Integer id, List<Integer> flowerIds) {
+        Bouquet bouquet = bouquetRepository.findById(id)
+                .orElseThrow(() -> new AppException("Bouquet not found", HttpStatus.INTERNAL_SERVER_ERROR));
+        Set<Flower> flowers = bouquet.getFlowers();
+        flowerIds.forEach(flowerId -> {
+            Flower flower = flowerService.getById(flowerId)
+                    .orElseThrow(() -> {
+                        logger.error("Flower not found {} ", flowerId);
+                        return new AppException("Flower not found", HttpStatus.INTERNAL_SERVER_ERROR);
+                    });
+            flowers.add(flower);
+        });
+        bouquet.setFlowers(flowers);
+        bouquetRepository.save(bouquet);
+    }
+
+    public void updateColors(Integer id, List<Integer> colorIds) {
+        Bouquet bouquet = bouquetRepository.findById(id)
+                .orElseThrow(() -> new AppException("Bouquet not found", HttpStatus.INTERNAL_SERVER_ERROR));
+        Set<Color> colors = bouquet.getColors();
+        colorIds.forEach(colorId -> {
+            Color color = colorService.getById(colorId)
+                    .orElseThrow(() -> {
+                        logger.error("Color not found {} ", colorId);
+                        return new AppException("Color not found", HttpStatus.INTERNAL_SERVER_ERROR);
+                    });
+            colors.add(color);
+        });
+        bouquet.setColors(colors);
         bouquetRepository.save(bouquet);
     }
 }

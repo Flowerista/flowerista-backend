@@ -2,11 +2,9 @@ package ua.flowerista.shop.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import ua.flowerista.shop.dto.AddressDto;
+import ua.flowerista.shop.models.user.Role;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,10 +17,10 @@ public class UserDto {
 	private String firstName;
 	private String lastName;
 	private String email;
-	private int phoneNumber;
+	private String phoneNumber;
 	private AddressDto address;
 	@JsonIgnore
-	private String role;
+	private Role role;
 	@JsonProperty("access_token")
 	private String accessToken;
 

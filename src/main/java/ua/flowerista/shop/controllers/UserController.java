@@ -17,8 +17,10 @@ import ua.flowerista.shop.dto.AddressDto;
 import ua.flowerista.shop.dto.user.PersonalInfoDto;
 import ua.flowerista.shop.dto.user.UpdatePasswordDto;
 import ua.flowerista.shop.exceptions.AppException;
+import ua.flowerista.shop.mappers.BouquetMapper;
 import ua.flowerista.shop.mappers.UserMapper;
-import ua.flowerista.shop.models.User;
+import ua.flowerista.shop.models.textContent.Languages;
+import ua.flowerista.shop.models.user.User;
 import ua.flowerista.shop.services.UserService;
 
 import java.security.Principal;
@@ -30,10 +32,11 @@ import java.util.Map;
 @CrossOrigin
 @Tag(name = "USER controller", description = "Operations that auth`d user can do")
 public class UserController {
-    Logger logger = LoggerFactory.getLogger(UserController.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
     private final UserMapper userMapper;
+    private final BouquetMapper bouquetMapper;
 
     @GetMapping("/profile")
     @Operation(summary = "Get user profile dto",
@@ -60,11 +63,11 @@ public class UserController {
         return ResponseEntity.accepted().build();
     }
 
-    @PatchMapping("/changeAddress")
     @Operation(summary = "Change address endpoint",
             description = "Changing authenticated users addresses")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "202", description = "If address was updated")})
+    @PatchMapping("/changeAddress")
     public ResponseEntity<?> updateAddress(@RequestBody @Valid AddressDto address,
                                            @NotNull Principal principal) {
         userService.changeAddress(address, principal);
@@ -85,9 +88,11 @@ public class UserController {
     @GetMapping("/wishlist")
     @Operation(summary = "Get users wishlist",
             description = "Returns set of bouquets that user have in wishlist")
-    public ResponseEntity<?> getWishList(Principal principal) {
+    public ResponseEntity<?> getWishList(Principal principal, @RequestParam(defaultValue = "en") Languages lang ) {
         Integer id = getIdFromPrincipal(principal);
-        return ResponseEntity.ok(userService.getWishList(id));
+        return ResponseEntity.ok(userService.getWishList(id).stream()
+                .map(bouquet -> bouquetMapper.toDto(bouquet, lang))
+                .toList());
     }
 
     @PostMapping("/wishlist")

@@ -17,6 +17,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AddressDto {
+    private Integer id;
     @NotBlank(message = "City name must not be empty")
     @Pattern(regexp = "^[\\p{L}\\p{IsCyrillic} -]*$", message = "Only letters, spaces, hyphens, and combinations are allowed in the city name")
     private String city;

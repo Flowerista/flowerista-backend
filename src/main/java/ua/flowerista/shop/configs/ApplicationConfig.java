@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ua.flowerista.shop.auditing.ApplicationAuditAware;
-import ua.flowerista.shop.repo.UserRepository;
+import ua.flowerista.shop.repositories.UserRepository;
 
 @Configuration
 @RequiredArgsConstructor

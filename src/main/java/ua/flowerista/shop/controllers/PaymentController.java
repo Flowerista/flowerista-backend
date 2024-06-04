@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ua.flowerista.shop.models.CompletedOrder;
+import ua.flowerista.shop.models.paypal.CompletedOrder;
 import ua.flowerista.shop.services.OrderService;
 import ua.flowerista.shop.services.PaypalService;
 

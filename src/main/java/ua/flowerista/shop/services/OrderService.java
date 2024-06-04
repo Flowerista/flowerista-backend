@@ -9,11 +9,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ua.flowerista.shop.exceptions.AppException;
-import ua.flowerista.shop.models.Order;
-import ua.flowerista.shop.models.OrderItem;
-import ua.flowerista.shop.models.OrderStatus;
-import ua.flowerista.shop.models.PaymentOrder;
-import ua.flowerista.shop.repo.*;
+import ua.flowerista.shop.models.order.Order;
+import ua.flowerista.shop.models.order.OrderItem;
+import ua.flowerista.shop.models.order.OrderStatus;
+import ua.flowerista.shop.models.paypal.PaymentOrder;
+import ua.flowerista.shop.repositories.AddressRepository;
+import ua.flowerista.shop.repositories.order.OrderItemRepository;
+import ua.flowerista.shop.repositories.order.OrderRepository;
+import ua.flowerista.shop.repositories.paypal.PaymentOrderRepository;
 
 import java.time.Instant;
 import java.util.List;
@@ -44,6 +47,7 @@ public class OrderService {
         order.setPayId(payId);
         orderRepository.save(order);
     }
+
     @Transactional
     public Order create(Order order) {
         order.setCreated(Instant.now());
@@ -51,6 +55,7 @@ public class OrderService {
         bouquetService.updateStock(order.getOrderItems());
         return save(order);
     }
+
     @Transactional
     public Order update(Order order) {
         if (order.getStatus().compareTo(OrderStatus.PLACED) != 0) {
@@ -88,10 +93,7 @@ public class OrderService {
 
     public boolean isOrderWaitingForPayment(Integer orderId) {
         Optional<Order> order = orderRepository.findById(orderId);
-        if (order.isEmpty()) {
-            return false;
-        }
-        return order.get().getStatus().equals(OrderStatus.PENDING);
+        return order.map(value -> value.getStatus().equals(OrderStatus.PENDING)).orElse(false);
     }
 
     public Page<Order> getAll(Predicate predicate,

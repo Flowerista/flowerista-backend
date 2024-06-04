@@ -2,10 +2,10 @@ package ua.flowerista.shop.services.validators;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ua.flowerista.shop.dto.OrderDto;
-import ua.flowerista.shop.dto.OrderItemDto;
+import ua.flowerista.shop.dto.order.OrderDto;
+import ua.flowerista.shop.dto.order.OrderItemDto;
 import ua.flowerista.shop.services.BouquetService;
-import ua.flowerista.shop.services.BouqueteSizeService;
+import ua.flowerista.shop.services.BouquetSizeService;
 import ua.flowerista.shop.services.ColorService;
 
 import java.math.BigInteger;
@@ -17,7 +17,7 @@ import java.util.List;
 public class OrderValidator {
     private final BouquetService bouquetService;
     private final ColorService colorService;
-    private final BouqueteSizeService bouqueteSizeService;
+    private final BouquetSizeService bouquetSizeService;
 
     public List<String> validateOrder(OrderDto order) {
         List<String> errors = new ArrayList<>();
@@ -25,6 +25,7 @@ public class OrderValidator {
         isOrderItemsEmpty(order, errors);
         isProductIdEmpty(order, errors);
         isSizeEmpty(order, errors);
+        isPriceEmpty(order, errors);
 
         isQuantityPositive(order, errors);
 
@@ -37,6 +38,14 @@ public class OrderValidator {
         return errors;
     }
 
+    private void isPriceEmpty(OrderDto order, List<String> errors) {
+        order.getOrderItems().forEach(orderItem -> {
+            if (orderItem.getSizeId() == null) {
+                errors.add("Price is empty");
+            }
+        });
+    }
+
     private void isQuantityPositive(OrderDto order, List<String> errors) {
         order.getOrderItems().forEach(orderItem -> {
             if (orderItem.getQuantity() <= 0) {
@@ -47,7 +56,7 @@ public class OrderValidator {
 
     private void isProductIdAvailableForSale(OrderDto order, List<String> errors) {
         order.getOrderItems().forEach(orderItem -> {
-            if (!bouquetService.isBouquetAvailableForSale(orderItem.getProductId())) {
+            if (!bouquetService.isAvailableForSale(orderItem.getProductId())) {
                 errors.add("Product with id " + orderItem.getProductId() + " is not available for sale - " +
                         "out of stock or not active");
             }
@@ -57,7 +66,7 @@ public class OrderValidator {
     private void isSumCalculatedOnFrontEqualToCalculatedOnServer(OrderDto order, List<String> errors) {
         BigInteger sum = BigInteger.ZERO;
         for (OrderItemDto orderItem : order.getOrderItems()) {
-            BigInteger price = bouqueteSizeService.getPriceById(orderItem.getSizeId());
+            BigInteger price = bouquetSizeService.getPriceById(orderItem.getSizeId());
             sum = sum.add(price.multiply(BigInteger.valueOf(orderItem.getQuantity())));
         }
         if (sum.compareTo(order.getSum()) != 0) {
@@ -68,7 +77,7 @@ public class OrderValidator {
 
     private void isSizeIdExist(OrderDto order, List<String> errors) {
         order.getOrderItems().forEach(orderItem -> {
-            if (!bouqueteSizeService.isExistById(orderItem.getSizeId())) {
+            if (!bouquetSizeService.isExistById(orderItem.getSizeId())) {
                 errors.add("Size with id " + orderItem.getSizeId() + " does not exist");
             }
         });
@@ -76,7 +85,7 @@ public class OrderValidator {
 
     private void isProductIdExist(OrderDto order, List<String> errors) {
         order.getOrderItems().forEach(orderItem -> {
-            if (!bouquetService.isBouquetExist(orderItem.getProductId())) {
+            if (!bouquetService.isExist(orderItem.getProductId())) {
                 errors.add("Product with id " + orderItem.getProductId() + " does not exist");
             }
         });

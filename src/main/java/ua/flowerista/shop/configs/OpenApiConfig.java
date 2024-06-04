@@ -13,15 +13,15 @@ import io.swagger.v3.oas.annotations.servers.Server;
 @OpenAPIDefinition(
         info = @Info(
                 contact = @Contact(
-                        name = "Vladyslav Valchuk",
-                        email = "valchukvladyslavkhm@gmail.com"
+                        name = "Serhii Babanov",
+                        email = "serhii.babanov@gmail.com"
                 ),
                 description = "OpenApi documentation for Flowerista backend application",
                 title = "OpenApi specification - Flowerista",
                 version = "1.0",
                 license = @License(
-                        name = "Licence name",
-                        url = "https://some-url.com"
+                        name = "Apache 2.0",
+                        url = "https://www.apache.org/licenses/LICENSE-2.0.html"
                 ),
                 termsOfService = "Terms of service"
         ),

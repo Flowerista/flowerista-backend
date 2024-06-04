@@ -1,44 +1,22 @@
 package ua.flowerista.shop.mappers;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import ua.flowerista.shop.dto.OrderItemDto;
-import ua.flowerista.shop.models.OrderItem;
-import ua.flowerista.shop.repo.BouquetRepository;
-import ua.flowerista.shop.repo.BouquetSizeRepository;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import ua.flowerista.shop.dto.order.OrderItemDto;
+import ua.flowerista.shop.models.order.OrderItem;
+import ua.flowerista.shop.services.BouquetService;
+import ua.flowerista.shop.services.BouquetSizeService;
 
-@Component
-@RequiredArgsConstructor
-public class OrderItemMapper implements EntityMapper<OrderItem, OrderItemDto> {
-    private final BouquetSizeRepository bouquetSizeRepository;
-    private final BouquetRepository bouquetRepository;
+@Mapper(componentModel = "spring", uses = {BouquetService.class, BouquetSizeService.class})
+public interface OrderItemMapper {
+    @Mapping(source = "productId", target = "bouquet")
+    @Mapping(source = "sizeId", target = "size")
+    OrderItem toEntity(OrderItemDto dto);
 
-    @Override
-    public OrderItem toEntity(OrderItemDto dto) {
-        OrderItem entity = new OrderItem();
-        entity.setBouquet(bouquetRepository.findById(dto.getProductId()).get());
-        entity.setName(dto.getName());
-        entity.setQuantity(dto.getQuantity());
-        //TODO: change get() to orElseThrow()
-        entity.setSize(bouquetSizeRepository.findById(dto.getSizeId()).get());
-        if (entity.getSize().getIsSale()) {
-            entity.setPrice(entity.getSize().getDiscountPrice());
-        } else {
-            entity.setPrice(entity.getSize().getDefaultPrice());
-        }
-        return entity;
-    }
+    @Mapping(source = "bouquet.id", target = "productId")
+    @Mapping(source = "bouquet.imageUrls", target = "imageUrls")
+    @Mapping(source = "size.size.", target = "size")
+    @Mapping(source = "size.id", target = "sizeId")
+    OrderItemDto toDto(OrderItem entity);
 
-    @Override
-    public OrderItemDto toDto(OrderItem entity) {
-        OrderItemDto dto = new OrderItemDto();
-        dto.setProductId(entity.getBouquet().getId());
-        dto.setName(entity.getName());
-        dto.setQuantity(entity.getQuantity());
-        dto.setSizeId(entity.getSize().getId());
-        dto.setSize(entity.getSize().getSize().name());
-        dto.setPrice(entity.getPrice());
-        dto.setImageUrls(entity.getBouquet().getImageUrls());
-        return dto;
-    }
 }

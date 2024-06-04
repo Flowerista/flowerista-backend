@@ -44,7 +44,7 @@
         <tr th:each="bouquet : ${bouquets.content}">
             <td th:text="${bouquet.id}" style="width: 5%"></td>
             <td th:text="${bouquet.name}" style="width: 10%"></td>
-            <td th:text="${bouquet.quantity}" style="width: 10%"></td>
+            <td th:text="${bouquet.stockQuantity}" style="width: 10%"></td>
             <td style="width: 25%">
                 <ul>
                     <li th:each="item : ${bouquet.flowers}">

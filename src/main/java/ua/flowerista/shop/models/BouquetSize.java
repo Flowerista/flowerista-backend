@@ -1,10 +1,12 @@
 package ua.flowerista.shop.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.math.BigInteger;
@@ -13,10 +15,9 @@ import java.util.Objects;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Entity
 @ToString
-@Table(name = "bouquete_size")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Entity
+@Table(name = "bouquets_sizes")
 public class BouquetSize {
 
     @Id
@@ -28,31 +29,32 @@ public class BouquetSize {
     @Enumerated(EnumType.STRING)
     private Size size;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(cascade = {jakarta.persistence.CascadeType.PERSIST, jakarta.persistence.CascadeType.MERGE})
     @JsonIgnore
-    @JoinColumn(name = "bouquete_id", nullable = false)
     @ToString.Exclude
+    @JoinColumn(name = "bouquet_id")
     private Bouquet bouquet;
 
-    @Column(name = "defaultprice")
+    @Column(name = "default_price")
     @NotNull
     private BigInteger defaultPrice;
 
     @Column(name = "is_sale")
     private Boolean isSale;
 
-    @Column(name = "discount")
-    private BigInteger discount;
-
-    @Column(name = "discountprice")
+    @Column(name = "discount_price")
     private BigInteger discountPrice;
 
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        Class<?> oEffectiveClass = o instanceof HibernateProxy
+                ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy
+                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
         BouquetSize that = (BouquetSize) o;
         return getId() != null && Objects.equals(getId(), that.getId());
@@ -60,6 +62,8 @@ public class BouquetSize {
 
     @Override
     public final int hashCode() {
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+        return this instanceof HibernateProxy
+                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
+                : getClass().hashCode();
     }
 }

@@ -16,8 +16,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Service
 public class RedisService {
-
-    Logger logger = LoggerFactory.getLogger(RedisService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisService.class);
 
     private final JedisPool pool;
 
@@ -51,8 +50,7 @@ public class RedisService {
 
     public Set<String> getSet(String key){
         try (Jedis jedis = pool.getResource()) {
-            Set<String> set = jedis.smembers(key);
-            return set;
+            return jedis.smembers(key);
         } catch (Exception e) {
             logger.error("Error while getting set: " + key, e);
             throw new AppException("Error while getting set", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -77,11 +75,10 @@ public class RedisService {
                 return null;
             }
             String login = jedis.hget(key, "login");
-            VerificationToken token = VerificationToken.builder()
+            return VerificationToken.builder()
                     .id(id)
                     .userLogin(login)
                     .build();
-            return token;
         } catch (Exception e) {
             logger.error("Error while getting token: " + key, e);
             throw new AppException("Error while getting string", HttpStatus.INTERNAL_SERVER_ERROR);

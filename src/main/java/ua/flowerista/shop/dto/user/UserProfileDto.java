@@ -14,6 +14,6 @@ public class UserProfileDto {
     private String firstName;
     private String lastName;
     private String email;
-    private int phoneNumber;
+    private String phoneNumber;
     private AddressDto address;
 }

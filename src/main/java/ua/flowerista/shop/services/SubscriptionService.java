@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ua.flowerista.shop.dto.SubscriptionDto;
 import ua.flowerista.shop.exceptions.AppException;
 import ua.flowerista.shop.models.Subscription;
-import ua.flowerista.shop.repo.SubscriptionRepository;
+import ua.flowerista.shop.repositories.SubscriptionRepository;
 
 @Service
 @RequiredArgsConstructor

@@ -16,7 +16,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 @Configuration
 @EnableJpaRepositories(basePackages = {
-        "ua.flowerista.shop.repo"
+        "ua.flowerista.shop.repositories"
 })
 public class PostgresTestProfileJPAConfig {
     @Value("${spring.datasource.url}")

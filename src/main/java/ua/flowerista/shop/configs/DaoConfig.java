@@ -51,9 +51,9 @@ public class DaoConfig {
 	public DataSource dataSource() {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName(driverClassName);
-		URI dbUri = null;
+		URI dbUri;
 		try {
-			dbUri = new URI(System.getenv("DATABASE_URL"));
+			dbUri = new URI(System.getenv("SCHEMATOGO_URL"));
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}

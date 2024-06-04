@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ua.flowerista.shop.dto.FlowerDto;
 import ua.flowerista.shop.mappers.FlowerMapper;
-import ua.flowerista.shop.models.Languages;
+import ua.flowerista.shop.models.textContent.Languages;
 import ua.flowerista.shop.services.FlowerService;
 
 import java.util.List;
@@ -18,13 +18,13 @@ import java.util.List;
 @Tag(name = "Flower controller")
 public class FlowerController {
 
-    private final FlowerService service;
+    private final FlowerService flowerService;
     private final FlowerMapper flowerMapper;
 
     @GetMapping
     @Operation(summary = "Get all flowers", description = "Returns list of all flowers")
     public List<FlowerDto> getAllFlowers(@RequestParam(defaultValue = "en") Languages lang) {
-        return flowerMapper.toDto(service.getAll(), lang);
+        return flowerMapper.toDto(flowerService.getAll(), lang);
     }
 
 }

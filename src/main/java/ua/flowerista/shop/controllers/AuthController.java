@@ -20,8 +20,8 @@ import ua.flowerista.shop.dto.user.UserDto;
 import ua.flowerista.shop.dto.user.ResetPasswordDto;
 import ua.flowerista.shop.exceptions.AppException;
 import ua.flowerista.shop.mappers.UserMapper;
-import ua.flowerista.shop.models.User;
-import ua.flowerista.shop.registration.OnRegistrationCompleteEvent;
+import ua.flowerista.shop.models.user.User;
+import ua.flowerista.shop.listeners.registration.OnRegistrationCompleteEvent;
 import ua.flowerista.shop.services.RefreshTokenService;
 import ua.flowerista.shop.services.UserService;
 
@@ -115,12 +115,12 @@ public class AuthController {
         } catch (AppException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .location(URI.create("http://flowerista-frontend.vercel.app/"))
+                    .location(URI.create("https://flowerista-frontend.vercel.app/"))
                     .build();
         }
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
-                .header(HttpHeaders.LOCATION, "http://flowerista-frontend.vercel.app/login")
+                .header(HttpHeaders.LOCATION, "https://flowerista-frontend.vercel.app/login")
                 .build();
     }
 

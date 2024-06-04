@@ -13,14 +13,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import ua.flowerista.shop.dto.FlowerDto;
+import ua.flowerista.shop.dto.admin.FlowerFullDto;
 import ua.flowerista.shop.exceptions.AppException;
 import ua.flowerista.shop.mappers.FlowerMapper;
 import ua.flowerista.shop.models.Flower;
-import ua.flowerista.shop.models.Languages;
+import ua.flowerista.shop.models.textContent.Languages;
 import ua.flowerista.shop.services.FlowerService;
-import ua.flowerista.shop.services.validators.FlowerValidator;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/api/admin/flowers")
@@ -30,7 +28,6 @@ public class FlowerAPController {
 
     private final FlowerService flowerService;
     private final FlowerMapper flowerMapper;
-    private final FlowerValidator flowerValidator;
 
 
     @GetMapping
@@ -46,37 +43,34 @@ public class FlowerAPController {
         return new ModelAndView("admin/flowers/flowersList").addObject("flowers", flowers);
     }
 
-    @PostMapping
-    public ModelAndView saveFlower(@RequestParam("flowerName") String flowerName) {
-        FlowerDto flower = new FlowerDto(flowerName);
-        List<String> errors = flowerValidator.validate(flower);
-        if (!errors.isEmpty()) {
-            ModelAndView modelAndView = new ModelAndView("admin/error");
-            modelAndView.addObject("errors", errors);
-            return modelAndView;
-        }
-        flowerService.insert(flowerMapper.toEntity(flower));
-        return new ModelAndView("redirect:/api/admin/flowers");
-    }
-
     @GetMapping("/{id}")
-    public ModelAndView getFlowerById(@PathVariable int id, @RequestParam(defaultValue = "en") Languages lang) {
+    public ModelAndView getFlowerById(@PathVariable Integer id) {
         ModelAndView result = new ModelAndView("admin/flowers/flowerView");
-        FlowerDto flower = flowerService.getById(id).map(flow -> flowerMapper.toDto(flow, lang)).
-                orElseThrow(() -> {
-                    logger.error("Flower not found {}", id);
-                    return new AppException("Flower not found. {} " + id, HttpStatus.INTERNAL_SERVER_ERROR);
+        FlowerFullDto flower = flowerService.getById(id)
+                .map(flowerMapper::toAdminDto)
+                .orElseThrow(() -> {
+                    logger.error("Flower not found by id: {}", id);
+                    return new AppException("Flower not found", HttpStatus.NOT_FOUND);
                 });
         result.addObject("flower", flower);
         return result;
     }
 
     @PostMapping("/{id}")
-    public ModelAndView changeFlowerName(@PathVariable int id,
-                                         @RequestParam("inputName") String flowerName,
-                                         @RequestParam(name = "lang", defaultValue = "en") Languages lang) {
-        flowerService.update(new FlowerDto(id, flowerName), lang);
-        return new ModelAndView("redirect:/api/admin/flowers/" + id + "?lang=" + lang);
+    public ModelAndView updateFlower(@ModelAttribute("flower") FlowerFullDto flower) {
+        flowerService.update(flowerMapper.toEntity(flower));
+        return new ModelAndView("redirect:/api/admin/flowers/" + flower.getId());
+    }
+
+    @PostMapping("/add")
+    public ModelAndView addFlower(@RequestParam("name") String name) {
+        Flower flower = flowerService.addFlower(name);
+        return new ModelAndView("redirect:/api/admin/flowers/" + flower.getId());
+    }
+
+    @ModelAttribute("flower")
+    private FlowerFullDto getDefaultProduct() {
+        return new FlowerFullDto();
     }
 
 }

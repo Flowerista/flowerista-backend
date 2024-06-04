@@ -17,8 +17,8 @@
             <div class="col-md-12">
                 <div>
                     <h3>Add flower</h3>
-                    <form th:action="@{/api/admin/flowers}" method="post" style="display: flex">
-                        <input type="text" id="flowerName" class="form-control" placeholder="Flower name" name="flowerName" style="width: 20%" required>
+                    <form th:action="@{/api/admin/flowers/add}" method="post" style="display: flex">
+                        <input type="text" id="flowerName" class="form-control" placeholder="Flower name" name="name" style="width: 20%" required>
                         <button class="btn btn-primary" type="submit" style="margin: 0 2%">Save new flower</button>
                     </form>
                 </div>

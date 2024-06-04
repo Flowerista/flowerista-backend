@@ -1,150 +1,84 @@
 package ua.flowerista.shop.mappers;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import ua.flowerista.shop.dto.BouqueteCardDto;
+import org.mapstruct.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ua.flowerista.shop.dto.BouquetDto;
-import ua.flowerista.shop.dto.BouqueteSmallDto;
-import ua.flowerista.shop.models.*;
+import ua.flowerista.shop.dto.admin.BouquetFullDto;
+import ua.flowerista.shop.models.Bouquet;
+import ua.flowerista.shop.models.BouquetSize;
+import ua.flowerista.shop.models.Size;
+import ua.flowerista.shop.models.textContent.Languages;
+import ua.flowerista.shop.models.textContent.TextContent;
+import ua.flowerista.shop.models.textContent.Translation;
 
-@Component
-public class BouquetMapper implements EntityMapper<Bouquet, BouquetDto>, EntityMultiLanguagesDtoMapper<Bouquet, BouquetDto> {
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Set;
 
-	private ColorMapper colorMapper;
-	private FlowerMapper flowerMapper;
+@Mapper(componentModel = "spring", uses = {FlowerMapper.class, ColorMapper.class, BouquetSizeMapper.class, TextContentMapper.class})
+public interface BouquetMapper {
+    Logger logger = LoggerFactory.getLogger(BouquetMapper.class);
 
+    @Mapping(target = "name", qualifiedByName = "TextContentToStringInBouquetMapper")
+    @Mapping(source = "entity.sizes", target = "defaultPrice", qualifiedByName = "SizesToDefaultPrice")
+    @Mapping(source = "entity.sizes", target = "discount", qualifiedByName = "SizesToDiscount")
+    @Mapping(source = "entity.sizes", target = "discountPrice", qualifiedByName = "SizesToDiscountPrice")
+    @Mapping(source = "availableQuantity", target = "stockQuantity")
+    BouquetDto toDto(Bouquet entity, @Context Languages language);
 
-	@Autowired
-	public BouquetMapper(ColorMapper colorMapper, FlowerMapper flowerMapper) {
-		this.colorMapper = colorMapper;
-		this.flowerMapper = flowerMapper;
-	}
+    List<BouquetDto> toDto(List<Bouquet> bouquets, @Context Languages language);
 
-	@Override
-	public Bouquet toEntity(BouquetDto dto) {
-		return null;
-	}
+    @Named("TextContentToStringInBouquetMapper")
+    default String getNameFromTextContext(TextContent textContent, @Context Languages language) {
+        return textContent.getTranslation().stream()
+                .filter((t) -> t.getTranslationEmbeddedId().getLanguage().getName().equals(language.name()))
+                .findFirst()
+                .map(Translation::getText)
+                .orElse(textContent.getOriginalText());
+    }
 
-	@Override
-	public BouquetDto toDto(Bouquet entity) {
-		BouquetDto dto = new BouquetDto();
-		dto.setId(entity.getId());
-		dto.setFlowers(
-				entity.getFlowers().stream().map(flower -> flowerMapper.toDto(flower)).collect(Collectors.toSet()));
-		dto.setColors(entity.getColors().stream().map(color -> colorMapper.toDto(color)).collect(Collectors.toSet()));
-		dto.setItemCode(entity.getItemCode());
-		dto.setName(entity.getName());
-		dto.setQuantity(entity.getQuantity());
-		dto.setImageUrls(entity.getImageUrls());
-		dto.setSoldQuantity(entity.getSoldQuantity());
-		dto.setSizes(entity.getSizes());
-		return dto;
-	}
+    @Named("SizesToDiscount")
+    default BigInteger getDiscountFromMediumSize(Set<BouquetSize> sizes) {
+        return sizes.stream()
+                .filter((s) -> s.getSize().equals(Size.MEDIUM))
+                .filter(BouquetSize::getIsSale)
+                .findFirst()
+                .map((s) -> s.getDefaultPrice().subtract(s.getDiscountPrice()))
+                .orElse(BigInteger.ZERO);
+    }
 
-	public BouqueteSmallDto toSmallDto(Bouquet entity) {
-		BouqueteSmallDto dto = new BouqueteSmallDto();
-		BouquetSize size = findBouqueteSize(entity);
-		dto.setId(entity.getId());
-		dto.setDefaultPrice(size.getDefaultPrice());
-		dto.setDiscount(size.getDiscount());
-		dto.setDiscountPrice(size.getDiscountPrice());
-		dto.setName(entity.getName());
-		dto.setImageUrls(entity.getImageUrls());
-		dto.setSizes(entity.getSizes());
-		dto.setStockQuantity(entity.getQuantity());
-		return dto;
-	}
+    @Named("SizesToDiscountPrice")
+    default BigInteger getDiscountPriceFromMediumSize(Set<BouquetSize> sizes) {
+        return sizes.stream()
+                .filter((s) -> s.getSize().equals(Size.MEDIUM))
+                .filter(BouquetSize::getIsSale)
+                .findFirst()
+                .map(BouquetSize::getDiscountPrice)
+                .orElse(BigInteger.ZERO);
+    }
 
-	public BouqueteCardDto toCardDto(Bouquet entity) {
-		BouqueteCardDto dto = new BouqueteCardDto();
-		dto.setId(entity.getId());
-		dto.setFlowers(entity.getFlowers().stream().map(flower -> flowerMapper.toDto(flower)).collect(Collectors.toSet()));
-		dto.setImageUrls(entity.getImageUrls());
-		dto.setItemCode(entity.getItemCode());
-		dto.setName(entity.getName());
-		dto.setSizes(entity.getSizes());
-		dto.setStockQuantity(entity.getQuantity());
-		return dto;
-	}
+    @Named("SizesToDefaultPrice")
+    default BigInteger getDefaultPriceFromMediumSize(Set<BouquetSize> sizes) {
+        return sizes.stream()
+                .filter((s) -> s.getSize().equals(Size.MEDIUM))
+                .findFirst()
+                .map(BouquetSize::getDefaultPrice)
+                .orElseGet(() -> {
+                    logger.error("Medium size not found. Sizes: {}", sizes);
+                    return BigInteger.ZERO;
+                });
+    }
 
-	private BouquetSize findBouqueteSize(Bouquet bouquet) {
-		Set<BouquetSize> sizes = bouquet.getSizes();
-		for (BouquetSize bouquetSize : sizes) {
-			if (bouquetSize.getSize() == Size.MEDIUM) {
-				return bouquetSize;
-			}
-		}
-		throw new RuntimeException("Size not found for Bouquete: " + bouquet.getId());
-	}
+    Bouquet toEntity(BouquetFullDto bouquetFullDto);
 
-	@Override
-	public BouquetDto toDto(Bouquet entity, Languages language) {
-		BouquetDto dto = new BouquetDto();
-		dto = mapGenericField(entity, dto);
-		dto = translateFields(entity, dto, language);
-		return dto;
-	}
+    @AfterMapping
+    default void linkSizes(@MappingTarget Bouquet bouquet) {
+        bouquet.getSizes().forEach(size -> size.setBouquet(bouquet));
+    }
 
-	public BouqueteSmallDto toSmallDto(Bouquet entity, Languages language) {
-		BouquetDto dto = toDto(entity, language);
+    BouquetFullDto toDto(Bouquet bouquet);
 
-		BouqueteSmallDto bouqueteSmallDto = new BouqueteSmallDto();
-		BouquetSize size = findBouqueteSize(entity);
-		bouqueteSmallDto.setId(dto.getId());
-		bouqueteSmallDto.setDefaultPrice(size.getDefaultPrice());
-		bouqueteSmallDto.setDiscount(size.getDiscount());
-		bouqueteSmallDto.setDiscountPrice(size.getDiscountPrice());
-		bouqueteSmallDto.setName(dto.getName());
-		bouqueteSmallDto.setImageUrls(dto.getImageUrls());
-		bouqueteSmallDto.setSizes(dto.getSizes());
-		bouqueteSmallDto.setStockQuantity(dto.getQuantity());
-		return bouqueteSmallDto;
-	}
-
-	public BouqueteCardDto toCardDto(Bouquet entity, Languages language) {
-		BouquetDto dto = toDto(entity, language);
-
-		BouqueteCardDto bouqueteCardDto = new BouqueteCardDto();
-		bouqueteCardDto.setId(dto.getId());
-		bouqueteCardDto.setFlowers(dto.getFlowers());
-		bouqueteCardDto.setImageUrls(dto.getImageUrls());
-		bouqueteCardDto.setItemCode(dto.getItemCode());
-		bouqueteCardDto.setName(dto.getName());
-		bouqueteCardDto.setSizes(dto.getSizes());
-		bouqueteCardDto.setStockQuantity(dto.getQuantity());
-		return bouqueteCardDto;
-	}
-
-	private BouquetDto mapGenericField(Bouquet entity, BouquetDto dto) {
-		dto.setId(entity.getId());
-		dto.setItemCode(entity.getItemCode());
-		dto.setQuantity(entity.getQuantity());
-		dto.setImageUrls(entity.getImageUrls());
-		dto.setSizes(entity.getSizes());
-		dto.setSoldQuantity(entity.getSoldQuantity());
-		return dto;
-	}
-	private BouquetDto translateFields(Bouquet entity, BouquetDto dto, Languages language) {
-		//choose color
-		dto.setColors(entity.getColors().stream()
-				.map(color -> colorMapper.toDto(color, language))
-				.collect(Collectors.toSet()));
-		//choose name
-		dto.setName(entity.getTranslates().stream()
-				.filter((t) -> t.getLanguage() == language)
-				.findFirst()
-				.orElse(Translate.builder().text(entity.getName()).build())
-				.getText());
-		//choose flowers
-		dto.setFlowers(entity.getFlowers().stream()
-				.map(flower -> flowerMapper.toDto(flower, language))
-				.collect(Collectors.toSet()));
-		return dto;
-	}
-
-
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    Bouquet partialUpdate(BouquetFullDto bouquetFullDto, @MappingTarget Bouquet bouquet);
 }

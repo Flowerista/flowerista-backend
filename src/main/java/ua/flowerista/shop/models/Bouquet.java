@@ -1,14 +1,12 @@
 package ua.flowerista.shop.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.annotations.Type;
 import org.hibernate.proxy.HibernateProxy;
+import ua.flowerista.shop.models.textContent.TextContent;
 
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -16,10 +14,8 @@ import java.util.Set;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@ToString
 @Entity
-@Table(name = "bouquete")
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+@Table(name = "bouquets")
 public class Bouquet {
 
 	@Column(name = "id")
@@ -27,53 +23,42 @@ public class Bouquet {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-			CascadeType.REFRESH }, fetch = FetchType.EAGER)
-	@JoinTable(name = "bouquete_flower",
-			joinColumns = @JoinColumn(name = "bouquete_id", referencedColumnName = "id"),
-			inverseJoinColumns = @JoinColumn(name = "flower_id"))
+	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<Flower> flowers;
 
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-			CascadeType.REFRESH }, fetch = FetchType.EAGER)
-	@JoinTable(name = "bouquete_color",
-			joinColumns = @JoinColumn(name = "bouquete_id", referencedColumnName = "id"),
-			inverseJoinColumns = @JoinColumn(name = "color_id"))
+	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<Color> colors;
 
-	@Column(name = "itemcode", nullable = false, unique = true)
-	@NotBlank
+	@Column(name = "item_code", unique = true)
 	private String itemCode;
-
-	@Column(name = "name", nullable = false, unique = true)
-	@NotBlank
-	private String name;
 
 	@Type(JsonType.class)
 	@Column(columnDefinition = "jsonb")
 	private Map<Integer, String> imageUrls;
 
-    @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "bouquet", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "bouquet")
     private Set<BouquetSize> sizes;
 
-	@Column(name = "quantity")
-	private int quantity;
+	@Column(name = "available_quantity")
+	private int availableQuantity;
 
-	@Column(name = "soldquantity")
+	@Column(name = "sold_quantity")
 	private int soldQuantity;
 
-	@ToString.Exclude
-	@OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-			CascadeType.REFRESH }, fetch = FetchType.EAGER, mappedBy = "bouquet")
-	private Set<Translate> translates;
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name = "name_id")
+	private TextContent name;
 
 	@Override
 	public final boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null) return false;
-		Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-		Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+		Class<?> oEffectiveClass = o instanceof HibernateProxy
+				? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass()
+				: o.getClass();
+		Class<?> thisEffectiveClass = this instanceof HibernateProxy
+				? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
+				: this.getClass();
 		if (thisEffectiveClass != oEffectiveClass) return false;
 		Bouquet bouquet = (Bouquet) o;
 		return getId() != null && Objects.equals(getId(), bouquet.getId());
@@ -81,6 +66,8 @@ public class Bouquet {
 
 	@Override
 	public final int hashCode() {
-		return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+		return this instanceof HibernateProxy
+				? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
+				: getClass().hashCode();
 	}
 }

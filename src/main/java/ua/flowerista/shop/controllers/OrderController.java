@@ -5,21 +5,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-import ua.flowerista.shop.dto.OrderDto;
+import ua.flowerista.shop.dto.order.OrderDto;
 import ua.flowerista.shop.mappers.OrderMapper;
-import ua.flowerista.shop.models.Order;
-import ua.flowerista.shop.models.User;
+import ua.flowerista.shop.models.order.Order;
+import ua.flowerista.shop.models.user.User;
 import ua.flowerista.shop.services.OrderService;
 import ua.flowerista.shop.services.validators.OrderValidator;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor

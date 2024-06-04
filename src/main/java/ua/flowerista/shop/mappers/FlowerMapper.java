@@ -1,48 +1,40 @@
 package ua.flowerista.shop.mappers;
 
-import org.springframework.stereotype.Component;
-
+import org.mapstruct.*;
 import ua.flowerista.shop.dto.FlowerDto;
+import ua.flowerista.shop.dto.admin.FlowerFullDto;
 import ua.flowerista.shop.models.Flower;
-import ua.flowerista.shop.models.Languages;
-import ua.flowerista.shop.models.Translate;
+import ua.flowerista.shop.models.textContent.Languages;
+import ua.flowerista.shop.models.textContent.TextContent;
+import ua.flowerista.shop.models.textContent.Translation;
 
 import java.util.List;
 
-@Component
-public class FlowerMapper implements EntityMapper<Flower, FlowerDto> , EntityMultiLanguagesDtoMapper<Flower, FlowerDto>{
+@Mapper(componentModel = "spring", uses = {TextContentMapper.class, TranslationMapper.class})
+public interface FlowerMapper {
 
-	@Override
-	public Flower toEntity(FlowerDto dto) {
-		Flower entity = new Flower();
-		entity.setId(dto.getId());
-		entity.setName(dto.getName());
-		return entity;
-	}
+    @Mapping(source = "name", target = "name", qualifiedByName = "TextContentToStringInFlowerMapper")
+    FlowerDto toDto(Flower entity, @Context Languages language);
 
-	@Override
-	public FlowerDto toDto(Flower entity) {
-		FlowerDto dto = new FlowerDto();
-		dto.setId(entity.getId());
-		dto.setName(entity.getName());
-		return dto;
-	}
+    List<FlowerDto> toDto(List<Flower> flowers, @Context Languages lang);
 
-	@Override
-	public FlowerDto toDto(Flower entity, Languages language) {
-		FlowerDto dto = new FlowerDto();
-		dto.setId(entity.getId());
-		dto.setName(entity.getNameTranslate().stream()
-				.filter((t) -> t.getLanguage() == language)
-				.findFirst()
-				.orElse(Translate.builder().text(entity.getName()).build())
-				.getText());
-		return dto;
-	}
+    @Named("TextContentToStringInFlowerMapper")
+    default String getNameFromTextContext(TextContent textContent, @Context Languages language) {
+        return textContent.getTranslation().stream()
+                .filter((t) -> t.getTranslationEmbeddedId().getLanguage().getName().equals(language.name()))
+                .findFirst()
+                .map(Translation::getText)
+                .orElse(textContent.getOriginalText());
+    }
 
-	public List<FlowerDto> toDto(List<Flower> flowers, Languages lang){
-		return flowers.stream()
-				.map(flower -> toDto(flower, lang))
-				.toList();
-	}
+    @Mapping(source = "name.originalLanguageName", target = "name.originalLanguage.name")
+    @Mapping(source = "name.originalLanguageId", target = "name.originalLanguage.id")
+    Flower toEntity(FlowerFullDto flowerFullDto);
+
+
+    FlowerFullDto toAdminDto(Flower flower);
+
+    @InheritConfiguration(name = "toEntity")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    Flower partialUpdate(FlowerFullDto flowerFullDto, @MappingTarget Flower flower);
 }

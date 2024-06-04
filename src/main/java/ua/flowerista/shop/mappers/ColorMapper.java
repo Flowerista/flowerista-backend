@@ -1,48 +1,39 @@
 package ua.flowerista.shop.mappers;
 
-import org.springframework.stereotype.Component;
-
+import org.mapstruct.*;
 import ua.flowerista.shop.dto.ColorDto;
+import ua.flowerista.shop.dto.admin.ColorFullDto;
 import ua.flowerista.shop.models.Color;
-import ua.flowerista.shop.models.Languages;
-import ua.flowerista.shop.models.Translate;
+import ua.flowerista.shop.models.textContent.Languages;
+import ua.flowerista.shop.models.textContent.TextContent;
+import ua.flowerista.shop.models.textContent.Translation;
 
 import java.util.List;
 
-@Component
-public class ColorMapper implements EntityMapper<Color, ColorDto>, EntityMultiLanguagesDtoMapper<Color, ColorDto>{
+@Mapper(componentModel = "spring", uses = {TextContentMapper.class, TranslationMapper.class})
+public interface ColorMapper {
+    @Mapping(target = "name", qualifiedByName = "TextContentToStringInColorMapper")
+    ColorDto toDto(Color entity, @Context Languages language);
 
-	@Override
-	public Color toEntity(ColorDto dto) {
-		Color entity = new Color();
-		entity.setId(dto.getId());
-		entity.setName(dto.getName());
-		return entity;
-	}
+    List<ColorDto> toDto(List<Color> colors, @Context Languages language);
 
-	@Override
-	public ColorDto toDto(Color entity) {
-		ColorDto dto = new ColorDto();
-		dto.setId(entity.getId());
-		dto.setName(entity.getName());
-		return dto;
-	}
+    @Named("TextContentToStringInColorMapper")
+    default String getNameFromTextContext(TextContent textContent, @Context Languages language) {
+        return textContent.getTranslation().stream()
+                .filter((t) -> t.getTranslationEmbeddedId().getLanguage().getName().equals(language.name()))
+                .findFirst()
+                .map(Translation::getText)
+                .orElse(textContent.getOriginalText());
+    }
 
-	@Override
-	public ColorDto toDto(Color entity, Languages language) {
-		ColorDto dto = new ColorDto();
-		dto.setId(entity.getId());
-		dto.setName(entity.getNameTranslate().stream()
-				.filter((t) -> t.getLanguage() == language)
-				.findFirst()
-				.orElse(Translate.builder().text(entity.getName()).build())
-				.getText());
-		return dto;
-	}
+    @Mapping(source = "name.originalLanguageName", target = "name.originalLanguage.name")
+    @Mapping(source = "name.originalLanguageId", target = "name.originalLanguage.id")
+    Color toEntity(ColorFullDto colorFullDto);
 
-	public List<ColorDto> toDto(List<Color> colors, Languages lang){
-		return colors.stream()
-				.map(color -> toDto(color, lang))
-				.toList();
-	}
+
+    ColorFullDto toAdminDto(Color color);
+
+    @InheritConfiguration(name = "toEntity")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    Color partialUpdate(ColorFullDto colorFullDto, @MappingTarget Color color);
 }

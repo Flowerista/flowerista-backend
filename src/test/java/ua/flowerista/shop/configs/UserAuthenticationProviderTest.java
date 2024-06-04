@@ -3,8 +3,6 @@ package ua.flowerista.shop.configs;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,12 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ua.flowerista.shop.dto.user.UserDto;
-import ua.flowerista.shop.models.Role;
-import ua.flowerista.shop.models.User;
+import ua.flowerista.shop.models.user.Role;
+import ua.flowerista.shop.models.user.User;
 
 import java.util.Base64;
 
@@ -42,7 +39,7 @@ class UserAuthenticationProviderTest {
         UserDto user = UserDto.builder()
                 .id(1)
                 .email("test@test.com")
-                .role("USER")
+                .role(Role.USER)
                 .build();
         //when
         String token = userAuthenticationProvider.createAccessToken(user);
@@ -52,7 +49,7 @@ class UserAuthenticationProviderTest {
         String claimRole = decodedJwt.getClaim("role").asString();
         assertNotNull(token, "Token should not be null");
         assertEquals(user.getId(), claimId, "Claim id should be equal to user id");
-        assertEquals(user.getRole(), claimRole, "Claim role should be equal to user role");
+        assertEquals(user.getRole().name(), claimRole, "Claim role should be equal to user role");
     }
 
     @Test
@@ -92,7 +89,7 @@ class UserAuthenticationProviderTest {
         UserDto user = UserDto.builder()
                 .id(1)
                 .email("test@test.com")
-                .role("USER")
+                .role(Role.USER)
                 .build();
         String token = userAuthenticationProvider.createAccessToken(user);
         //when
@@ -111,13 +108,13 @@ class UserAuthenticationProviderTest {
         UserDto userDto = UserDto.builder()
                 .id(1)
                 .email("test@test.com")
-                .role("USER")
+                .role(Role.USER)
                 .build();
         String token = userAuthenticationProvider.createAccessToken(userDto);
         User user = User.builder()
                 .id(userDto.getId())
                 .email(userDto.getEmail())
-                .role(Role.valueOf(userDto.getRole()))
+                .role(Role.USER)
                 .build();
         when(userDetailsService.loadUserByUsername(user.getEmail())).thenReturn(user);
         //when
@@ -129,7 +126,7 @@ class UserAuthenticationProviderTest {
         assertNotNull(principal, "Principal should not be null");
         assertEquals(userDto.getId(), principal.getId(),"Principal should be equal to user id");
         assertEquals(userDto.getEmail(), principal.getEmail(),"Principal should be equal to user email");
-        assertEquals(userDto.getRole(), principal.getRole().name(),"Principal should be equal to user role");
+        assertEquals(userDto.getRole().name(), principal.getRole().name(),"Principal should be equal to user role");
     }
 
     private DecodedJWT getDecodedJwt(String token) {

@@ -6,7 +6,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import ua.flowerista.shop.models.User;
+import ua.flowerista.shop.models.user.User;
 
 import java.util.Locale;
 
