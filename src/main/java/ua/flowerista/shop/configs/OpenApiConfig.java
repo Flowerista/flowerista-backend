@@ -32,7 +32,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 ),
                 @Server(
                         description = "PROD ENV",
-                        url = "https://floverista-011daa2eb6c3.herokuapp.com/"
+                        url = "https://flowerista-1b251853cf70.herokuapp.com/"
                 )
         },
         security = {
