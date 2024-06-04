@@ -62,7 +62,7 @@ public class BouquetService {
         return bouquetRepository.findAll();
     }
 
-    public List<Bouquet> finnAllUncached() {
+    public List<Bouquet> findAllUncached() {
         return bouquetRepository.findAll();
     }
 

@@ -34,7 +34,7 @@ spring:
   data:
     redis:
       url: ${UPSTASH_REDIS_URL}
-
+#cache refresh time 5 seconds - in CacheService.class
 cloudinary:
   cloud-name: dg77kfpuv
   api-key: 296129768843992

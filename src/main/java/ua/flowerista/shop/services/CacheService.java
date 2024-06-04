@@ -19,7 +19,7 @@ public class CacheService {
         bouquetRepository.findAll();
     }
 
-    @Scheduled(fixedRate = 300_000)
+    @Scheduled(fixedRate = 5000)
     public void evictAllCachesAtIntervals() {
         evictAllCaches();
     }
