@@ -16,7 +16,7 @@ public class CacheService {
     public void evictAllCaches() {
         cacheManager.getCacheNames()
                 .forEach(cacheName -> cacheManager.getCache(cacheName).clear());
-        bouquetRepository.findAll();
+        bouquetRepository.findAllCached();
     }
 
     @Scheduled(fixedRate = 5000)

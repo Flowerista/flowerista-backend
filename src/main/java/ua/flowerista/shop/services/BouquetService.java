@@ -7,7 +7,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -57,13 +56,12 @@ public class BouquetService {
         return bouquetRepository.findTop5ByOrderByDiscountDesc();
     }
 
-    @Cacheable("bouquets")
     public List<Bouquet> findAll() {
         return bouquetRepository.findAll();
     }
 
-    public List<Bouquet> findAllUncached() {
-        return bouquetRepository.findAll();
+    public List<Bouquet> findAllCached() {
+        return bouquetRepository.findAllCached();
     }
 
     public List<Bouquet> getCatalogFiltered(List<Integer> flowerIds,
@@ -74,7 +72,7 @@ public class BouquetService {
                                             Boolean sortByPriceHighToLow,
                                             Boolean sortByPriceLowToHigh) {
         //cached query for all bouquets
-        List<Bouquet> bouquets = findAll();
+        List<Bouquet> bouquets = findAllCached();
         //if all filters are null, return all bouquets
         if ((flowerIds == null) && (colorIds == null) && (minPrice == null) && (maxPrice == null)
                 && (sortByNewest == null) && (sortByPriceHighToLow == null) && (sortByPriceLowToHigh == null)) {
